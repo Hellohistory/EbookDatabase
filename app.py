@@ -161,4 +161,5 @@ async def search(
 
 if __name__ == '__main__':
 
+    # 允许任何地址请求10223端口访问服务
     uvicorn.run(app, host='0.0.0.0', port=10223)

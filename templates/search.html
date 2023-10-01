@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>读秀2.0-5.0检索结果</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        .search-time {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .total-records {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .book-container {
+            background-color: #fff;
+            margin: 10px 20px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-title {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .book-details p {
+            margin: 5px 0;
+            color: #34495e;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #666;
+            margin: 20px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        li::marker {
+            content: none;
+        }
+
+        .page-item a {
+            margin: 0 5px;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .page-item a:hover {
+            background-color: #eee;
+        }
+
+        .page-item.active a {
+            background-color: #3498db;
+            color: #fff;
+        }
+
+        .page-item.disabled a {
+            color: #aaa;
+            cursor: not-allowed;
+        }
+
+        .button-container {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        #select-all-btn,
+        #deselect-all-btn,
+        #copy-selected-btn {
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        #select-all-btn {
+            background-color: #28a745; /* 绿色 */
+        }
+
+        #deselect-all-btn {
+            background-color: #dc3545; /* 红色 */
+        }
+
+        #copy-selected-btn {
+            background-color: #17a2b8; /* 青色 */
+        }
+
+        .copy-link-btn {
+            background-color: #007bff; /* 蓝色背景 */
+            color: white; /* 白色文字 */
+            border: none; /* 无边框 */
+            padding: 5px 10px; /* 内边距 */
+            margin-left: 10px; /* 左外边距，与秒传链接有一点距离 */
+            cursor: pointer; /* 鼠标悬停时变为手指样式 */
+            border-radius: 4px; /* 圆角 */
+            font-size: 14px; /* 字体大小 */
+        }
+
+        /* 鼠标悬停时的样式 */
+        .copy-link-btn:hover {
+            background-color: #0056b3; /* 深蓝色背景 */
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <h1>检索结果</h1>
+    <p class="search-time">检索时间: {{ search_time | round(2) }} 秒</p>
+    <p class="total-records">检索到: {{ total_records }}条内容</p>
+
+    {% if books %}
+        <div class="button-container">
+    <button id="select-all-btn">全选</button>
+    <button id="deselect-all-btn">全不选</button>
+    <button id="copy-selected-btn">复制选中的秒传链接</button>
+        </div>
+        {% for book in books %}
+            <div class="book-container">
+                <div class="checkbox-container">
+                    <label>
+                        <input type="checkbox" class="copy-checkbox" data-second-pass="{{ book.second_pass_code }}" />
+                    </label>
+                </div>
+                <h2 class="book-title">{{ book.title }}</h2>
+                <div class="book-details">
+                    <p><strong>作者:</strong> {{ book.author }}</p>
+                    <p><strong>出版商:</strong> {{ book.publisher }}</p>
+                    <p><strong>出版日期:</strong> {{ book.publish_date }}</p>
+                    <p><strong>页数:</strong> {{ book.page_count }}</p>
+                    <p><strong>ISBN:</strong> {{ book.ISBN }}</p>
+                    <p><strong>SS码:</strong> {{ book.SS_code }}</p>
+                    <p class="second-pass-code">
+                    <strong>秒传链接:</strong> {{ book.second_pass_code }}
+                    <button class="copy-link-btn">复制</button>
+                    </p>
+                    <p><strong>文件大小:</strong> {{ book.size }}</p>
+                    <p><strong>文件类型:</strong> {{ book.file_type }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="no-results">没有找到匹配的结果。</p>
+    {% endif %}
+
+<!-- 分页控件 -->
+{% if total_pages > 1 %}
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        <li class="page-item{% if current_page == 1 %} disabled{% endif %}">
+            <a class="page-link" href="?query={{ query }}&field={{ field }}&fuzzy={{ fuzzy }}&page_size={{ page_size }}&page=1" aria-label="First">
+                <span aria-hidden="true">&laquo;&laquo;</span>
+            </a>
+        </li>
+        <li class="page-item{% if current_page == 1 %} disabled{% endif %}">
+            <a class="page-link" href="?query={{ query }}&field={{ field }}&fuzzy={{ fuzzy }}&page_size={{ page_size }}&page={{ current_page - 1 }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% set query = query if query is defined else '' %}
+        {% set field = field if field is defined else '' %}
+        {% set start_page = current_page - 2 if current_page > 2 else 1 %}
+        {% set end_page = current_page + 2 if current_page + 2 <= total_pages else total_pages %}  <!-- 确保end_page不超过total_pages -->
+        {% for page_num in range(start_page, end_page + 1) %}
+            {% if page_num <= total_pages and page_num >= 1 %}  <!-- 添加这个条件来检查page_num是否是一个有效的页码 -->
+                <li class="page-item{% if current_page == page_num %} active{% endif %}">
+                    <a class="page-link" href="?query={{ query }}&field={{ field }}&fuzzy={{ fuzzy }}&page_size={{ page_size }}&page={{ page_num }}">{{ page_num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        <li class="page-item{% if current_page == total_pages %} disabled{% endif %}">
+            <a class="page-link" href="?query={{ query }}&field={{ field }}&fuzzy={{ fuzzy }}&page_size={{ page_size }}&page={{ current_page + 1 }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        <li class="page-item{% if current_page == total_pages %} disabled{% endif %}">
+            <a class="page-link" href="?query={{ query }}&field={{ field }}&fuzzy={{ fuzzy }}&page_size={{ page_size }}&page={{ total_pages }}" aria-label="Last">
+                <span aria-hidden="true">&raquo;&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+
+<script>
+    function fallbackCopyTextToClipboard(text) {
+    var textArea = document.createElement("textarea");
+    textArea.value = text;
+
+    // 保证 textarea 元素不可见
+    textArea.style.position = 'fixed';
+    textArea.style.top = '0';
+    textArea.style.left = '0';
+    textArea.style.width = '0';
+    textArea.style.height = '0';
+    textArea.style.opacity = '0';
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+        var successful = document.execCommand('copy');
+        if (successful) {
+            alert('所有链接已复制到剪贴板！');
+        } else {
+            alert('复制失败，请手动复制。');
+        }
+    } catch (err) {
+        alert('复制失败，请手动复制。');
+        console.error('复制失败:', err);
+    }
+
+    document.body.removeChild(textArea);
+}
+
+document.getElementById('select-all-btn').addEventListener('click', function() {
+    document.querySelectorAll('.copy-checkbox').forEach(function(checkbox) {
+        checkbox.checked = true;
+    });
+});
+
+document.getElementById('deselect-all-btn').addEventListener('click', function() {
+    document.querySelectorAll('.copy-checkbox').forEach(function(checkbox) {
+        checkbox.checked = false;
+    });
+});
+
+document.getElementById('copy-selected-btn').addEventListener('click', function() {
+    var selectedLinks = [];
+    document.querySelectorAll('.copy-checkbox:checked').forEach(function(checkbox) {
+        var secondPassCode = checkbox.closest('.book-container').querySelector('.second-pass-code').textContent.split(':')[1].trim();
+        selectedLinks.push(secondPassCode);
+    });
+
+    if (selectedLinks.length > 0) {
+        var allLinks = selectedLinks.join('\n');
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(allLinks).then(function() {
+                alert('所有链接已复制到剪贴板！');
+            }, function() {
+                alert('复制失败，请手动复制。');
+            });
+        } else {
+            fallbackCopyTextToClipboard(allLinks);
+        }
+    } else {
+        alert('未选择任何书籍');
+    }
+});
+
+// 为每个复制按钮添加点击事件
+document.querySelectorAll('.copy-link-btn').forEach(function(button) {
+    button.addEventListener('click', function() {
+        var secondPassCode = this.closest('.book-container').querySelector('.second-pass-code').textContent.split(':')[1].trim();
+
+        // 使用浏览器的剪贴板API或者回退方法来复制文本
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(secondPassCode).then(function() {
+                alert('链接已复制到剪贴板！');
+            }, function() {
+                alert('复制失败，请手动复制。');
+            });
+        } else {
+            fallbackCopyTextToClipboard(secondPassCode);
+        }
+    });
+});
+
+
+</script>
+
+</body>
+
+</html>

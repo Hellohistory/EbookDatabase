@@ -38,17 +38,21 @@ metadata.create_all(engine)
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
+
 @app.on_event("startup")
 async def startup():
     await database.connect()
+
 
 @app.on_event("shutdown")
 async def shutdown():
     await database.disconnect()
 
+
 @app.get("/favicon.ico")
 async def favicon():
     return {}
+
 
 # 路由
 @app.get("/", response_class=HTMLResponse)
@@ -160,6 +164,5 @@ async def search(
 
 
 if __name__ == '__main__':
-
     # 允许任何地址请求10223端口访问服务
     uvicorn.run(app, host='0.0.0.0', port=10223)

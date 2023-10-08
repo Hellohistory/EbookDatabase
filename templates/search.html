@@ -168,7 +168,7 @@
                     <p><strong>ISBN:</strong> {{ book.ISBN }}</p>
                     <p><strong>SS码:</strong> {{ book.SS_code }}</p>
                     <p class="second-pass-code">
-                    <strong>秒传链接:</strong> {{ book.second_pass_code }}
+                    <strong>秒传链接:</strong> <span class="actual-link">{{ book.second_pass_code }}</span>
                     <button class="copy-link-btn">复制</button>
                     </p>
                     <p><strong>文件大小:</strong> {{ book.size }}</p>
@@ -266,7 +266,8 @@ document.getElementById('deselect-all-btn').addEventListener('click', function()
 document.getElementById('copy-selected-btn').addEventListener('click', function() {
     var selectedLinks = [];
     document.querySelectorAll('.copy-checkbox:checked').forEach(function(checkbox) {
-        var secondPassCode = checkbox.closest('.book-container').querySelector('.second-pass-code').textContent.split(':')[1].trim();
+        // 使用 'actual-link' 类来获取实际的秒传链接
+        var secondPassCode = checkbox.closest('.book-container').querySelector('.actual-link').innerText.trim();
         selectedLinks.push(secondPassCode);
     });
 
@@ -289,7 +290,7 @@ document.getElementById('copy-selected-btn').addEventListener('click', function(
 // 为每个复制按钮添加点击事件
 document.querySelectorAll('.copy-link-btn').forEach(function(button) {
     button.addEventListener('click', function() {
-        var secondPassCode = this.closest('.book-container').querySelector('.second-pass-code').textContent.split(':')[1].trim();
+    var secondPassCode = this.closest('.book-container').querySelector('.actual-link').innerText.trim();
 
         // 使用浏览器的剪贴板API或者回退方法来复制文本
         if (navigator.clipboard) {

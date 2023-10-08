@@ -14,6 +14,18 @@
 
 ## 快速开始
 
+### 本地运行
+
+1.下载本项目所提供的数据库
+
+2.将数据库放置到instance文件夹之中
+
+3.安装本项目所需要的依赖
+
+4.运行app.py
+
+这样就可以在 `http://localhost:10223/`当中使用
+
 ### 使用 Docker 运行
 
 1. 首先，确保您已经安装了 [Docker](https://www.docker.com/products/docker-desktop)。
@@ -37,7 +49,7 @@
     docker run -p 10223:10223 dx2_5
     ```
 
-    这将会把应用运行在 `http://localhost:10223/`
+这样就可以在 `http://localhost:10223/`当中使用
 
 ## Docker 容器存储设置
 

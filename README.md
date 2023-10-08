@@ -10,7 +10,7 @@
 
 数据库备份可以通过以下网盘链接获取：
 
-- [网盘链接](https://www.123pan.com/s/oNv9-zWI2.html提取码:dx25)
+- [网盘链接](https://www.123pan.com/s/oNv9-zWI2.html)  提取码:dx25
 
 ## 快速开始
 

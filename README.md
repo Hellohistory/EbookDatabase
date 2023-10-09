@@ -16,15 +16,46 @@
 
 ### 本地运行
 
-1.下载本项目所提供的数据库
+1. 打开终端或命令提示符，并导航到您项目的根目录。
 
-2.将数据库放置到instance文件夹之中
+2. 创建一个新的虚拟环境，您可以使用以下命令：
 
-3.安装本项目所需要的依赖
+```python
+python -m venv venv
+```
 
-4.运行app.py
+这将在项目根目录中创建一个名为`venv`的新虚拟环境。
 
-这样就可以在 `http://localhost:10223/`当中使用
+3. 激活虚拟环境。在 Windows 上，使用以下命令：
+
+```python
+venv\Scripts\activate
+```
+
+在 macOS 和 Linux 上，使用以下命令：
+
+```python
+source venv/bin/activate
+```
+
+激活虚拟环境后，终端前面的提示符会显示虚拟环境名称，表示虚拟环境已经激活。
+
+4. 接下来，安装项目所需的依赖。使用以下命令在虚拟环境中安装依赖：
+
+```python
+pip install -r requirements.txt
+```
+
+这将会根据`requirements.txt`文件安装项目所需的所有依赖，而且这些依赖将仅在虚拟环境中可用。
+
+5. 最后，运行应用程序。使用以下命令启动应用程序：
+
+```python
+python app.py
+```
+
+这将在虚拟环境中运行应用程序，然后在 http://localhost:10223/ 上使用它。
+
 
 ### 使用 Docker 运行
 

@@ -2,7 +2,7 @@
 
 ## 简介
 
-这是读秀书库的本地化检索版本。该项目使用 FastAPI 和 SQLite 数据库构建，并可以通过 Docker 轻松部署。
+这是读秀书库的本地化检索版本。该项目使用 FastAPI 和 SQLite 数据库构建，并可以通过 本地 与 Docker 轻松部署。
 
 ![主页页面](image/img_1.png)
 

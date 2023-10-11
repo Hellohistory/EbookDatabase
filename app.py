@@ -41,12 +41,16 @@ templates = Jinja2Templates(directory="templates")
 
 @app.on_event("startup")
 async def startup():
+    logger.info("启动数据库连接")
     await database.connect()
+    logger.info("数据库连接成功")
 
 
 @app.on_event("shutdown")
 async def shutdown():
+    logger.info("关闭数据库连接")
     await database.disconnect()
+    logger.info("数据库连接已关闭")
 
 
 @app.get("/favicon.ico")
@@ -108,10 +112,10 @@ async def search(
         query_conditions.append(f"publisher LIKE :publisher" if fuzzy else "publisher = :publisher")
         params['publisher'] = f"%{query}%" if fuzzy else query
     elif field == "isbn":
-        query_conditions.append(f"isbn LIKE :isbn" if fuzzy else "isbn = :isbn")
+        query_conditions.append(f"ISBN LIKE :isbn" if fuzzy else "ISBN = :isbn")
         params['isbn'] = f"%{query}%" if fuzzy else query
     elif field == "sscode":
-        query_conditions.append(f"pubdate LIKE :sscode" if fuzzy else "sscode = :sscode")
+        query_conditions.append(f"SS_code LIKE :sscode" if fuzzy else "SS_code = :sscode")
         params['sscode'] = f"%{query}%" if fuzzy else query
 
     # 构建查询语句
@@ -126,7 +130,6 @@ async def search(
 
     # 从数据库获取总记录数
     total_records = await database.fetch_one(query=total_query_str, values=params)
-    total_pages = math.ceil(total_records[0] / page_size)  # 计算总页数
 
     # 分页设置
     total_pages = math.ceil(total_records[0] / page_size)
@@ -136,6 +139,7 @@ async def search(
 
     # 构建查询语句
     query_str += f" LIMIT {page_size} OFFSET {offset}"
+    logger.info(f"构建的查询语句为：{query_str}")
 
     # 从数据库获取数据
     books = await database.fetch_all(query=query_str, values=params)
@@ -145,6 +149,7 @@ async def search(
     end_time = time.time()  # 记录结束时间
     search_time = end_time - start_time  # 计算检索时间
     logging.info(f"检索耗时: {search_time} 秒")
+    logger.info("完成处理搜索请求，准备返回结果")
 
     # 返回结果
     return templates.TemplateResponse(
@@ -165,4 +170,6 @@ async def search(
 
 if __name__ == '__main__':
     # 允许任何地址请求10223端口访问服务
+    logger.info("启动 FastAPI 应用")
     uvicorn.run(app, host='0.0.0.0', port=10223)
+    logger.info("FastAPI 应用已关闭")

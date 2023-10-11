@@ -3,3 +3,5 @@ databases==0.8.0
 fastapi==0.103.1
 SQLAlchemy==1.4.49
 starlette==0.27.0
+aiosqlite==0.19.0
+Jinja2==3.1.2

@@ -1,4 +1,4 @@
-# EbookDatabase - 电子数据检索系统
+# EbookDatabase - 电子书籍检索系统
 
 ## 简介
 

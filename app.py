@@ -12,7 +12,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import create_engine, MetaData
 
 # 创建一个处理器，每天凌晨回滚日志文件，保留最近 7 天的日志文件，并使用 UTF-8 编码
-handler = TimedRotatingFileHandler('app.log', when="midnight", interval=1, backupCount=7, encoding='utf-8')
+handler = TimedRotatingFileHandler('log/app.log', when="midnight", interval=1, backupCount=7, encoding='utf-8')
 
 # 设置日志格式
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -171,5 +171,5 @@ async def search(
 if __name__ == '__main__':
     # 允许任何地址请求10223端口访问服务
     logger.info("启动 FastAPI 应用")
-    uvicorn.run(app, host='0.0.0.0', port=10223)
+    uvicorn.run(app, host='127.0.0.1', port=10223)
     logger.info("FastAPI 应用已关闭")

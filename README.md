@@ -14,57 +14,32 @@
 
 如果参与的人多，数据库会定期更新，人人为我，我为人人。
 
+可以添加群聊与同好一起交流
+
+QQ群：942385978
+
 ![主页页面](image/img_1.png)
 
 ## 数据库备份
 
 数据库备份可以通过以下网盘链接获取：
 
-- [网盘链接](https://www.123pan.com/s/oNv9-zWI2.html)  提取码:dx25
+- [123网盘链接](https://www.123pan.com/s/oNv9-zWI2.html)  提取码:dx25
+- [arlenzhang256提供的链接](https://cloud.zyuan.xyz/s/kR5s6) 在此表示感谢
 
 ## 快速开始
 
 ### 本地运行
 
-1. 打开终端或命令提示符，并导航到您项目的根目录。
+1.下载本项目发布的软件包
 
-2. 创建一个新的虚拟环境，您可以使用以下命令：
+2.解压下载下来的软件包
 
-```python
-python -m venv venv
-```
+3.下载本项目的数据库文件并且存放到instance文件夹
 
-这将在项目根目录中创建一个名为`venv`的新虚拟环境。
+4.点击启动.bat一键启动本项目
 
-3. 激活虚拟环境。在 Windows 上，使用以下命令：
-
-```python
-venv\Scripts\activate
-```
-
-在 macOS 和 Linux 上，使用以下命令：
-
-```python
-source venv/bin/activate
-```
-
-激活虚拟环境后，终端前面的提示符会显示虚拟环境名称，表示虚拟环境已经激活。
-
-4. 接下来，安装项目所需的依赖。使用以下命令在虚拟环境中安装依赖：
-
-```python
-pip install -r requirements.txt
-```
-
-这将会根据`requirements.txt`文件安装项目所需的所有依赖，而且这些依赖将仅在虚拟环境中可用。
-
-5. 最后，运行应用程序。使用以下命令启动应用程序：
-
-```python
-python app.py
-```
-
-这将在虚拟环境中运行应用程序，然后在 http://localhost:10223/ 上使用它。
+5.然后在 http://127.0.0.1:10223/ 上使用它。
 
 
 ### 使用 Docker 运行

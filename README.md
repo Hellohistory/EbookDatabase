@@ -30,6 +30,12 @@ QQ群：942385978
 
 ## 快速开始
 
+视频：
+
+YouTube：https://youtu.be/-jD8OsF6di4
+
+bilibili：https://www.bilibili.com/video/BV1fN4y1r7fP/
+
 ### 本地运行
 
 #### 方法一

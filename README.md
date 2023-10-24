@@ -30,6 +30,14 @@ QQ群：942385978
 
 ## 快速开始
 
+视频：
+
+YouTube：https://youtu.be/-jD8OsF6di4
+
+bilibili：https://www.bilibili.com/video/BV1fN4y1r7fP/
+
+其他仓库地址：https://gitee.com/etojsyc/EbookDatabase
+
 ### 本地运行
 
 #### 方法一

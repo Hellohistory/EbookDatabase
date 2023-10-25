@@ -22,11 +22,7 @@ QQ群：942385978
 
 ## 数据库备份
 
-数据库备份可以通过以下网盘链接获取：
-
-- [123网盘链接](https://www.123pan.com/s/oNv9-zWI2.html)  提取码:dx25
-- [arlenzhang256提供的链接](https://cloud.zyuan.xyz/s/kR5s6) 在此表示感谢
-- 688f06358afa3ebab06f6d0ebe029c9c#3414196224#DX_2.0-5.0.db    感谢OpenSSL提供的百度网盘秒传链接
+### [点击查看数据库列表](Markdown/数据库下载文档.md)
 
 ## 快速开始
 

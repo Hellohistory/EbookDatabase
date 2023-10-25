@@ -1,5 +1,6 @@
 import logging
 import math
+import os
 import time
 from logging.handlers import TimedRotatingFileHandler
 from typing import Optional
@@ -38,19 +39,35 @@ metadata.create_all(engine)
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
+# 初始化数据库连接字典
+database_connections = {}
 
+
+# 在启动时扫描数据库文件
 @app.on_event("startup")
 async def startup():
-    logger.info("启动数据库连接")
-    await database.connect()
-    logger.info("数据库连接成功")
+    logger.info("扫描instance文件夹以查找数据库文件")
+    db_files = [f for f in os.listdir('instance') if f.endswith('.db')]
+    logger.info(f"找到 {len(db_files)} 个数据库文件：{db_files}")
 
 
-@app.on_event("shutdown")
-async def shutdown():
-    logger.info("关闭数据库连接")
-    await database.disconnect()
-    logger.info("数据库连接已关闭")
+@app.get("/available_dbs/")
+async def get_available_databases():
+    db_files = [f for f in os.listdir('instance') if f.endswith('.db')]
+    return {"databases": db_files}
+
+
+@app.post("/connect_db/")
+async def connect_database(db_name: str):
+    if db_name not in database_connections:
+        db_url = f"sqlite:///instance/{db_name}"
+        new_db = databases.Database(db_url)
+        await new_db.connect()
+        database_connections[db_name] = new_db
+        logger.info(f"数据库 {db_name} 连接成功")
+        return {"status": "success", "message": f"成功连接到数据库 {db_name}"}
+    else:
+        return {"status": "error", "message": f"数据库 {db_name} 已连接"}
 
 
 @app.get("/favicon.ico")
@@ -69,13 +86,13 @@ async def search(
         request: Request,
         query: str,
         field: str,
-        fuzzy: Optional[str] = Query(default=None),  # 接收字符串
-        page: Optional[str] = Query(default=None),  # 接收字符串
-        page_size: Optional[str] = Query(default=None)  # 接收字符串
+        fuzzy: Optional[str] = Query(default="true"),  # 默认为 "开启模糊检索"
+        page: Optional[str] = Query(default=None),
+        page_size: Optional[str] = Query(default=None)
 ):
     # 如果fuzzy为None或空字符串，设置默认值
     if not fuzzy:
-        fuzzy = "false"
+        fuzzy = "true"  # 默认为 开启模糊检索
     # 将fuzzy转换为布尔值
     fuzzy = fuzzy.lower() in ["true", "1"]
 

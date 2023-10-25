@@ -3,11 +3,13 @@ import math
 import os
 import time
 from logging.handlers import TimedRotatingFileHandler
+from pathlib import Path
 from typing import Optional
 
 import databases
 import uvicorn
 from fastapi import FastAPI, Request, Query
+from fastapi.responses import FileResponse
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import create_engine, MetaData
@@ -70,9 +72,10 @@ async def connect_database(db_name: str):
         return {"status": "error", "message": f"数据库 {db_name} 已连接"}
 
 
+# 返回favicon
 @app.get("/favicon.ico")
 async def favicon():
-    return {}
+    return FileResponse(Path("templates/logo.ico"), media_type="templates/logo.ico")
 
 
 # 路由

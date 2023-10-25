@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #fff;
+            background-color: #f7f7f9;
             margin: 0;
             padding: 0;
         }
@@ -16,22 +16,22 @@
         #container {
             width: 500px;
             padding: 20px;
-            background-color: #fff;
-            border: 1px solid #E0E0E0;
+            background-color: #ffffff;
+            border: 2px solid #4A90E2;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
             margin: 50px auto 0;
         }
 
         h1 {
             text-align: center;
-            color: #212121;
+            color: #4A90E2;
         }
 
         .form-label {
             font-weight: bold;
             margin-bottom: 5px;
-            color: #757575;
+            color: #333;
         }
 
         .form-control,
@@ -39,16 +39,17 @@
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
-            border: 1px solid #E0E0E0;
+            border: 1px solid #BDC3C7;
             border-radius: 4px;
             outline: none;
             box-shadow: none;
+            box-sizing: border-box;
         }
 
         .form-control:focus,
         .form-select:focus {
-            border-color: #4285F4;
-            box-shadow: 0 0 0 2px rgba(66,133,244,.2);
+            border-color: #4A90E2;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, .2);
         }
 
         .form-check-input {
@@ -56,7 +57,7 @@
         }
 
         .btn {
-            background-color: #4285F4;
+            background-color: #4A90E2;
             color: #fff;
             padding: 10px 20px;
             border: none;
@@ -66,7 +67,7 @@
         }
 
         .btn:hover {
-            background-color: #357ae8;
+            background-color: #357ABD;
         }
 
         .mt-4 {
@@ -76,9 +77,19 @@
         .mb-3 {
             margin-bottom: 15px;
         }
+
+        /* 添加滚动条样式 */
+        #connected-dbs {
+            max-height: 100px;
+            overflow-y: auto;
+            border: 1px solid #BDC3C7;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
     </style>
 </head>
-
 <body>
 
 <div id="container">
@@ -104,11 +115,28 @@
         </div>
         <button type="submit" class="btn btn-primary">搜索</button>
     </form>
+    <p id="connected-dbs">已连接的数据库：正在加载...</p>
+
 </div>
 
 <script>
-
+  // 当页面加载完成后执行此函数
+  window.onload = function() {
+    // 使用fetch API请求已连接的数据库列表
+    fetch('/available_dbs/')
+    .then(response => response.json())  // 解析返回的JSON数据
+    .then(data => {
+      // 更新页面上的信息
+      const connectedDbsElement = document.getElementById('connected-dbs');
+      connectedDbsElement.innerHTML = "已连接的数据库：" + data.databases.join(", ");
+    })
+    .catch(error => {
+      // 如果出现错误，显示错误信息
+      console.error('获取数据库列表出错:', error);
+    });
+  };
 </script>
+
 </body>
 
 </html>

@@ -89,13 +89,13 @@ async def search(
         request: Request,
         query: str,
         field: str,
-        fuzzy: Optional[str] = Query(default="true"),  # 默认为 "开启模糊检索"
-        page: Optional[str] = Query(default=None),
-        page_size: Optional[str] = Query(default=None)
+        fuzzy: Optional[str] = Query(default=None),  # 接收字符串
+        page: Optional[str] = Query(default=None),  # 接收字符串
+        page_size: Optional[str] = Query(default=None)  # 接收字符串
 ):
     # 如果fuzzy为None或空字符串，设置默认值
     if not fuzzy:
-        fuzzy = "true"  # 默认为 开启模糊检索
+        fuzzy = "false"
     # 将fuzzy转换为布尔值
     fuzzy = fuzzy.lower() in ["true", "1"]
 

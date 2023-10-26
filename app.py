@@ -72,10 +72,10 @@ async def connect_database(db_name: str):
         return {"status": "error", "message": f"数据库 {db_name} 已连接"}
 
 
-# 返回favicon
+# 返回favicon图标
 @app.get("/favicon.ico")
 async def favicon():
-    return FileResponse(Path("templates/logo.ico"), media_type="templates/logo.ico")
+    return FileResponse(Path("templates/logo.ico"), media_type="image/x-icon")
 
 
 # 路由

@@ -136,6 +136,42 @@
         .copy-link-btn:hover {
             background-color: #0056b3; /* 深蓝色背景 */
         }
+
+        .home-button {
+            background-color: #3498db; /* 蓝色背景 */
+            color: white; /* 白色文字 */
+            border: none; /* 无边框 */
+            padding: 10px 20px; /* 内边距 */
+            text-align: center; /* 文字居中 */
+            text-decoration: none; /* 无下划线 */
+            display: inline-block; /* 内联块级元素 */
+            font-size: 16px; /* 字体大小 */
+            margin: 4px 2px; /* 外边距 */
+            cursor: pointer; /* 鼠标悬停时变为手指样式 */
+            border-radius: 4px; /* 圆角 */
+        }
+
+        /* 返回主页鼠标悬停时的样式 */
+        .home-button:hover {
+            background-color: #2980b9; /* 深蓝色背景 */
+        }
+
+        /* 全选按钮悬停样式 */
+        #select-all-btn:hover {
+            background-color: #218838; /* 深绿色 */
+        }
+
+        /* 全不选按钮悬停样式 */
+        #deselect-all-btn:hover {
+            background-color: #c82333; /* 深红色 */
+        }
+
+        /* 复制选中的秒传链接按钮悬停样式 */
+        #copy-selected-btn:hover {
+            background-color: #138496; /* 深青色 */
+        }
+
+
     </style>
 
 </head>
@@ -151,6 +187,7 @@
     <button id="select-all-btn">全选</button>
     <button id="deselect-all-btn">全不选</button>
     <button id="copy-selected-btn">复制选中的秒传链接</button>
+    <a href="/" class="home-button">回到主页</a>
         </div>
         {% for book in books %}
             <div class="book-container">

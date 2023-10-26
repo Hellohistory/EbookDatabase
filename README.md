@@ -127,7 +127,7 @@ python app.py
 为了使这个数据库文件夹能够从外部访问并持久化存储，可以在运行 Docker 容器时使用 `-v` 参数来将这个 `instance` 文件夹映射到宿主机的一个特定目录。
 
    ```bash
-   docker run -v /path/to/instance:/app/instance -v /path/to/logs:/app/logs your-image-name
+   docker run -v /path/to/instance:/app/instance -v /path/to/log:/app/log your-image-name
    ```
 
 这里，`/path/to/instance` 和 `/path/to/logs` 是在宿主机上用于存放数据库和日志的目录。

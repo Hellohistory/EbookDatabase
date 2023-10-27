@@ -8,15 +8,15 @@ WORKDIR /app
 COPY requirements.txt .
 
 # 安装依赖
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
 
 # 将 app.py, templates 和其他需要的文件复制到工作目录
 COPY app.py .
 COPY templates templates/
 
 # 创建一个目录用于存放日志和数据库
-RUN mkdir /app/logs
-RUN mkdir /app/instance
+RUN mkdir /app/log && \
+    mkdir /app/instance
 
 # 暴露端口 10223
 EXPOSE 10223

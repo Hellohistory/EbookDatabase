@@ -13,6 +13,7 @@ from fastapi.responses import FileResponse
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import create_engine, MetaData
+from fastapi.staticfiles import StaticFiles
 
 # 创建一个处理器，每天凌晨回滚日志文件，保留最近 7 天的日志文件，并使用 UTF-8 编码
 handler = TimedRotatingFileHandler('log/app.log', when="midnight", interval=1, backupCount=7, encoding='utf-8')
@@ -40,6 +41,7 @@ metadata.create_all(engine)
 # FastAPI应用实例
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # 初始化数据库连接字典
 database_connections = {}
@@ -75,7 +77,7 @@ async def connect_database(db_name: str):
 # 返回favicon图标
 @app.get("/favicon.ico")
 async def favicon():
-    return FileResponse(Path("templates/logo.ico"), media_type="image/x-icon")
+    return FileResponse(Path("static/logo.ico"), media_type="image/x-icon")
 
 
 # 路由

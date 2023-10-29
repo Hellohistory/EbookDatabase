@@ -18,7 +18,7 @@
 
 QQ群：942385978
 
-![主页页面](image/img_1.png)
+![主页页面](image/img.png)
 
 ## 数据库备份
 
@@ -139,6 +139,7 @@ python app.py
 - 支持模糊搜索和准确搜索
 - 分页显示结果
 
+![检索结果页](image/img_1.png)
 ![检索结果页](image/img_2.png)
 
 ## Bug反馈

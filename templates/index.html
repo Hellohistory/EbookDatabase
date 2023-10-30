@@ -5,92 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>EbookDatabase</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f7f7f9;
-            margin: 0;
-            padding: 0;
-        }
-
-        #container {
-            width: 500px;
-            padding: 20px;
-            background-color: #ffffff;
-            border: 2px solid #4A90E2;
-            border-radius: 8px;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-            margin: 50px auto 0;
-        }
-
-        h1 {
-            text-align: center;
-            color: #4A90E2;
-        }
-
-        .form-label {
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #333;
-        }
-
-        .form-control,
-        .form-select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #BDC3C7;
-            border-radius: 4px;
-            outline: none;
-            box-shadow: none;
-            box-sizing: border-box;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: #4A90E2;
-            box-shadow: 0 0 0 2px rgba(74, 144, 226, .2);
-        }
-
-        .form-check-input {
-            margin-right: 10px;
-        }
-
-        .btn {
-            background-color: #4A90E2;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .btn:hover {
-            background-color: #357ABD;
-        }
-
-        .mt-4 {
-            margin-top: 20px;
-        }
-
-        .mb-3 {
-            margin-bottom: 15px;
-        }
-
-        /* 添加滚动条样式 */
-        #connected-dbs {
-            max-height: 100px;
-            overflow-y: auto;
-            border: 1px solid #BDC3C7;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-
-    </style>
+    <link rel="stylesheet" href="/static/index_styles.css">
 </head>
 <body>
+<div id="settings-icon">
+  <object type="image/svg+xml" data="/static/setting_logo.svg" width="30" height="30">
+    设置
+  </object>
+</div>
+<div id="platform-icons">
+  <a href="https://github.com/Hellohistory/EbookDatabase" target="_blank">
+    <img src="/static/github-mark.svg" alt="GitHub" width="30" height="30">
+  </a>
+  <a href="https://gitee.com/etojsyc/EbookDatabase" target="_blank">
+    <img src="/static/gitee-svgrepo-com.svg" alt="Gitee" width="30" height="30">
+  </a>
+</div>
 
 <div id="container">
     <h1>EbookDatabase</h1>
@@ -100,6 +30,11 @@
             <input type="text" id="query" name="query" placeholder="请输入关键词" class="form-control" required>
         </div>
         <div class="mb-3">
+        <label for="db_names" class="form-label">选择数据库：</label>
+        <div id="database-checkboxes">
+        </div>
+    </div>
+    <div class="mb-3">
             <label for="field" class="form-label">搜索方式：</label>
             <select id="field" name="field" class="form-select">
                 <option value="title">书名</option>
@@ -115,28 +50,9 @@
         </div>
         <button type="submit" class="btn btn-primary">搜索</button>
     </form>
-    <p id="connected-dbs">已连接的数据库：正在加载...</p>
-
 </div>
 
-<script>
-  // 当页面加载完成后执行此函数
-  window.onload = function() {
-    // 使用fetch API请求已连接的数据库列表
-    fetch('/available_dbs/')
-    .then(response => response.json())  // 解析返回的JSON数据
-    .then(data => {
-      // 更新页面上的信息
-      const connectedDbsElement = document.getElementById('connected-dbs');
-      connectedDbsElement.innerHTML = "已连接的数据库：" + data.databases.join(", ");
-    })
-    .catch(error => {
-      // 如果出现错误，显示错误信息
-      console.error('获取数据库列表出错:', error);
-    });
-  };
-</script>
-
+<script src="/static/index_script.js"></script>
 </body>
 
 </html>

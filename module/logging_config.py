@@ -1,14 +1,24 @@
-# logging_config.py
-
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
 
-# 日志配置函数
-def setup_logging() -> None:
-    handler = TimedRotatingFileHandler('log/app.log', when="midnight", interval=1, backupCount=7, encoding='utf-8')
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    logger.addHandler(handler)
+class LogManager:
+    def __init__(self, log_file: str, backup_count: int = 7):
+        # 创建一个处理器，每天凌晨回滚日志文件
+        handler = TimedRotatingFileHandler(
+            log_file, when="midnight", interval=1, backupCount=backup_count, encoding='utf-8'
+        )
+
+        # 设置日志格式
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+
+        # 获取 logger 对象并设置日志级别
+        self.logger = logging.getLogger()
+        self.logger.setLevel(logging.INFO)
+
+        # 将处理器添加到 logger 对象
+        self.logger.addHandler(handler)
+
+    def get_logger(self):
+        return self.logger

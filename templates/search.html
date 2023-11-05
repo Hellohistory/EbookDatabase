@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>EbookDatabase</title>
-    <link rel="stylesheet" href="/static/search_styles.css">
+    <link rel="stylesheet" href="/static/search.css">
 </head>
 
 <body>
@@ -44,6 +44,7 @@
             <p><strong>页数:</strong> {{ book.page_count }}</p>
             <p><strong>ISBN:</strong> {{ book.ISBN }}</p>
             <p><strong>SS码:</strong> {{ book.SS_code }}</p>
+            <p><strong>DXID:</strong> {{ book.dxid }}</p>
             <p class="second-pass-code">
                 <strong>秒传链接:</strong> <span class="actual-link">{{ book.second_pass_code }}</span>
                 <button class="copy-link-btn">复制</button>
@@ -57,34 +58,34 @@
     <p class="no-results">没有找到匹配的结果。</p>
     {% endif %}
 
-<!-- 分页控件 -->
+<!-- 基础检索与高级检索分页控件 -->
 {% if total_pages > 1 %}
 <nav aria-label="Page navigation">
     <ul class="pagination">
         <li class="page-item{% if current_page == 1 %} disabled{% endif %}">
-            <a class="page-link" href="?query={{ query }}&field={{ field }}&fuzzy={{ fuzzy }}{% for db_name in db_names %}&db_names={{ db_name }}{% endfor %}&page_size={{ page_size }}&page=1" aria-label="First">
+            <a class="page-link" href="?{% if logic %}{% for l in logic %}logic={{ l }}&{% endfor %}{% endif %}{% for q in query %}query={{ q }}&{% endfor %}{% for f in field %}field={{ f }}&{% endfor %}{% for fz in fuzzy %}fuzzy={{ fz }}&{% endfor %}{% for db_name in db_names %}db_names={{ db_name }}&{% endfor %}page=1" aria-label="First">
                 <span aria-hidden="true">&laquo;&laquo;</span>
             </a>
         </li>
         <li class="page-item{% if current_page == 1 %} disabled{% endif %}">
-            <a class="page-link" href="?query={{ query }}&field={{ field }}&fuzzy={{ fuzzy }}{% for db_name in db_names %}&db_names={{ db_name }}{% endfor %}&page_size={{ page_size }}&page={{ current_page - 1 }}" aria-label="Previous">
+            <a class="page-link" href="?{% if logic %}{% for l in logic %}logic={{ l }}&{% endfor %}{% endif %}{% for q in query %}query={{ q }}&{% endfor %}{% for f in field %}field={{ f }}&{% endfor %}{% for fz in fuzzy %}fuzzy={{ fz }}&{% endfor %}{% for db_name in db_names %}db_names={{ db_name }}&{% endfor %}page={{ current_page - 1 }}" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
         {% for page_num in range(current_page - 2, current_page + 3) %}
         {% if page_num > 0 and page_num <= total_pages %}
         <li class="page-item{% if current_page == page_num %} active{% endif %}">
-            <a class="page-link" href="?query={{ query }}&field={{ field }}&fuzzy={{ fuzzy }}{% for db_name in db_names %}&db_names={{ db_name }}{% endfor %}&page_size={{ page_size }}&page={{ page_num }}">{{ page_num }}</a>
+            <a class="page-link" href="?{% if logic %}{% for l in logic %}logic={{ l }}&{% endfor %}{% endif %}{% for q in query %}query={{ q }}&{% endfor %}{% for f in field %}field={{ f }}&{% endfor %}{% for fz in fuzzy %}fuzzy={{ fz }}&{% endfor %}{% for db_name in db_names %}db_names={{ db_name }}&{% endfor %}page={{ page_num }}">{{ page_num }}</a>
         </li>
         {% endif %}
         {% endfor %}
         <li class="page-item{% if current_page == total_pages %} disabled{% endif %}">
-            <a class="page-link" href="?query={{ query }}&field={{ field }}&fuzzy={{ fuzzy }}{% for db_name in db_names %}&db_names={{ db_name }}{% endfor %}&page_size={{ page_size }}&page={{ current_page + 1 }}" aria-label="Next">
+            <a class="page-link" href="?{% if logic %}{% for l in logic %}logic={{ l }}&{% endfor %}{% endif %}{% for q in query %}query={{ q }}&{% endfor %}{% for f in field %}field={{ f }}&{% endfor %}{% for fz in fuzzy %}fuzzy={{ fz }}&{% endfor %}{% for db_name in db_names %}db_names={{ db_name }}&{% endfor %}page={{ current_page + 1 }}" aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
             </a>
         </li>
         <li class="page-item{% if current_page == total_pages %} disabled{% endif %}">
-            <a class="page-link" href="?query={{ query }}&field={{ field }}&fuzzy={{ fuzzy }}{% for db_name in db_names %}&db_names={{ db_name }}{% endfor %}&page_size={{ page_size }}&page={{ total_pages }}" aria-label="Last">
+            <a class="page-link" href="?{% if logic %}{% for l in logic %}logic={{ l }}&{% endfor %}{% endif %}{% for q in query %}query={{ q }}&{% endfor %}{% for f in field %}field={{ f }}&{% endfor %}{% for fz in fuzzy %}fuzzy={{ fz }}&{% endfor %}{% for db_name in db_names %}db_names={{ db_name }}&{% endfor %}page={{ total_pages }}" aria-label="Last">
                 <span aria-hidden="true">&raquo;&raquo;</span>
             </a>
         </li>
@@ -94,14 +95,27 @@
 
 <!-- 跳转到页数的输入和按钮 -->
 {% if total_pages > 1 %}
+        <!-- 新增的按钮 -->
+    <div class="button-container-horizontal">
+        <a href="/" class="home-button">回到主页</a>
+        <button id="select-all-btn">全选</button>
+        <button id="deselect-all-btn">全不选</button>
+        <button id="copy-selected-btn">复制选中的秒传链接</button>
+    </div>
+    <!-- 新增按钮结束 -->
 <div class="jump-container">
     <label for="jump-to-page">跳转到页数:</label>
     <input type="text" id="jump-to-page" placeholder="页数" />
     <button id="jump-button">跳转</button>
+
+
 </div>
 {% endif %}
 
-<script src="/static/search_script.js"></script>
+<script src="/static/search_js/search_clipboard.js"></script>
+<script src="/static/search_js/search_selection-controls.js"></script>
+<script src="/static/search_js/search_pagination-controls.js"></script>
+<script src="/static/search_js/search_file-size-formatter.js"></script>
 
 </body>
 </html>

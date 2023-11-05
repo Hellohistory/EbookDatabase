@@ -8,7 +8,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # 安装依赖
-RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+RUN pip install --no-settings-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
 
 # 将 app.py, templates 和其他需要的文件复制到工作目录
 COPY app.py .

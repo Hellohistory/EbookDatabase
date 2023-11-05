@@ -1,0 +1,55 @@
+/* 侧边栏整体样式 */
+#sidebar {
+    background-color: #f9f9f9;
+    padding: 15px 20px; /* 调整内边距 */
+    border-right: 1px solid #ccc;
+    height: 100vh;
+    overflow-y: auto;
+    font-family: 'Arial', sans-serif;
+}
+
+/* 关闭图标样式 */
+.close-icon-style:hover {
+    cursor: pointer;
+    color: #7f8c8d;
+    font-size: 30px;
+    margin-bottom: 15px; /* 调整边距 */
+}
+
+/* 标签样式 */
+label.form-label {
+    display: block;
+    margin-bottom: 10px;
+    color: #34495e;
+    font-weight: bold;
+}
+
+/* 复选框列表样式 */
+#database-checkboxes {
+    overflow-y: auto;
+    border: 1px solid #e0e0e0; /* 更淡的边框颜色 */
+    padding: 8px; /* 调整内边距 */
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+input[type=checkbox] {
+    margin-right: 5px;
+}
+
+label {
+    margin-right: 15px; /* 增加间距 */
+    user-select: none;
+}
+
+#database-checkboxes::-webkit-scrollbar {
+    width: 5px;
+}
+
+#database-checkboxes::-webkit-scrollbar-track {
+    background: #f4f4f4;
+}
+
+#database-checkboxes::-webkit-scrollbar-thumb {
+    background: #bdc3c7;
+}

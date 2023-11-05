@@ -1,58 +1,141 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>EbookDatabase</title>
-    <link rel="stylesheet" href="/static/index_styles.css">
+    <link rel="stylesheet" href="/static/index_css/alertstyles.css">
+    <link rel="stylesheet" href="/static/index_css/buttonandLinkstyles.css">
+    <link rel="stylesheet" href="/static/index_css/databaseliststyles.css">
+    <link rel="stylesheet" href="/static/index_css/generalstyles.css">
+    <link rel="stylesheet" href="/static/index_css/iconcontainerstyles.css">
+    <link rel="stylesheet" href="/static/index_css/modalstyles.css">
+    <link rel="stylesheet" href="/static/index_css/sidebarstyles.css">
+    <link rel="stylesheet" href="/static/index_css/utilityclasses.css">
 </head>
 <body>
-<div id="settings-icon">
-  <object type="image/svg+xml" data="/static/setting_logo.svg" width="30" height="30">
-    设置
-  </object>
-</div>
-<div id="platform-icons">
-  <a href="https://github.com/Hellohistory/EbookDatabase" target="_blank">
-    <img src="/static/github-mark.svg" alt="GitHub" width="30" height="30">
-  </a>
-  <a href="https://gitee.com/etojsyc/EbookDatabase" target="_blank">
-    <img src="/static/gitee-svgrepo-com.svg" alt="Gitee" width="30" height="30">
-  </a>
+    <div id="menu-icon" class="cursor-pointer" onclick="toggleSidebar()">
+        &#9776;
+    </div>
+
+    <nav id="sidebar" class="sidebar-style">
+        <div class="center-text padding-10 cursor-pointer close-icon-style" onclick="toggleSidebar()">
+            &times;
+        </div>
+        <label for="db_names" class="form-label">选择数据库：</label>
+        <div id="database-checkboxes"></div>
+    </nav>
+
+    <div id="platform-icons" class="platform-icons-style">
+        <a href="https://github.com/Hellohistory/EbookDatabase" target="_blank">
+            <img src="/static/github-mark.svg" alt="GitHub" width="30" height="30" />
+        </a>
+        <a href="https://gitee.com/etojsyc/EbookDatabase" target="_blank">
+            <img src="/static/gitee-svgrepo-com.svg" alt="Gitee" width="30" height="30" />
+        </a>
+        <a href="javascript:void(0);" onclick="openSettingsModal()">
+            <img src="/static/settings-icon.svg" alt="设置" width="30" height="30" />
+        </a>
+    </div>
+
+    <div id="container" class="container-style">
+        <h1>EbookDatabase</h1>
+        <ul class="search-tab">
+            <li class="on" val="basic" onclick="switchTab('basic')">基础检索</li>
+            <li val="advanced" onclick="switchTab('advanced')">高级检索</li>
+        </ul>
+        <div id="basic-search" style="display: block;">
+            <!-- 基础检索表单 -->
+            <form id="basicSearchForm" action="/search/" method="get" class="mt-4" onsubmit="submitForm(event)">
+                <!-- 表单内容 -->
+                <div class="mb-3 d-flex align-items-center">
+                    <label for="basicSelectedField" class="form-label me-2"></label>
+                    <select id="basicSelectedField" name="field" class="form-select me-2" style="width: auto;">
+                        <option value="title">书名</option>
+                        <option value="author">作者</option>
+                        <option value="publisher">出版商</option>
+                        <option value="publishdate">出版时间</option>
+                        <option value="isbn">ISBN码</option>
+                        <option value="sscode">SS码</option>
+                        <option value="dxid">DXID</option>
+                    </select>
+
+                    <label for="basicQuery" class="form-label me-2"></label>
+                    <input type="text" id="basicQuery" name="query" placeholder="请输入关键词" class="form-control" style="flex-grow: 1;" required />
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" id="basicFuzzy" name="fuzzy" value="true" class="form-check-input" checked />
+                    <label for="basicFuzzy" class="form-check-label">模糊搜索</label>
+                </div>
+                <button type="submit" class="custom-button">搜索</button>
+            </form>
+        </div>
+
+    <div id="advanced-search" style="display: none;">
+        <!-- 高级检索表单 -->
+        <form id="advancedSearchForm" action="/search/advanced" method="get" class="mt-4" onsubmit="submitForm(event)">
+            <div id="searchConditions" class="search-conditions">
+                <div class="mb-3 d-flex align-items-center search-condition">
+                    <label class="d-flex align-items-center">
+                        <select name="field[]" class="form-select me-1">
+                            <option value="title">书名</option>
+                            <option value="author">作者</option>
+                            <option value="publisher">出版商</option>
+                            <option value="publishdate">出版时间</option>
+                            <option value="isbn">ISBN码</option>
+                            <option value="sscode">SS码</option>
+                            <option value="dxid">DXID</option>
+                        </select>
+                        <span>-</span>
+                        <input type="text" name="query[]" placeholder="请输入关键词" class="form-control me-1" required />
+                    </label>
+
+                    <div class="form-check form-switch">
+                        <label>
+                            <input type="checkbox" name="fuzzy[]" value="true" class="form-check-input" checked />
+                        </label>
+                        <label class="form-check-label">模糊搜索</label>
+                    </div>
+                </div>
+            </div>
+            <button type="button" id="addCondition" class="custom-button">添加条件</button>
+            <button type="submit" class="custom-button">搜索</button>
+        </form>
+    </div>
 </div>
 
-<div id="container">
-    <h1>EbookDatabase</h1>
-    <form action="/search/" method="get" class="mt-4">
-        <div class="mb-3">
-            <label for="query" class="form-label">关键词：</label>
-            <input type="text" id="query" name="query" placeholder="请输入关键词" class="form-control" required>
-        </div>
-        <div class="mb-3">
-        <label for="db_names" class="form-label">选择数据库：</label>
-        <div id="database-checkboxes">
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div id="custom-alert" class="custom-alert"></div>
+            <span class="close" onclick="closeSettingsModal()">&times;</span>
+            <h2>设置</h2>
+            <div class="setting-item">
+                <label for="page-size">每页结果数：</label>
+                <select id="page-size" name="page_size">
+                    <option value="10">10条/页</option>
+                    <option value="20">20条/页</option>
+                    <option value="30">30条/页</option>
+                    <option value="50">50条/页</option>
+                    <option value="100">100条/页</option>
+                    <option value="200">200条/页</option>
+                    <option value="300">300条/页</option>
+                </select>
+            </div>
+            <button id="confirmButton" onclick="confirmSettings()">确认</button>
         </div>
     </div>
-    <div class="mb-3">
-            <label for="field" class="form-label">搜索方式：</label>
-            <select id="field" name="field" class="form-select">
-                <option value="title">书名</option>
-                <option value="author">作者</option>
-                <option value="publisher">出版商</option>
-                <option value="isbn">ISBN码</option>
-                <option value="sscode">SS码</option>
-            </select>
-        </div>
-        <div class="mb-3 form-check">
-            <input type="checkbox" id="fuzzy" name="fuzzy" value="true" class="form-check-input" checked>
-            <label for="fuzzy" class="form-check-label">模糊搜索</label>
-        </div>
-        <button type="submit" class="btn btn-primary">搜索</button>
-    </form>
-</div>
 
-<script src="/static/index_script.js"></script>
+    <div id="alert-box" class="alert">
+        <span>设置已保存!</span>
+    </div>
+
+    <script src="/static/index_js/index_utils.js"></script>
+    <script src="/static/index_js/index_sidebar.js"></script>
+
+    <script src="/static/index_js/index_modal.js"></script>
+    <script src="/static/index_js/index_form.js"></script>
+    <script src="/static/index_js/index_inputEvents.js"></script>
+    <script src="/static/index_js/index_main.js"></script>
+    <script src="/static/index_js/index_tab.js"></script>
 </body>
-
 </html>

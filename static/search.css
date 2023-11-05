@@ -1,0 +1,234 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-top: 20px;
+}
+
+.search-time {
+    text-align: center;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.total-records {
+    text-align: center;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.book-container {
+    background-color: #fff;
+    margin: 10px 20px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.book-title {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+.book-details p {
+    margin: 5px 0;
+    color: #34495e;
+}
+
+.no-results {
+    text-align: center;
+    color: #666;
+    margin: 20px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+li::marker {
+    content: none;
+}
+
+.page-item a {
+    margin: 0 5px;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: #333;
+    text-decoration: none;
+}
+
+.page-item a:hover {
+    background-color: #eee;
+}
+
+.page-item.active a {
+    background-color: #3498db;
+    color: #fff;
+}
+
+.page-item.disabled a {
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+.button-container {
+    margin-left: 20px;
+    margin-bottom: 20px;
+}
+
+#select-all-btn,
+#deselect-all-btn,
+#copy-selected-btn {
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+#select-all-btn {
+    background-color: #28a745; /* 绿色 */
+}
+
+#deselect-all-btn {
+    background-color: #dc3545; /* 红色 */
+}
+
+#copy-selected-btn {
+    background-color: #17a2b8; /* 青色 */
+}
+
+.copy-link-btn {
+    background-color: #007bff; /* 蓝色背景 */
+    color: white; /* 白色文字 */
+    border: none; /* 无边框 */
+    padding: 5px 10px; /* 内边距 */
+    margin-left: 10px; /* 左外边距，与秒传链接有一点距离 */
+    cursor: pointer; /* 鼠标悬停时变为手指样式 */
+    border-radius: 4px; /* 圆角 */
+    font-size: 14px; /* 字体大小 */
+}
+
+/* 鼠标悬停时的样式 */
+.copy-link-btn:hover {
+    background-color: #0056b3; /* 深蓝色背景 */
+}
+
+.home-button {
+    background-color: #3498db; /* 蓝色背景 */
+    color: white; /* 白色文字 */
+    border: none; /* 无边框 */
+    padding: 10px 20px; /* 内边距 */
+    text-align: center; /* 文字居中 */
+    text-decoration: none; /* 无下划线 */
+    display: inline-block; /* 内联块级元素 */
+    font-size: 16px; /* 字体大小 */
+    margin: 4px 2px; /* 外边距 */
+    cursor: pointer; /* 鼠标悬停时变为手指样式 */
+    border-radius: 4px; /* 圆角 */
+}
+
+/* 返回主页鼠标悬停时的样式 */
+.home-button:hover {
+    background-color: #2980b9; /* 深蓝色背景 */
+}
+
+/* 全选按钮悬停样式 */
+#select-all-btn:hover {
+    background-color: #218838; /* 深绿色 */
+}
+
+/* 全不选按钮悬停样式 */
+#deselect-all-btn:hover {
+    background-color: #c82333; /* 深红色 */
+}
+
+/* 复制选中的秒传链接按钮悬停样式 */
+#copy-selected-btn:hover {
+    background-color: #138496; /* 深青色 */
+}
+
+/* 非商业性质声明样式 */
+.non-commercial-notice {
+    font-size: 14px;
+    color: red;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.jump-container {
+display: flex;
+align-items: center;
+justify-content: center;
+margin-top: 20px;
+margin-bottom: 20px;
+padding: 10px;
+border: 1px solid #ccc;
+border-radius: 5px;
+
+}
+
+.jump-container label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.jump-container input {
+    width: 60px;
+    padding: 5px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.jump-container button {
+    padding: 6px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.jump-container button:hover {
+    background-color: #0056b3;
+}
+
+    .pagination-controls {
+        display: flex;
+        justify-content: space-between; /* 使用space-between来分隔左侧和中间的内容 */
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .button-container {
+        display: flex;
+        gap: 5px; /* 缩小按钮之间的间距 */
+    }
+
+    .button-container button {
+        padding: 3px 5px; /* 缩小按钮内边距 */
+        font-size: 12px; /* 缩小字体大小 */
+        line-height: 1; /* 调整行高以适应更小的按钮 */
+    }
+
+    .page-jump-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }

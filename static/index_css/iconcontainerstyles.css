@@ -1,0 +1,21 @@
+/* 图标容器样式，用于设置和菜单图标 */
+#icon-container,
+#platform-icons,
+#settings-icon,
+#menu-icon,
+#close-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+/* 菜单图标特定位置 */
+#menu-icon {
+    left: 10px;
+}
+
+/* 关闭图标样式，初始时不显示 */
+#close-icon {
+    display: none;
+}

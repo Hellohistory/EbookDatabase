@@ -1,35 +1,31 @@
-import asyncio
+import json
 import logging
 import os
 import threading
 import time
 import webbrowser
-from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 from typing import List, Optional
 
 import uvicorn
-from fastapi import FastAPI, Request, Query, Depends, HTTPException
+from fastapi import FastAPI, Request, Query, Depends
 from fastapi.responses import FileResponse
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from module.database_manager import DatabaseManager
+from module.logging_config import LogManager
+from module.utils import validate_page_size
+from search.database_queries import perform_search
+from search.search_utils import build_search_query, build_advanced_search_query
 
-# 创建一个处理器，每天凌晨回滚日志文件，保留最近 7 天的日志文件，并使用 UTF-8 编码
-handler = TimedRotatingFileHandler('log/app.log', when="midnight", interval=1, backupCount=7, encoding='utf-8')
+# 初始化日志管理器
+log_manager = LogManager('log/app.log')
+logger = log_manager.get_logger()
 
-# 设置日志格式
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-
-# 获取 logger 对象并设置日志级别
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-
-# 将处理器添加到 logger 对象
-logger.addHandler(handler)
+# 现在可以使用 logger 来记录信息
+logger.info("日志信息已经记录")
 
 # FastAPI 和 DatabaseManager 实例化
 app = FastAPI()
@@ -62,6 +58,30 @@ async def get_available_databases():
     return {"databases": available_databases}
 
 
+# 获取设置
+@app.get("/settings/")
+async def get_settings():
+    try:
+        with open('static/settings.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return {"status": "success", "data": data}
+    except Exception as e:
+        logger.error(f"读取设置文件失败: {e}")
+        return {"status": "error", "message": "读取设置文件失败"}
+
+
+# 更新设置
+@app.post("/settings/")
+async def update_settings(data: dict):
+    try:
+        with open('static/settings.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        return {"status": "success", "message": "设置已更新"}
+    except Exception as e:
+        logger.error(f"更新设置文件失败: {e}")
+        return {"status": "error", "message": "更新设置文件失败"}
+
+
 @app.post("/connect_db/")
 async def connect_database(db_name: str):
     logging.info(f"尝试连接数据库：{db_name}")
@@ -88,18 +108,6 @@ async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "available_databases": available_databases})
 
 
-async def validate_page_size(page_size: str = Query("10", alias="page_size")) -> int:
-    try:
-        page_size_int = int(page_size) if page_size else 10  # 如果是空字符串，则使用默认值 10
-    except ValueError:
-        raise HTTPException(status_code=400, detail="page_size must be a valid integer")
-
-    if page_size_int < 1:
-        raise HTTPException(status_code=400, detail="page_size must be greater than zero")
-
-    return page_size_int
-
-
 @app.get("/search/", response_class=HTMLResponse)
 async def search(
         request: Request,
@@ -110,85 +118,80 @@ async def search(
         page: Optional[int] = Query(default=1),
         page_size: int = Depends(validate_page_size)
 ):
-    logger.info(
-        f"搜索请求参数 - 查询: {query}, 字段: {field}, 数据库: {db_names}, 模糊搜索: {fuzzy}, 页面: {page}, 每页大小: {page_size}")
+    # 构建搜索查询
+    query_str, total_query_str, params = build_search_query(query, field, fuzzy, page_size, page)
     start_time = time.time()
 
-    query_conditions = []
-    params = {}
+    # 执行数据库查询并获取结果
+    all_books, total_records = await perform_search(db_manager, query_str, total_query_str, params, db_names,
+                                                    available_databases)
 
-    # 构建模糊搜索或准确检索的条件
-    if field == "title":
-        query_conditions.append(f"title LIKE :title" if fuzzy else "title = :title")
-        params['title'] = f"%{query}%" if fuzzy else query
-    elif field == "author":
-        query_conditions.append(f"author LIKE :author" if fuzzy else "author = :author")
-        params['author'] = f"%{query}%" if fuzzy else query
-    elif field == "publisher":
-        query_conditions.append(f"publisher LIKE :publisher" if fuzzy else "publisher = :publisher")
-        params['publisher'] = f"%{query}%" if fuzzy else query
-    elif field == "isbn":
-        query_conditions.append(f"ISBN LIKE :isbn" if fuzzy else "ISBN = :isbn")
-        params['isbn'] = f"%{query}%" if fuzzy else query
-    elif field == "sscode":
-        query_conditions.append(f"SS_code LIKE :sscode" if fuzzy else "SS_code = :sscode")
-        params['sscode'] = f"%{query}%" if fuzzy else query
-
-    query_str = "SELECT * FROM books"
-    total_query_str = "SELECT COUNT(*) FROM books"
-    if query_conditions:
-        conditions_str = " WHERE " + " AND ".join(query_conditions)
-        query_str += conditions_str
-        total_query_str += conditions_str
-
-    offset = (page - 1) * page_size
-    query_str += f" LIMIT {page_size} OFFSET {offset}"
-
-    if db_names is not None:
-        tasks = [asyncio.create_task(db_manager.fetch_all(db_name, query_str, params)) for db_name in db_names if
-                 db_name in available_databases]
-        total_tasks = [asyncio.create_task(db_manager.fetch_one(db_name, total_query_str, params))
-                       for db_name in db_names if
-                       db_name in available_databases]
-    else:
-        logging.warning("db_names 是 None，无法执行数据库查询")
-        return
-
-    # 并发执行所有任务并获取结果
-    results, total_results = await asyncio.gather(
-        asyncio.gather(*tasks),
-        asyncio.gather(*total_tasks)
-    )
-
-    all_books = []
-    total_records = 0
-
-    for books in results:
-        if books is not None:
-            all_books.extend(books)
-
-    for total in total_results:
-        if total is not None:
-            total_records += total[0]
-
+    # 计算总页数
     total_pages = -(-total_records // page_size)  # 向上取整
 
     end_time = time.time()
     search_time = end_time - start_time
 
+    # 生成响应
     return templates.TemplateResponse(
         "search.html",
         {
             "request": request,
             "books": all_books,
-            "search_time": search_time,
             "current_page": page,
             "total_pages": total_pages,
             "query": query,
             "field": field,
             "fuzzy": fuzzy,
             "db_names": db_names,
-            "total_records": total_records
+            "total_records": total_records,
+            "search_time": search_time
+        }
+    )
+
+
+@app.get("/search/advanced", response_class=HTMLResponse)
+async def advanced_search(
+        request: Request,
+        db_names: Optional[List[str]] = Query(None),  # 添加db_names作为查询参数
+        field: List[str] = Query(...),
+        query: List[str] = Query(...),
+        logic: List[str] = Query(...),
+        fuzzy: List[bool] = Query(default=None),
+        page: Optional[int] = Query(default=1),
+        page_size: int = Depends(validate_page_size)
+):
+    # 验证参数长度是否一致
+    if not (len(field) == len(query) == len(logic) + 1):
+        return {"status": "error", "message": "查询参数不匹配"}
+
+    start_time = time.time()
+
+    # 构建高级搜索查询
+    query_str, total_query_str, params = build_advanced_search_query(field, query, logic, fuzzy, page_size, page)
+
+    # 执行查询并获取结果
+    all_books, total_records = await perform_search(db_manager, query_str, total_query_str, params, db_names,
+                                                    available_databases)
+
+    search_time = time.time() - start_time
+
+    total_pages = -(-total_records // page_size)  # 向上取整
+
+    return templates.TemplateResponse(
+        "search.html",
+        {
+            "request": request,
+            "books": all_books,
+            "current_page": page,
+            "total_pages": total_pages,
+            "query": query,
+            "field": field,
+            "fuzzy": fuzzy,
+            "logic": logic,
+            "db_names": db_names,
+            "total_records": total_records,
+            "search_time": search_time
         }
     )
 

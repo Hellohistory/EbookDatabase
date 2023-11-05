@@ -59,8 +59,7 @@ document.getElementById('theme-switch').addEventListener('change', function(even
 // 保存设置到后端服务器并显示自定义弹窗
 async function confirmSettings() {
     const pageSize = document.getElementById('page-size').value;
-    const theme = document.getElementById('theme-switch').value;
-    let settingsData = { pageSize, theme };
+    let settingsData = { pageSize };
 
     try {
         let response = await fetch('/settings/', {

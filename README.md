@@ -16,6 +16,10 @@
 
 QQ群：942385978
 
+软件反馈问卷：
+
+https://www.wenjuan.com/s/UZBZJvHwOHq/#《EbookDatabase意见反馈》
+
 ![主页页面](image/img.png)
 ![主页页面](image/img_1.png)
 

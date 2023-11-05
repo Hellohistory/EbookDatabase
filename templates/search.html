@@ -25,9 +25,9 @@
 
     {% if books %}
     <div class="button-container">
-        <button id="select-all-btn">全选</button>
-        <button id="deselect-all-btn">全不选</button>
-        <button id="copy-selected-btn">复制选中的秒传链接</button>
+        <button class="select-all-btn">全选</button>
+        <button class="deselect-all-btn">全不选</button>
+        <button class="copy-selected-btn">复制选中的秒传链接</button>
     </div>
     {% for book in books %}
     <div class="book-container">
@@ -98,17 +98,15 @@
         <!-- 新增的按钮 -->
     <div class="button-container-horizontal">
         <a href="/" class="home-button">回到主页</a>
-        <button id="select-all-btn">全选</button>
-        <button id="deselect-all-btn">全不选</button>
-        <button id="copy-selected-btn">复制选中的秒传链接</button>
+        <button class="select-all-btn">全选</button>
+        <button class="deselect-all-btn">全不选</button>
+        <button class="copy-selected-btn">复制选中的秒传链接</button>
     </div>
     <!-- 新增按钮结束 -->
 <div class="jump-container">
     <label for="jump-to-page">跳转到页数:</label>
     <input type="text" id="jump-to-page" placeholder="页数" />
     <button id="jump-button">跳转</button>
-
-
 </div>
 {% endif %}
 

@@ -2,13 +2,11 @@
 
 ## 简介
 
-这是本地化检索的电子数据。该项目使用 FastAPI 和 SQLite 数据库构建，并可以通过 本地 与 Docker 轻松部署。
+这是一款本地化的电子书检索系统，支持使用高级检索进行查询。
 
-目前本项目包含的数据库：
+该项目使用 FastAPI 和 SQLite 数据库构建，并可以通过本项目发行包轻松部署。
 
-读秀2.0-5.0
-
-这个数据库是通过很多渠道汇集到一起形成的，所以会出现信息不全等种种情况发生，还望谅解。
+本项目提供的数据库是通过很多渠道汇集到一起形成的，所以会出现信息不全等种种情况发生，还望谅解。
 
 如果你发现数据库内容错误或者有好的内容想要与大家分享，请与本人联系，
 
@@ -19,6 +17,7 @@
 QQ群：942385978
 
 ![主页页面](image/img.png)
+![主页页面](image/img_1.png)
 
 ## 数据库备份
 
@@ -95,52 +94,14 @@ python app.py
 
 ---
 
-### 使用 Docker 运行
-
-1. 首先，确保您已经安装了 [Docker](https://www.docker.com/products/docker-desktop)。
-
-2. 克隆此仓库：
-
-    ```bash
-    git clone https://github.com/Hellohistory/DX2_5.git
-    cd your-repo-dir
-    ```
-
-3. 构建 Docker 镜像：
-
-    ```bash
-    docker build -t dx2_5 .
-    ```
-
-4. 运行 Docker 容器：
-
-    ```bash
-    docker run -p 10223:10223 dx2_5
-    ```
-
-这样就可以在 `http://localhost:10223/`当中使用
-
-## Docker 容器存储设置
-
-在 Dockerfile 中，使用 `RUN mkdir /app/instance` 命令来在容器的 `/app` 工作目录下创建一个名为 `instance` 的文件夹。这个文件夹用于存放 SQLite 数据库。
-
-为了使这个数据库文件夹能够从外部访问并持久化存储，可以在运行 Docker 容器时使用 `-v` 参数来将这个 `instance` 文件夹映射到宿主机的一个特定目录。
-
-   ```bash
-   docker run -v /path/to/instance:/app/instance -v /path/to/log:/app/log your-image-name
-   ```
-
-这里，`/path/to/instance` 和 `/path/to/logs` 是在宿主机上用于存放数据库和日志的目录。
-
-
 ## 功能
 
-- 本地化检索
+- 支持本地基础检索和高级检索
 - 支持模糊搜索和准确搜索
 - 分页显示结果
 
-![检索结果页](image/img_1.png)
-![检索结果页](image/img_2.png)
+![检索结果页](image/img_3.png)
+![检索结果页](image/img_4.png)
 
 ## Bug反馈
 

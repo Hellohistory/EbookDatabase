@@ -37,6 +37,30 @@ function buildQueryString(params) {
     return newParts.join('&');
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+    const pageLinks = document.querySelectorAll('.page-link-js');
+
+    pageLinks.forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+        const pageNum = this.getAttribute('data-page');
+        const currentUrl = window.location.href;
+        window.location.href = addOrUpdateParameter(currentUrl, 'page', pageNum);
+    });
+  });
+
+  function addOrUpdateParameter(url, paramName, paramValue) {
+      const regex = new RegExp("([?&])" + paramName + "=.*?(&|$)", "i");
+      const separator = url.indexOf('?') !== -1 ? "&" : "?";
+      if (url.match(regex)) {
+      return url.replace(regex, '$1' + paramName + "=" + paramValue + '$2');
+    }
+    else {
+      return url + separator + paramName + "=" + paramValue;
+    }
+  }
+});
+
 // 确保页面加载完毕后执行
 document.addEventListener("DOMContentLoaded", function() {
     const jumpButton = document.getElementById("jump-button");

@@ -10,7 +10,7 @@ def build_search_query(query: str, field: str, fuzzy: Optional[bool], page_size:
         "title": "title",
         "author": "author",
         "publisher": "publisher",
-        "publishdate": "publishdate",
+        "publishdate": "publish_date",
         "isbn": "ISBN",
         "sscode": "SS_code",
         "dxid": "dxid"

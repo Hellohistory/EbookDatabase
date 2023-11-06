@@ -101,67 +101,20 @@ li::marker {
     border-radius: 4px;
 }
 
-#select-all-btn {
-    background-color: #28a745; /* 绿色 */
-}
-
-#deselect-all-btn {
-    background-color: #dc3545; /* 红色 */
-}
-
-#copy-selected-btn {
-    background-color: #17a2b8; /* 青色 */
-}
-
-.copy-link-btn {
-    background-color: #007bff; /* 蓝色背景 */
-    color: white; /* 白色文字 */
-    border: none; /* 无边框 */
-    padding: 5px 10px; /* 内边距 */
-    margin-left: 10px; /* 左外边距，与秒传链接有一点距离 */
-    cursor: pointer; /* 鼠标悬停时变为手指样式 */
-    border-radius: 4px; /* 圆角 */
-    font-size: 14px; /* 字体大小 */
-}
-
-/* 鼠标悬停时的样式 */
-.copy-link-btn:hover {
-    background-color: #0056b3; /* 深蓝色背景 */
-}
-
 .home-button {
-    background-color: #3498db; /* 蓝色背景 */
-    color: white; /* 白色文字 */
-    border: none; /* 无边框 */
-    padding: 10px 20px; /* 内边距 */
-    text-align: center; /* 文字居中 */
-    text-decoration: none; /* 无下划线 */
-    display: inline-block; /* 内联块级元素 */
-    font-size: 16px; /* 字体大小 */
-    margin: 4px 2px; /* 外边距 */
-    cursor: pointer; /* 鼠标悬停时变为手指样式 */
-    border-radius: 4px; /* 圆角 */
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
 }
 
-/* 返回主页鼠标悬停时的样式 */
-.home-button:hover {
-    background-color: #2980b9; /* 深蓝色背景 */
-}
-
-/* 全选按钮悬停样式 */
-#select-all-btn:hover {
-    background-color: #218838; /* 深绿色 */
-}
-
-/* 全不选按钮悬停样式 */
-#deselect-all-btn:hover {
-    background-color: #c82333; /* 深红色 */
-}
-
-/* 复制选中的秒传链接按钮悬停样式 */
-#copy-selected-btn:hover {
-    background-color: #138496; /* 深青色 */
-}
 
 /* 非商业性质声明样式 */
 .non-commercial-notice {
@@ -209,26 +162,60 @@ border-radius: 5px;
     background-color: #0056b3;
 }
 
-    .pagination-controls {
-        display: flex;
-        justify-content: space-between; /* 使用space-between来分隔左侧和中间的内容 */
-        align-items: center;
-        margin-top: 10px;
-    }
+.select-all-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
 
-    .button-container {
-        display: flex;
-        gap: 5px; /* 缩小按钮之间的间距 */
-    }
+.deselect-all-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
 
-    .button-container button {
-        padding: 3px 5px; /* 缩小按钮内边距 */
-        font-size: 12px; /* 缩小字体大小 */
-        line-height: 1; /* 调整行高以适应更小的按钮 */
-    }
+.copy-selected-btn {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
 
-    .page-jump-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+.copy-link-btn {
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.copy-link-btn:hover {
+    background-color: #0056b3;
+}
+

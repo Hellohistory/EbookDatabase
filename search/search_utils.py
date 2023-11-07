@@ -50,7 +50,7 @@ def build_advanced_search_query(fields: List[str], queries: List[str], logics: L
         "title": "title",
         "author": "author",
         "publisher": "publisher",
-        "publishdate": "publishdate",
+        "publishdate": "publish_date",
         "isbn": "ISBN",
         "sscode": "SS_code",
         "dxid": "dxid"

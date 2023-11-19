@@ -7,6 +7,8 @@ import webbrowser
 from pathlib import Path
 from typing import List, Optional
 
+import httpx
+import markdown2
 import uvicorn
 from fastapi import FastAPI, Request, Query, Depends
 from fastapi.responses import FileResponse
@@ -108,6 +110,34 @@ async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "available_databases": available_databases})
 
 
+@app.get("/about/")
+async def about(request: Request):
+    urls = [
+        'https://gitee.com/etojsyc/EbookDatabase/raw/main/Markdown/ThePillarOfShame.md',
+        'https://gitee.com/etojsyc/EbookDatabase/raw/main/Markdown/EbookDataTools.md',
+        'https://gitee.com/etojsyc/EbookDatabase/raw/main/Markdown/UpdateLog.md',
+        'https://gitee.com/etojsyc/EbookDatabase/raw/main/Markdown/DatabaseDownload.md',
+    ]
+
+    html_contents = []
+
+    async with httpx.AsyncClient() as client:
+        for url in urls:
+            resp = await client.get(url)
+            markdown_content = resp.text
+            # 将每个 Markdown 文件的内容转换为 HTML 并存储
+            html_contents.append(markdown2.markdown(markdown_content))
+
+    # 将转换后的 HTML 内容传递给前端
+    return templates.TemplateResponse("about.html", {
+        "request": request,
+        "html_content1": html_contents[0],
+        "html_content2": html_contents[1],
+        "html_content3": html_contents[2],
+        "html_content4": html_contents[3]
+    })
+
+
 @app.get("/search/", response_class=HTMLResponse)
 async def search(
         request: Request,
@@ -207,5 +237,5 @@ if __name__ == '__main__':
 
     # 允许任何地址请求10223端口访问服务
     logger.info("启动 FastAPI 应用")
-    uvicorn.run(app, host='127.0.0.1', port=10223)
+    uvicorn.run(app, host='0.0.0.0', port=10223)
     logger.info("FastAPI 应用已关闭")

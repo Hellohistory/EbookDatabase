@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>关于页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            padding: 20px;
+            margin: 0;
+        }
+
+        /* 导航栏样式 */
+        nav {
+            background: #add8e6; /* 浅蓝色背景 */
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        nav ul li {
+            display: inline;
+            margin: 0 20px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        nav ul li a:hover {
+            color: #ddd;
+        }
+
+        /* 内容样式 */
+        .content {
+            background: white;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: none; /* 默认隐藏所有内容 */
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .content {
+                margin: 10px 0;
+                padding: 15px;
+            }
+
+            /* 默认隐藏所有内容 */
+            .content {
+                display: none;
+            }
+
+            /* 默认显示第一个内容 */
+            .content.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav>
+        <ul>
+            <li><a href="javascript:void(0);" onclick="showContent('content1')">耻辱柱</a></li>
+            <li><a href="javascript:void(0);" onclick="showContent('content2')">EbookDataTools下载</a></li>
+            <li><a href="javascript:void(0);" onclick="showContent('content3')">更新日志</a></li>
+            <li><a href="javascript:void(0);" onclick="showContent('content4')">数据库下载</a></li>
+        </ul>
+    </nav>
+
+    <div id="content1" class="content active">
+        {{ html_content1 | safe }}
+    </div>
+    <div id="content2" class="content">
+        {{ html_content2 | safe }}
+    </div>
+    <div id="content3" class="content">
+        {{ html_content3 | safe }}
+    </div>
+    <div id="content4" class="content">
+        {{ html_content4 | safe }}
+    </div>
+
+    <script>
+        function showContent(contentId) {
+            // 隐藏所有内容
+            const contents = document.querySelectorAll('.content');
+            contents.forEach(function(content) {
+                content.classList.remove('active');
+            });
+
+            // 显示选中的内容
+            const selectedContent = document.getElementById(contentId);
+            if (selectedContent) {
+                selectedContent.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>

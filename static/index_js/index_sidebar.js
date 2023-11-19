@@ -1,3 +1,12 @@
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar.style.transform === 'translateX(0px)') {
+        sidebar.style.transform = 'translateX(-100%)'; // 隐藏侧边栏
+    } else {
+        sidebar.style.transform = 'translateX(0px)'; // 显示侧边栏
+    }
+}
+
 function loadSidebarDatabases() {
     const sidebar = document.getElementById('sidebar');
     if (sidebar.dataset.loaded === 'true') { // 避免重复加载
@@ -6,7 +15,7 @@ function loadSidebarDatabases() {
     fetch('/available_dbs/')
     .then(response => response.json())
     .then(data => {
-        const checkboxContainer = document.createElement('div');
+        const checkboxContainer = document.getElementById('database-checkboxes') || document.createElement('div');
         checkboxContainer.id = 'database-checkboxes';
         data.databases.forEach(db => {
             const checkbox = document.createElement('input');

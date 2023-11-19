@@ -38,19 +38,19 @@
         </div>
         <h2 class="book-title">{{ book.title }}</h2>
         <div class="book-details">
-            <p><strong>作者:</strong> {{ book.author }}</p>
-            <p><strong>出版商:</strong> {{ book.publisher }}</p>
-            <p><strong>出版日期:</strong> {{ book.publish_date }}</p>
-            <p><strong>页数:</strong> {{ book.page_count }}</p>
-            <p><strong>ISBN:</strong> {{ book.ISBN }}</p>
-            <p><strong>SS码:</strong> {{ book.SS_code }}</p>
-            <p><strong>DXID:</strong> {{ book.dxid }}</p>
+            {% if book.author %}<p><strong>作者:</strong> {{ book.author }}</p>{% endif %}
+            {% if book.publisher %}<p><strong>出版商:</strong> {{ book.publisher }}</p>{% endif %}
+            {% if book.publish_date %}<p><strong>出版日期:</strong> {{ book.publish_date }}</p>{% endif %}
+            {% if book.page_count %}<p><strong>页数:</strong> {{ book.page_count }}</p>{% endif %}
+            {% if book.ISBN %}<p><strong>ISBN:</strong> {{ book.ISBN }}</p>{% endif %}
+            {% if book.SS_code %}<p><strong>SS码:</strong> {{ book.SS_code }}</p>{% endif %}
+            {% if book.dxid %}<p><strong>DXID:</strong> {{ book.dxid }}</p>{% endif %}
             <p class="second-pass-code">
                 <strong>秒传链接:</strong> <span class="actual-link">{{ book.second_pass_code }}</span>
                 <button class="copy-link-btn">复制</button>
             </p>
-            <p class="file-size"><strong>文件大小:</strong> {{ book.size }}</p>
-            <p><strong>文件类型:</strong> {{ book.file_type }}</p>
+            {% if book.size %}<p class="file-size"><strong>文件大小:</strong> {{ book.size }}</p>{% endif %}
+            {% if book.file_type %}<p><strong>文件类型:</strong> {{ book.file_type }}</p>{% endif %}
         </div>
     </div>
     {% endfor %}
@@ -93,54 +93,9 @@
         <button id="jump-button">跳转</button>
     </div>
 {% endif %}
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  // 全选按钮功能
-  document.querySelectorAll('.select-all-btn').forEach(button => {
-    button.addEventListener('click', function() {
-      document.querySelectorAll('.copy-checkbox').forEach(checkbox => {
-        checkbox.checked = true;
-      });
-    });
-  });
 
-  // 单个复制秒传链接按钮功能
-  document.querySelectorAll('.copy-link-btn').forEach(button => {
-    button.addEventListener('click', function(event) {
-      const secondPassCode = event.target.closest('.second-pass-code').querySelector('.actual-link').textContent;
-      navigator.clipboard.writeText(secondPassCode.trim()).then(function() {
-        alert('复制成功：' + secondPassCode.trim());
-      }, function(err) {
-        alert('复制失败：' + err);
-      });
-    });
-  });
 
-  // 全不选按钮功能
-  document.querySelectorAll('.deselect-all-btn').forEach(button => {
-    button.addEventListener('click', function() {
-      document.querySelectorAll('.copy-checkbox').forEach(checkbox => {
-        checkbox.checked = false;
-      });
-    });
-  });
-
-  // 复制选中的秒传链接按钮功能
-  document.querySelectorAll('.copy-selected-btn').forEach(button => {
-    button.addEventListener('click', function() {
-      const selectedLinks = Array.from(document.querySelectorAll('.copy-checkbox:checked'))
-        .map(checkbox => checkbox.getAttribute('data-second-pass'));
-      const textToCopy = selectedLinks.join('\n');
-      navigator.clipboard.writeText(textToCopy).then(function() {
-        alert('复制成功！');
-      }, function(err) {
-        alert('复制失败：', err);
-      });
-    });
-  });
-});
-
-</script>
+<script src="/static/search_js/search_copy.js"></script>
 <script src="/static/search_js/search_pagination-controls.js"></script>
 <script src="/static/search_js/search_file-size-formatter.js"></script>
 

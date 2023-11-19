@@ -1,4 +1,3 @@
-/* 警告框样式，用于显示警告或通知 */
 .alert {
     display: none;
     position: fixed;
@@ -6,7 +5,7 @@
     top: 50%;
     transform: translate(-50%, -50%);
     padding: 15px;
-    background-color: #4CAF50;  /* 提示背景色 */
+    background-color: #4CAF50;
     color: white;
     border-radius: 5px;
     z-index: 1001;

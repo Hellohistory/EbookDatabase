@@ -1,4 +1,3 @@
-/* 按钮的基础样式 */
 .btn {
     background-color: #4A90E2;
     color: #fff;
@@ -10,39 +9,33 @@
     margin-bottom: 10px;
 }
 
-/* 鼠标悬停在按钮上时的样式 */
 .btn:hover {
     background-color: #357ABD;
 }
 
-/* 表单复选框前面的小方框样式 */
 .form-check-input {
     margin-right: 10px;
 }
 
-/* 自定义按钮的基础样式 */
 .custom-button {
-    background-color: #4a90e2; /* 设置按钮的背景色为淡蓝色 */
-    color: white; /* 设置按钮文字颜色为白色 */
-    padding: 12px 24px; /* 设置按钮的内边距 */
-    border: none; /* 去掉边框 */
-    border-radius: 5px; /* 给按钮设置圆角 */
-    cursor: pointer; /* 将鼠标悬停时的光标形状设置为手形 */
-    transition: background-color 0.3s ease; /* 设置背景色变化的过渡效果 */
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); /* 添加阴影效果 */
-    font-size: 16px; /* 设置文字大小 */
-    font-weight: bold; /* 设置文字加粗 */
+    background-color: #4a90e2;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    font-size: 16px;
+    font-weight: bold;
 }
 
-/* 鼠标悬停在自定义按钮上时的样式 */
 .custom-button:hover {
-    background-color: #5ca2f8; /* 鼠标悬停时改为蓝绿色 */
+    background-color: #5ca2f8;
 }
 
-/* 在激活状态下的自定义按钮样式 */
 .custom-button:active {
-    background-color: #4a90e2; /* 点击时保持淡蓝色背景 */
-    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2); /* 点击时的阴影效果稍微减小 */
-    transform: translateY(2px); /* 点击时按钮轻微向下移动，增加点击效果 */
+    background-color: #4a90e2;
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+    transform: translateY(2px);
 }
-

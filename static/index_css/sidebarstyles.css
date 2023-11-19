@@ -1,11 +1,48 @@
 /* 侧边栏基础样式 */
 #sidebar {
-    position: absolute;
-    left: -250px;
+    position: fixed; /* 使用 fixed 保持相对于视口的位置 */
+    left: 0;
     top: 0;
-    width: 240px;
-    height: 100vh;
+    width: 240px; /* 侧边栏宽度 */
+    height: 100vh; /* 高度占满整个视口高度 */
     background-color: #f5f5f5;
-    transition: left 0.3s;
-    padding: 10px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* 轻微的阴影效果 */
+    transition: transform 0.3s ease-in-out; /* 平滑的过渡效果 */
+    transform: translateX(-100%); /* 默认状态是隐藏的 */
+    z-index: 2; /* 确保侧边栏在其他内容上面 */
+    border-right: 1px solid #c5d0e6; /* 右边框 */
+    border-radius: 0 10px 10px 0; /* 顶部和底部的右侧圆角 */
+    padding: 10px; /* 内边距 */
+}
+
+/* 复选框样式 */
+input[type="checkbox"] {
+    margin-right: 5px;
+    cursor: pointer; /* 鼠标指针变为手形图标 */
+}
+
+/* 标签样式 */
+label {
+    display: block; /* 确保每个标签独占一行 */
+    margin: 8px 0; /* 增加一些垂直间距 */
+    font-size: 14px; /* 文本大小 */
+    cursor: pointer; /* 鼠标指针变为手形图标 */
+    color: #333; /* 文本颜色 */
+}
+
+/* 侧边栏内部按钮样式 */
+#sidebar button {
+    background-color: #4a90e2; /* 按钮背景色 */
+    color: #fff; /* 文字颜色 */
+    border: none; /* 无边框 */
+    border-radius: 5px; /* 按钮圆角 */
+    padding: 10px 15px; /* 内边距 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 按钮阴影 */
+    transition: background-color 0.3s ease; /* 背景颜色过渡动画 */
+    margin-top: 10px; /* 与上方元素的间距 */
+    cursor: pointer; /* 鼠标指针变为手形图标 */
+}
+
+#sidebar button:hover {
+    background-color: #3e79b4; /* 鼠标悬停时按钮的背景色 */
 }

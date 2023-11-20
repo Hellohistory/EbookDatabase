@@ -1,3 +1,4 @@
+/* 基础布局和字体样式 */
 body {
     font-family: Arial, sans-serif;
     background-color: #f7f7f9;
@@ -5,6 +6,7 @@ body {
     padding: 0;
 }
 
+/* 容器样式，用于主要内容区域 */
 #container {
     max-width: 90%;
     width: 630px;
@@ -16,11 +18,13 @@ body {
     margin: 50px auto 0;
 }
 
+/* 主标题样式 */
 h1 {
     text-align: center;
     color: #4A90E2;
 }
 
+/* 表单元素的通用样式 */
 .form-control,
 .form-select {
     width: 100%;
@@ -33,12 +37,14 @@ h1 {
     box-sizing: border-box;
 }
 
+/* 表单元素获得焦点时的样式 */
 .form-control:focus,
 .form-select:focus {
     border-color: #4A90E2;
     box-shadow: 0 0 0 2px rgba(74, 144, 226, .2);
 }
 
+/* 表单标签样式 */
 .form-label {
     font-weight: bold;
     margin-bottom: 10px;
@@ -63,17 +69,18 @@ h1 {
 .search-tab li.on {
     border-bottom: 2px solid #0084ff;
 }
-
+/* 搜索表单水平布局 */
 .mb-3.d-flex {
     display: flex;
     align-items: center;
 }
 
+/* 选择框和输入框样式 */
 .form-select,
 .form-control {
     padding: 10px;
     margin-bottom: 10px;
-    margin-right: 10px;
+    margin-right: 10px; /* 给右侧留出间隙 */
     border: 1px solid #BDC3C7;
     border-radius: 4px;
     outline: none;
@@ -81,28 +88,33 @@ h1 {
     box-sizing: border-box;
 }
 
+/* 调整选择框的宽度为自动 */
 .form-select {
     width: auto;
 }
 
+/* 确保输入框可以填充剩余空间 */
 .form-control {
     flex-grow: 1;
 }
-
+/* 高级搜索的条件布局调整 */
 .search-condition {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 10px; /* 添加间隔 */
 }
 
+/* 去除默认的外边距 */
 .search-condition label {
     margin-bottom: 0;
 }
 
+/* 在下拉框和输入框之间添加横线 */
 .search-condition label > span {
     padding: 0 10px;
 }
 
+/* 搜索按钮样式 */
 .custom-button {
     background-color: #4A90E2;
     border: none;
@@ -110,40 +122,44 @@ h1 {
     border-radius: 4px;
     color: white;
     cursor: pointer;
-    margin-top: 10px;
+    margin-top: 10px; /* 为按钮添加上边距 */
 }
 
 .custom-button:hover {
     background-color: #357ABD;
 }
 
+/* 模糊搜索复选框样式调整 */
 .form-check.form-switch {
     display: flex;
     align-items: center;
-    margin-left: 10px;
+    margin-left: 10px; /* 添加左边距，与其它元素分开 */
 }
 
 .form-check-input {
-    width: auto;
+    width: auto; /* 调整复选框宽度为自动 */
 }
 
+/* 调整表单元素的宽度，使其更好地适应布局 */
 #searchConditions .form-select,
 #searchConditions .form-control {
     width: auto;
-    flex-grow: 0;
+    flex-grow: 0; /* 防止它们过度拉伸 */
 }
 
+/* 搜索条件按钮样式 */
 #addCondition {
     background-color: #5cb85c;
     border-color: #4cae4c;
     color: white;
-    margin-top: 0;
+    margin-top: 0; /* 移除上边距 */
 }
 
 #addCondition:hover {
     background-color: #4cae4c;
 }
 
+/* 适应屏幕大小的响应式设计 */
 @media (max-width: 768px) {
     .search-condition {
         flex-direction: column;
@@ -151,21 +167,21 @@ h1 {
     }
 
     .search-condition label > span {
-        display: none;
+        display: none; /* 在小屏幕上隐藏横线 */
     }
 
+    /* 确保在小屏幕上表单元素填充整个容器宽度 */
     #searchConditions .form-select,
     #searchConditions .form-control {
         width: 100%;
         flex-grow: 1;
     }
 }
-
 .search-condition {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    justify-content: space-between; /* 让元素在行上均匀分布 */
+    gap: 10px; /* 元素之间的间距 */
 }
 
 .form-select-and-input {
@@ -181,18 +197,18 @@ h1 {
 }
 
 .custom-delete-btn {
-    background-color: #f44336;
-    color: #ffffff;
-    padding: 4px 6px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: 0.3s;
-    font-size: 12px;
-    text-align: center;
+    background-color: #f44336; /* 红色背景 */
+    color: #ffffff; /* 白色文本 */
+    padding: 4px 6px; /* 减小内部间距以缩小按钮 */
+    border: none; /* 无边框 */
+    border-radius: 4px; /* 圆角 */
+    cursor: pointer; /* 当鼠标悬停时显示为手形 */
+    transition: 0.3s; /* 过渡效果 */
+    font-size: 12px; /* 可以调整字体大小以适应按钮大小 */
+    text-align: center; /* 文字水平居中 */
 }
 
 .custom-delete-btn:hover {
-    background-color: #d32f2f;
-    transform: scale(1.05);
+    background-color: #d32f2f; /* 深红色背景 */
+    transform: scale(1.05); /* 缩放效果 */
 }

@@ -150,6 +150,11 @@ async def about_content4():
     return HTMLResponse(content=html_content)
 
 
+@app.get("/about/content5")
+async def about_content5():
+    return FileResponse('static/LICENSE.txt')
+
+
 @app.get("/search/", response_class=HTMLResponse)
 async def search(
         request: Request,

@@ -27,5 +27,9 @@ function showAlertBox() {
 }
 
 function confirmSettings() {
+    // 处理用户的设置数据
+    // ...
+
+    // 显示提示框
     showAlertBox();
 }

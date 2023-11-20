@@ -110,32 +110,44 @@ async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "available_databases": available_databases})
 
 
+async def get_markdown_content(url):
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(url)
+        return markdown2.markdown(resp.text)
+
+
 @app.get("/about/")
 async def about(request: Request):
-    urls = [
-        'https://gitee.com/etojsyc/EbookDatabase/raw/main/Markdown/ThePillarOfShame.md',
-        'https://gitee.com/etojsyc/EbookDatabase/raw/main/Markdown/EbookDataTools.md',
-        'https://gitee.com/etojsyc/EbookDatabase/raw/main/Markdown/UpdateLog.md',
-        'https://gitee.com/etojsyc/EbookDatabase/raw/main/Markdown/DatabaseDownload.md',
-    ]
+    # 这里只渲染页面框架，不加载具体内容
+    return templates.TemplateResponse("about.html", {"request": request})
 
-    html_contents = []
 
-    async with httpx.AsyncClient() as client:
-        for url in urls:
-            resp = await client.get(url)
-            markdown_content = resp.text
-            # 将每个 Markdown 文件的内容转换为 HTML 并存储
-            html_contents.append(markdown2.markdown(markdown_content))
+@app.get("/about/content1")
+async def about_content1():
+    url = 'https://gitee.com/etojsyc/EbookDatabase/raw/main/Markdown/Pillory.md'
+    html_content = await get_markdown_content(url)
+    return HTMLResponse(content=html_content)
 
-    # 将转换后的 HTML 内容传递给前端
-    return templates.TemplateResponse("about.html", {
-        "request": request,
-        "html_content1": html_contents[0],
-        "html_content2": html_contents[1],
-        "html_content3": html_contents[2],
-        "html_content4": html_contents[3]
-    })
+
+@app.get("/about/content2")
+async def about_content2():
+    url = 'https://gitee.com/etojsyc/EbookDatabase/raw/main/Markdown/EbookDataTools.md'
+    html_content = await get_markdown_content(url)
+    return HTMLResponse(content=html_content)
+
+
+@app.get("/about/content3")
+async def about_content3():
+    url = 'https://gitee.com/etojsyc/EbookDatabase/raw/main/Markdown/UpdateLog.md'
+    html_content = await get_markdown_content(url)
+    return HTMLResponse(content=html_content)
+
+
+@app.get("/about/content4")
+async def about_content4():
+    url = 'https://gitee.com/etojsyc/EbookDatabase/raw/main/Markdown/DatabaseDownload.md'
+    html_content = await get_markdown_content(url)
+    return HTMLResponse(content=html_content)
 
 
 @app.get("/search/", response_class=HTMLResponse)

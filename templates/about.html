@@ -12,9 +12,8 @@
             margin: 0;
         }
 
-        /* 导航栏样式 */
         nav {
-            background: #add8e6; /* 浅蓝色背景 */
+            background: #add8e6;
             color: white;
             padding: 10px 0;
             text-align: center;
@@ -41,29 +40,25 @@
             color: #ddd;
         }
 
-        /* 内容样式 */
         .content {
             background: white;
             margin-bottom: 20px;
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            display: none; /* 默认隐藏所有内容 */
+            display: none;
         }
 
-        /* 响应式设计 */
         @media (max-width: 600px) {
             .content {
                 margin: 10px 0;
                 padding: 15px;
             }
 
-            /* 默认隐藏所有内容 */
             .content {
                 display: none;
             }
 
-            /* 默认显示第一个内容 */
             .content.active {
                 display: block;
             }
@@ -71,43 +66,65 @@
     </style>
 </head>
 <body>
-    <!-- 导航栏 -->
-    <nav>
-        <ul>
-            <li><a href="javascript:void(0);" onclick="showContent('content1')">耻辱柱</a></li>
-            <li><a href="javascript:void(0);" onclick="showContent('content2')">EbookDataTools下载</a></li>
-            <li><a href="javascript:void(0);" onclick="showContent('content3')">更新日志</a></li>
-            <li><a href="javascript:void(0);" onclick="showContent('content4')">数据库下载</a></li>
-        </ul>
-    </nav>
+<nav>
+    <ul>
+        <li><a href="javascript:void(0);" data-content-id="content1">耻辱柱</a></li>
+        <li><a href="javascript:void(0);" data-content-id="content2">EbookDataTools下载</a></li>
+        <li><a href="javascript:void(0);" data-content-id="content3">更新日志</a></li>
+        <li><a href="javascript:void(0);" data-content-id="content4">数据库下载</a></li>
+    </ul>
+</nav>
 
-    <div id="content1" class="content active">
-        {{ html_content1 | safe }}
-    </div>
-    <div id="content2" class="content">
-        {{ html_content2 | safe }}
-    </div>
-    <div id="content3" class="content">
-        {{ html_content3 | safe }}
-    </div>
-    <div id="content4" class="content">
-        {{ html_content4 | safe }}
-    </div>
 
-    <script>
-        function showContent(contentId) {
-            // 隐藏所有内容
-            const contents = document.querySelectorAll('.content');
-            contents.forEach(function(content) {
-                content.classList.remove('active');
-            });
+    <div id="content1" class="content active"></div>
+    <div id="content2" class="content"></div>
+    <div id="content3" class="content"></div>
+    <div id="content4" class="content"></div>
 
-            // 显示选中的内容
-            const selectedContent = document.getElementById(contentId);
-            if (selectedContent) {
-                selectedContent.classList.add('active');
-            }
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // 添加事件监听器到每个导航链接
+    document.querySelectorAll('nav ul li a').forEach(function (link) {
+        link.addEventListener('click', function (event) {
+            event.preventDefault();
+            let contentId = event.target.dataset.contentId;
+            loadContent(contentId);
+        });
+    });
+
+    // 定义加载内容的函数
+    async function loadContent(contentId) {
+        // 构造URL
+        let url = `/about/${contentId}`;
+        let contentDiv = document.getElementById(contentId);
+
+        // 如果已经加载过，只切换显示
+        if (contentDiv.innerHTML !== '') {
+            toggleContentDisplay(contentId);
+            return;
         }
-    </script>
+
+        // 从服务器获取Markdown内容并展示
+        try {
+            let response = await fetch(url);
+            contentDiv.innerHTML = await response.text();
+            toggleContentDisplay(contentId);
+        } catch (error) {
+            console.error('加载内容失败:', error);
+        }
+    }
+
+    // 定义切换内容显示的函数
+    function toggleContentDisplay(contentId) {
+        document.querySelectorAll('.content').forEach(function (div) {
+            div.style.display = div.id === contentId ? 'block' : 'none';
+        });
+    }
+
+    // 页面加载时自动加载并显示“耻辱柱”内容
+    loadContent('content1');
+});
+</script>
 </body>
 </html>

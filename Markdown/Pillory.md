@@ -12,9 +12,6 @@
 - **介绍**：此人违背项目初衷，在某论坛内发布付费帖谋取个人利益，我们对此表示强烈谴责。
 
 ### 0002
-- ![一些事实](https://picshack.net/ib/bS1H6FYGU6.png)
+- ![一些事实](https://picshack.net/ib/3xauivtOqM.png)
 - **违反协议网址**：[访问链接](https://tujixiazai.com/biaozhunguifan/v238199.html)
-- **网站相关资料截图**：
-  - ![图片1](https://picshack.net/ib/fUGzbeEwjA.png)
-  - ![图片2](https://picshack.net/ib/O39zfunwiJ.png)
 - **[相关资料下载地址](https://xmy521.lanzouw.com/iEbH41ff18ab)**

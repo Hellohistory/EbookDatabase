@@ -200,7 +200,7 @@ async def search(
 @app.get("/search/advanced", response_class=HTMLResponse)
 async def advanced_search(
         request: Request,
-        db_names: Optional[List[str]] = Query(None),  # 添加db_names作为查询参数
+        db_names: Optional[List[str]] = Query(None),
         field: List[str] = Query(...),
         query: List[str] = Query(...),
         logic: List[str] = Query(...),

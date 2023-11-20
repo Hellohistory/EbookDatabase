@@ -10,26 +10,22 @@
     cursor: pointer;
 }
 
-/* 菜单图标特定位置 */
 #menu-icon {
     left: 10px;
 }
 
-/* 关闭图标样式，初始时不显示 */
 #close-icon {
     display: none;
 }
 
-/* 新容器，仅用于 'about' 图标和版本号，实现右对齐 */
 .about-container {
-    position: fixed; /* 固定位置 */
-    bottom: 10px;    /* 距底部 10px */
-    right: 10px;     /* 距右侧 10px */
-    text-align: right; /* 右对齐 */
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    text-align: right;
 }
 
-/* 版本号显示样式 */
 .version-display {
-    text-align: center; /* 中心对齐 */
-    margin-top: 5px;    /* 与图标间隔 */
+    text-align: center;
+    margin-top: 5px;
 }

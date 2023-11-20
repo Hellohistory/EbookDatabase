@@ -41,10 +41,10 @@ def build_advanced_search_query(fields: List[str], queries: List[str], logics: L
     构建高级搜索查询字符串和参数，包括逻辑运算符。
     """
     if len(fields) == 0:
-        raise ValueError("字段列表不能为空。")
+        raise ValueError("字段列表不能为空")
 
     if len(logics) != len(fields) - 1:
-        raise ValueError("逻辑操作符的数量应该等于字段数量减一。")
+        raise ValueError("逻辑操作符的数量应该等于字段数量减一")
 
     query_field_dict = {
         "title": "title",

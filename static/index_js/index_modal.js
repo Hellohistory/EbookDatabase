@@ -24,8 +24,6 @@ document.getElementById('settings-modal').addEventListener('shown.bs.modal', asy
         if (result.status === "success") {
             // 应用获取到的设置
             document.getElementById('page-size').value = result.data.pageSize;
-            document.getElementById('theme-switch').value = result.data.theme;
-            toggleTheme(result.data.theme);
         } else {
             alert("获取设置失败：" + result.message);
         }
@@ -33,27 +31,6 @@ document.getElementById('settings-modal').addEventListener('shown.bs.modal', asy
         console.error("错误:", error);
         alert("获取设置时发生错误");
     }
-});
-
-// 切换主题
-function toggleTheme(theme) {
-    const body = document.body;
-    // 移除先前可能添加的主题类
-    body.classList.remove("light-theme", "dark-theme");
-
-    // 根据选择添加对应的主题类
-    if(theme === 'dark') {
-        body.classList.add("dark-theme");
-    } else if(theme === 'light') {
-        body.classList.add("light-theme");
-    }
-    // 保存主题设置
-    saveSettings({ theme });
-}
-
-// 绑定下拉框的变化事件到toggleTheme函数
-document.getElementById('theme-switch').addEventListener('change', function(event){
-    toggleTheme(event.target.value);
 });
 
 // 保存设置到后端服务器并显示自定义弹窗
@@ -109,7 +86,7 @@ function closeCustomAlert() {
 
 
 // 页面加载完成后的事件处理
-document.addEventListener('DOMContentLoaded', async (event) => {
+document.addEventListener('DOMContentLoaded', async () => {
     // 初始化设置
     try {
         let response = await fetch('/settings/');
@@ -118,8 +95,6 @@ document.addEventListener('DOMContentLoaded', async (event) => {
         if (result.status === "success") {
             // 应用获取到的设置
             document.getElementById('page-size').value = result.data.pageSize;
-            document.getElementById('theme-switch').value = result.data.theme;
-            toggleTheme(result.data.theme);
         } else {
             alert("加载设置失败：" + result.message);
         }
@@ -137,14 +112,3 @@ document.addEventListener('DOMContentLoaded', async (event) => {
         alertBox.addEventListener('click', closeCustomAlert);
     }
 });
-
-
-// 保存设置到LocalStorage
-function saveSettings(settings) {
-    // 获取当前设置或初始化一个新对象
-    const currentSettings = JSON.parse(localStorage.getItem('userSettings')) || {};
-    // 合并旧设置和新设置
-    const newSettings = { ...currentSettings, ...settings };
-    // 保存回LocalStorage
-    localStorage.setItem('userSettings', JSON.stringify(newSettings));
-}

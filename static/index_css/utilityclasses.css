@@ -10,18 +10,18 @@
 
 /* 搜索条件的上下外边距 */
 .search-condition {
-    margin-top: 20px; /* 与.mt-4类相同的上边距 */
-    margin-bottom: 15px; /* 与.mb-3类相同的下边距 */
+    margin-top: 20px;
+    margin-bottom: 15px;
 }
 
 /* 添加条件按钮与搜索条件上边距对齐 */
 #addCondition {
-    margin-top: 20px; /* 与搜索条件相同的上边距，确保垂直对齐 */
+    margin-top: 20px;
 }
 
 /* 如果添加按钮需要左边距来水平对齐，可以添加此规则 */
 #addCondition {
-    margin-left: 10px; /* 替换为合适的数值以确保与搜索条件左侧对齐 */
+    margin-left: 10px;
 }
 
 /* 可以为所有表单控件添加统一的左右外边距 */
@@ -29,7 +29,6 @@
 .form-control,
 .form-check-input,
 .form-check.form-switch {
-    margin-right: 10px; /* 替换为合适的数值以确保水平对齐 */
-    margin-left: 10px; /* 替换为合适的数值以确保水平对齐 */
+    margin-right: 10px;
+    margin-left: 10px;
 }
-

@@ -13,10 +13,10 @@
 
 ### 0002
 
-- **相关信息图片**
-  - ![图片3](https://picshack.net/ib/2eguXTeUgw.png)
-
-### 0003 
+- **网站名**：兔叽下载站
+- **违反协议网站备案号**：沪ICP备19042173号-3
+- **违反协议网址**：[访问链接](https://tujixiazai.com/biaozhunguifan/v238199.html)
+- **介绍**：此人与此网站盗用本项目信息与资料，实则下载软件为“鲁大师”安装包，严重诋毁本项目声誉，违反相关法律法规。目前已将部分材料整理准备提交。
 - **网站相关资料截图**：
   - ![图片1](https://picshack.net/ib/fUGzbeEwjA.png)
   - ![图片2](https://picshack.net/ib/O39zfunwiJ.png)

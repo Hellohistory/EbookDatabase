@@ -1,4 +1,4 @@
-/* 基础布局和字体样式 */
+/* 全局元素样式 */
 body {
     font-family: Arial, sans-serif;
     background-color: #f7f7f9;
@@ -22,9 +22,10 @@ h1 {
     color: #4A90E2;
 }
 
+/* 表单控制样式 */
 .form-control,
 .form-select {
-    width: 100%;
+    width: 100%; /* 为小屏幕设定宽度 */
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid #BDC3C7;
@@ -34,18 +35,39 @@ h1 {
     box-sizing: border-box;
 }
 
+/* 表单聚焦时的样式 */
 .form-control:focus,
 .form-select:focus {
     border-color: #4A90E2;
     box-shadow: 0 0 0 2px rgba(74, 144, 226, .2);
 }
 
+/* 表单标签样式 */
 .form-label {
     font-weight: bold;
     margin-bottom: 10px;
     color: #333;
 }
 
+/* 调整下拉选择框和输入框的布局 */
+.mb-3.d-flex.align-items-center {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* 选择框样式 */
+.form-select {
+    flex-grow: 0; /* 防止选择框拉伸 */
+    margin-right: 10px; /* 添加右边距 */
+}
+
+/* 输入框样式 */
+.form-control {
+    flex-grow: 1; /* 输入框拉伸以填充剩余空间 */
+}
+
+/* 搜索选项卡样式 */
 .search-tab {
     list-style-type: none;
     padding: 0;
@@ -65,35 +87,14 @@ h1 {
     border-bottom: 2px solid #0084ff;
 }
 
-.mb-3.d-flex {
-    display: flex;
-    align-items: center;
-}
-
-.form-select,
-.form-control {
-    padding: 10px;
-    margin-bottom: 10px;
-    margin-right: 10px;
-    border: 1px solid #BDC3C7;
-    border-radius: 4px;
-    outline: none;
-    box-shadow: none;
-    box-sizing: border-box;
-}
-
-.form-select {
-    width: auto;
-}
-
-.form-control {
-    flex-grow: 1;
-}
-
+/* 搜索条件样式 */
+.advanced-search-default,
 .search-condition {
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-top: 20px;
+    margin-bottom: 15px;
 }
 
 .search-condition label {
@@ -104,6 +105,7 @@ h1 {
     padding: 0 10px;
 }
 
+/* 自定义按钮样式 */
 .custom-button {
     background-color: #4A90E2;
     border: none;
@@ -118,6 +120,7 @@ h1 {
     background-color: #357ABD;
 }
 
+/* 表单开关样式 */
 .form-check.form-switch {
     display: flex;
     align-items: center;
@@ -128,23 +131,28 @@ h1 {
     width: auto;
 }
 
+/* 搜索条件的选择框和输入框样式 */
 #searchConditions .form-select,
 #searchConditions .form-control {
-    width: auto;
+    width: auto; /* 非小屏幕设定宽度 */
     flex-grow: 0;
+    margin-right: 10px; /* 添加右边距 */
 }
 
+/* 添加条件按钮样式 */
 #addCondition {
     background-color: #5cb85c;
     border-color: #4cae4c;
     color: white;
-    margin-top: 0;
+    margin-top: 20px; /* 对齐上边距 */
+    margin-left: 10px; /* 对齐左边距 */
 }
 
 #addCondition:hover {
     background-color: #4cae4c;
 }
 
+/* 响应式设计：小屏幕样式调整 */
 @media (max-width: 768px) {
     .search-condition {
         flex-direction: column;
@@ -157,30 +165,30 @@ h1 {
 
     #searchConditions .form-select,
     #searchConditions .form-control {
-        width: 100%;
+        width: 100%; /* 小屏幕设定宽度为100% */
         flex-grow: 1;
+    }
+
+    #addCondition {
+        margin-left: 0; /* 小屏幕移除左边距 */
     }
 }
 
-.search-condition {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
-
+/* 表单选择框和输入框组合样式 */
 .form-select-and-input {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
+/* 表单检查样式 */
 .form-check {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
+/* 删除按钮样式 */
 .custom-delete-btn {
     background-color: #f44336;
     color: #ffffff;
@@ -191,9 +199,19 @@ h1 {
     transition: 0.3s;
     font-size: 12px;
     text-align: center;
+    margin-left: 10px; /* 对齐左边距 */
 }
 
 .custom-delete-btn:hover {
     background-color: #d32f2f;
     transform: scale(1.05);
+}
+
+/* 工具类样式 */
+.mt-4 {
+    margin-top: 20px;
+}
+
+.mb-3 {
+    margin-bottom: 15px;
 }

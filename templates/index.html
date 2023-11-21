@@ -51,12 +51,8 @@
             <li val="advanced" onclick="switchTab('advanced')">高级检索</li>
         </ul>
         <div id="basic-search" style="display: block;">
-            <!-- 基础检索表单 -->
-            <form id="basicSearchForm" action="/search/" method="get" class="mt-4" onsubmit="submitForm(event)">
-                <!-- 表单内容 -->
                 <div class="mb-3 d-flex align-items-center">
-                    <label for="basicSelectedField" class="form-label me-2"></label>
-                    <select id="basicSelectedField" name="field" class="form-select me-2" style="width: auto;">
+                    <label for="basicSelectedField"></label><select id="basicSelectedField" name="field" class="form-select me-2" style="width: auto;">
                         <option value="title">书名</option>
                         <option value="author">作者</option>
                         <option value="publisher">出版商</option>
@@ -74,14 +70,13 @@
                     <label for="basicFuzzy" class="form-check-label">模糊搜索</label>
                 </div>
                 <button type="submit" class="custom-button">搜索</button>
-            </form>
         </div>
 
     <div id="advanced-search" style="display: none;">
         <!-- 高级检索表单 -->
         <form id="advancedSearchForm" action="/search/advanced" method="get" class="mt-4" onsubmit="submitForm(event)">
             <div id="searchConditions" class="search-conditions">
-                <div class="mb-3 d-flex align-items-center search-condition">
+                <div class="mb-3 d-flex align-items-center search-condition advanced-search-default">
                     <label class="d-flex align-items-center">
                         <select name="field[]" class="form-select me-1">
                             <option value="title">书名</option>

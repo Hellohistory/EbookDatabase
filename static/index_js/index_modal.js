@@ -1,6 +1,7 @@
 // 设置模态框的打开与关闭
-function openSettingsModal() {
+async function openSettingsModal() {
     document.getElementById('settings-modal').style.display = "block";
+    await fetchSettingsAndUpdateModal(); // 使用await等待异步操作完成
 }
 
 function closeSettingsModal() {
@@ -15,28 +16,26 @@ window.onclick = function(event) {
     }
 }
 
-// 当设置模态框被打开时，加载当前设置
-document.getElementById('settings-modal').addEventListener('shown.bs.modal', async function() {
+// 成功保存设置后，更新模态框内的元素
+async function fetchSettingsAndUpdateModal() {
     try {
         let response = await fetch('/settings/');
         let result = await response.json();
-
         if (result.status === "success") {
-            // 应用获取到的设置
             document.getElementById('page-size').value = result.data.pageSize;
-        } else {
-            alert("获取设置失败：" + result.message);
+            document.getElementById('default-search-field').value = result.data.defaultSearchField;
+            document.getElementById('basicSelectedField').value = result.data.defaultSearchField; // 更新页面表单
         }
     } catch (error) {
         console.error("错误:", error);
-        alert("获取设置时发生错误");
     }
-});
+}
 
 // 保存设置到后端服务器并显示自定义弹窗
 async function confirmSettings() {
     const pageSize = document.getElementById('page-size').value;
-    let settingsData = { pageSize };
+    const defaultSearchField = document.getElementById('default-search-field').value;
+    let settingsData = { pageSize, defaultSearchField };
 
     try {
         let response = await fetch('/settings/', {
@@ -49,14 +48,12 @@ async function confirmSettings() {
         let result = await response.json();
 
         if (result.status === "success") {
-            // 显示自定义弹窗
             showCustomAlert("设置已保存", "success");
-            // 设置3秒后自动关闭弹窗
             setTimeout(() => {
-                closeCustomAlert(); // 这是关闭自定义弹窗的函数
+                closeCustomAlert();
             }, 3000);
+            await fetchSettingsAndUpdateModal(); // 使用await等待异步操作完成
         } else {
-            // 显示自定义弹窗
             showCustomAlert("保存设置失败：" + result.message, "error");
         }
     } catch (error) {
@@ -83,32 +80,8 @@ function closeCustomAlert() {
     alertBox.style.display = 'none';
 }
 
-
-
 // 页面加载完成后的事件处理
-document.addEventListener('DOMContentLoaded', async () => {
-    // 初始化设置
-    try {
-        let response = await fetch('/settings/');
-        let result = await response.json();
+document.addEventListener('DOMContentLoaded', fetchSettingsAndUpdateModal);
 
-        if (result.status === "success") {
-            // 应用获取到的设置
-            document.getElementById('page-size').value = result.data.pageSize;
-        } else {
-            alert("加载设置失败：" + result.message);
-        }
-    } catch (error) {
-        console.error("错误:", error);
-        alert("加载设置时发生错误");
-    }
-
-    // 绑定确认按钮的点击事件
-    document.getElementById('confirmButton').addEventListener('click', confirmSettings);
-
-    // 初始化自定义弹窗的关闭事件
-    const alertBox = document.getElementById('custom-alert');
-    if (alertBox) {
-        alertBox.addEventListener('click', closeCustomAlert);
-    }
-});
+// 绑定确认按钮的事件监听器
+document.getElementById('confirmButton').addEventListener('click', confirmSettings);

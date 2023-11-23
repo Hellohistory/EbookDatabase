@@ -1,3 +1,4 @@
 {
-    "pageSize": "10"
+    "pageSize": "10",
+    "defaultSearchField": "title"
 }

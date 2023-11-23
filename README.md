@@ -76,7 +76,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
-这将在虚拟环境中运行应用程序，然后在 http://localhost:10223/ 上使用它。
+这将在虚拟环境中运行应用程序，然后在 http://127.0.0.1:10223/ 上使用它。
 
 ---
 

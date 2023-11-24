@@ -2,7 +2,6 @@ import asyncio
 from typing import List, Optional, Dict, Tuple
 from module.database_manager import DatabaseManager
 
-
 async def perform_search(
         db_manager: DatabaseManager,
         query_str: str,

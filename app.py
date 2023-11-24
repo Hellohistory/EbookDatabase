@@ -243,7 +243,6 @@ async def advanced_search(
     )
 
 
-# 用于打开浏览器
 def open_browser():
     webbrowser.open("http://127.0.0.1:10223", new=2)
 

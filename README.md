@@ -31,8 +31,7 @@ YouTube：https://youtu.be/-jD8OsF6di4
 
 bilibili：https://www.bilibili.com/video/BV1fN4y1r7fP/
 
-其他仓库地址：[Gitee](https://gitee.com/etojsyc/EbookDatabase)
-[DockerHub](https://hub.docker.com/repository/docker/hellohistory/ebookdatabase/general)
+其他仓库地址：https://gitee.com/etojsyc/EbookDatabase
 
 ### 本地运行
 
@@ -96,11 +95,25 @@ python app.py
 
 ---
 #### 方法三
+使用源代码构建Windows可执行程序
+
+1. 确保您是在Windows上执行本步骤
+
+2. 与方法二上一样的操作，但是在第五步中，使用以下命令构建应用程序：
+
+```python
+python setup.py build
+```
+
+这将在项目根目录中创建一个名为`build`的新目录，其中包含构建的应用程序。
+
+---
+#### 方法四
 
 1. 从dockerhub直接拉取镜像
 
    ```bash
-   docker pull hellohistory/ebookdatabase:0.0.4.3
+   docker pull hellohistory/ebookdatabase
    ```
 2. 构建完成后，运行以下命令以启动容器：
 
@@ -115,7 +128,7 @@ python app.py
 
 
 ---
-#### 方法四
+#### 方法五
 
 自行构建 Docker 容器进行使用
 

@@ -31,7 +31,8 @@ YouTube：https://youtu.be/-jD8OsF6di4
 
 bilibili：https://www.bilibili.com/video/BV1fN4y1r7fP/
 
-其他仓库地址：https://gitee.com/etojsyc/EbookDatabase
+其他仓库地址：[Gitee](https://gitee.com/etojsyc/EbookDatabase)
+[DockerHub](https://hub.docker.com/repository/docker/hellohistory/ebookdatabase/general)
 
 ### 本地运行
 
@@ -99,7 +100,7 @@ python app.py
 1. 从dockerhub直接拉取镜像
 
    ```bash
-   docker pull hellohistory/ebookdatabase
+   docker pull hellohistory/ebookdatabase:0.0.4.3
    ```
 2. 构建完成后，运行以下命令以启动容器：
 

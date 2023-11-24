@@ -35,7 +35,23 @@ bilibili：https://www.bilibili.com/video/BV1fN4y1r7fP/
 
 ### 本地运行
 
+---
+
 #### 方法一
+
+1. 下载本项目发布的软件包
+
+2. 解压下载下来的软件包
+
+3. 下载本项目的数据库文件并且存放到instance文件夹
+
+4. 双击exe一键启动本项目
+
+5. 然后在 http://127.0.0.1:10223/ 上使用它。
+
+---
+
+#### 方法二
 
 
 1. 打开终端或命令提示符，并导航到您项目的根目录。
@@ -75,22 +91,53 @@ pip install -r requirements.txt
 ```python
 python app.py
 ```
-
 这将在虚拟环境中运行应用程序，然后在 http://127.0.0.1:10223/ 上使用它。
 
 ---
+#### 方法三
 
-#### 方法二
+1. 从dockerhub直接拉取镜像
 
-1. 下载本项目发布的软件包
+   ```bash
+   docker pull hellohistory/ebookdatabase
+   ```
+2. 构建完成后，运行以下命令以启动容器：
 
-2. 解压下载下来的软件包
+   ```bash
+   docker run -v /path/to/instance:/app/instance -v /path/to/logs:/app/logs  -p 10223:10223 ebookdatabase
+   ```
+您需要将/path/to/instance替换为您本地的数据库文件存放路径，/path/to/logs替换为您本地的日志文件存放路径。
 
-3. 下载本项目的数据库文件并且存放到instance文件夹
+这将启动一个名为 `ebookdatabase` 的 Docker 容器，并将容器的 10223 端口映射到主机的同一端口。
 
-4. 双击exe一键启动本项目
+3. 在浏览器中访问 `http://127.0.0.1:10223/` 以使用应用。
 
-5. 然后在 http://127.0.0.1:10223/ 上使用它。
+
+---
+#### 方法四
+
+自行构建 Docker 容器进行使用
+
+1. 确保您的系统已安装 Docker。如果尚未安装，请参阅 [Docker 官方网站](https://www.docker.com/) 上的安装指南。
+
+2. 克隆或下载本项目的源码到您的本地环境。确保 `Dockerfile` 文件位于项目根目录中。
+
+3. 在终端或命令提示符中，导航到项目根目录，并运行以下命令构建 Docker 镜像：
+
+   ```bash
+   docker build -t ebookdatabase .
+   ```
+
+4. 构建完成后，运行以下命令以启动容器：
+
+   ```bash
+   docker run -v /path/to/instance:/app/instance  -p 10223:10223 ebookdatabase
+   ```
+   您需要将/path/to/instance替换为您本地的数据库文件存放路径。
+
+   这将启动一个名为 `ebookdatabase` 的 Docker 容器，并将容器的 10223 端口映射到主机的同一端口。
+
+5. 在浏览器中访问 `http://127.0.0.1:10223/` 以使用应用。
 
 ---
 

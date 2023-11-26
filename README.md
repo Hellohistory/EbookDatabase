@@ -114,7 +114,7 @@ python setup.py build
 1. 从dockerhub直接拉取镜像
 
    ```bash
-   docker pull hellohistory/ebookdatabase
+   docker pull hellohistory/ebookdatabase:您需要的版本号
    ```
 2. 构建完成后，运行以下命令以启动容器：
 

@@ -37,7 +37,7 @@ bilibili：https://www.bilibili.com/video/BV1fN4y1r7fP/
 
 ---
 
-#### 方法一
+#### 方法一 (推荐！使用发布包运行)
 
 1. 下载本项目发布的软件包
 
@@ -51,7 +51,7 @@ bilibili：https://www.bilibili.com/video/BV1fN4y1r7fP/
 
 ---
 
-#### 方法二
+#### 方法二 (使用源代码运行)
 
 
 1. 打开终端或命令提示符，并导航到您项目的根目录。
@@ -94,7 +94,8 @@ python app.py
 这将在虚拟环境中运行应用程序，然后在 http://127.0.0.1:10223/ 上使用它。
 
 ---
-#### 方法三
+#### 方法三(使用源代码构建Windows可执行程序)
+
 使用源代码构建Windows可执行程序
 
 1. 确保您是在Windows上执行本步骤
@@ -108,7 +109,7 @@ python setup.py build
 这将在项目根目录中创建一个名为`build`的新目录，其中包含构建的应用程序。
 
 ---
-#### 方法四
+#### 方法四(使用Docker部署)
 
 1. 从dockerhub直接拉取镜像
 
@@ -128,7 +129,7 @@ python setup.py build
 
 
 ---
-#### 方法五
+#### 方法五(自行构建 Docker 容器进行使用)
 
 自行构建 Docker 容器进行使用
 

@@ -13,7 +13,7 @@ setup(
                 "jinja2", "starlette", "pydantic", "module", "search", "httpx",
                 "markdown2", "anyio._backends._asyncio"
             ],
-            "include_files": ["templates", "log", "instance","static"],
+            "include_files": ["templates", "log", "instance", "static"],
         }
     },
 

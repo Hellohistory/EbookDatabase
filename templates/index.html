@@ -18,13 +18,13 @@
         &#9776;
     </div>
 
-        <nav id="sidebar" class="sidebar-style">
-            <div class="center-text padding-10 cursor-pointer close-icon-style" onclick="toggleSidebar()">
-                &times;
-            </div>
-            <label for="db_names" class="form-label">选择数据库：</label>
-            <div id="database-checkboxes"></div>
-        </nav>
+    <nav id="sidebar" class="sidebar-style">
+        <div class="center-text padding-10 cursor-pointer close-icon-style" onclick="toggleSidebar()">
+            &times;
+        </div>
+        <label for="db_names" class="form-label">选择数据库：</label>
+        <div id="database-checkboxes"></div>
+    </nav>
 
     <div id="platform-icons" class="platform-icons-style">
         <a href="https://github.com/Hellohistory/EbookDatabase" target="_blank">
@@ -125,6 +125,8 @@
                     <option value="100">100条/页</option>
                     <option value="200">200条/页</option>
                     <option value="300">300条/页</option>
+                    <option value="500">500条/页</option>
+                    <option value="99999999">不分页(慎选，有概率崩溃)</option>
                 </select>
             </div>
             <div class="setting-item">

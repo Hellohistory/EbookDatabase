@@ -1,5 +1,7 @@
 # EbookDatabase - 电子书籍检索系统
 
+[ENGLISH](Markdown/README_EN.md) | [日本語](Markdown/README_JP.md)
+
 ## 简介
 
 这是一款本地化的电子书检索系统，支持使用高级检索进行查询。
@@ -114,7 +116,7 @@ python setup.py build
 1. 从dockerhub直接拉取镜像
 
    ```bash
-   docker pull hellohistory/ebookdatabase:您需要的版本号
+   docker pull hellohistory/ebookdatabase
    ```
 2. 构建完成后，运行以下命令以启动容器：
 

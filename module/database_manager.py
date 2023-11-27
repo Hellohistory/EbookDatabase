@@ -67,4 +67,3 @@ class DatabaseManager:
                 logger.info("成功关闭数据库连接")
             except Exception as e:
                 logger.error(f"关闭数据库连接失败: {e}")
-

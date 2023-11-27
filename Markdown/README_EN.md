@@ -18,8 +18,8 @@ You can join a group chat to interact with like-minded people.
 
 QQ Group: 942385978
 
-![Homepage](../image/img.png)
-![Homepage](../image/img_1.png)
+![Homepage](image/img.png)
+![Homepage](image/img_1.png)
 
 ## Database Backup
 
@@ -163,8 +163,8 @@ Build and use a Docker container on your own.
 - Supports fuzzy and precise search
 - Displays results with pagination
 
-![Search Results Page](../image/img_3.png)
-![Search Results Page](../image/img_4.png)
+![Search Results Page](image/img_3.png)
+![Search Results Page](image/img_4.png)
 
 ## Bug Reporting
 

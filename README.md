@@ -1,6 +1,6 @@
 # EbookDatabase - 电子书籍检索系统
 
-[ENGLISH](Markdown/README_EN.md) | [日本語](Markdown/README_JP.md)
+[ENGLISH](Markdown/README_EN.md) | [日本語](Markdown/README_JP.md) | [正體中文](Markdown/README_ZH.md)
 
 ## 简介
 
@@ -18,8 +18,8 @@
 
 QQ群：942385978
 
-![主页页面](image/img.png)
-![主页页面](image/img_1.png)
+![主页页面](Markdown/image/img.png)
+![主页页面](Markdown/image/img_1.png)
 
 ## 数据库备份
 
@@ -164,8 +164,8 @@ python setup.py build
 - 支持模糊搜索和准确搜索
 - 分页显示结果
 
-![检索结果页](image/img_3.png)
-![检索结果页](image/img_4.png)
+![检索结果页](Markdown/image/img_3.png)
+![检索结果页](Markdown/image/img_4.png)
 
 ## Bug反馈
 

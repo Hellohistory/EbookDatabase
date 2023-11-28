@@ -21,9 +21,15 @@ QQ群：942385978
 ![主页页面](Markdown/image/img.png)
 ![主页页面](Markdown/image/img_1.png)
 
-## 数据库备份
+## 数据库备份与EbookDataTools工具的下载
 
 ### [点击查看数据库列表](Markdown/数据库下载文档.md)
+
+### [点击查看EbookDataTools工具下载](Markdown/EbookDataTools.md)
+
+## 违反项目协议的曝光
+
+### [点击查看违反协议的曝光](Markdown/Pillory.md)
 
 ## 快速开始
 

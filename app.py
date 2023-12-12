@@ -6,6 +6,7 @@ import time
 import webbrowser
 from pathlib import Path
 from typing import List, Optional
+import socket
 
 import httpx
 import markdown2
@@ -241,6 +242,23 @@ async def advanced_search(
             "search_time": search_time
         }
     )
+
+
+@app.get("/get_qr_code_url/")
+async def get_qr_code_url():
+    # 获取当前设备的局域网 IP 地址
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    finally:
+        s.close()
+
+    # 组合成完整的 URL
+    port = 10223  # 这里使用您应用的端口号
+    url = f"http://{ip}:{port}"
+    logger.info(f"QR Code URL: {url}")
+    return {"url": url}
 
 
 # 用于打开浏览器

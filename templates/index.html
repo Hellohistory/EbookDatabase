@@ -49,7 +49,9 @@
         <ul class="search-tab">
             <li class="on" val="basic" onclick="switchTab('basic')">基础检索</li>
             <li val="advanced" onclick="switchTab('advanced')">高级检索</li>
+            <li val="remote-access" onclick="switchTab('remote-access')">远程访问</li>
         </ul>
+
         <div id="basic-search" style="display: block;">
             <!-- 基础检索表单 -->
             <form id="basicSearchForm" action="/search/" method="get" class="mt-4" onsubmit="submitForm(event)">
@@ -108,6 +110,11 @@
             <button type="submit" class="custom-button">搜索</button>
         </form>
     </div>
+        <div id="remote-access" style="display: none;">
+        <div id="qr-code-container"></div>
+        <p id="access-url"></p>
+        <p>使用移动设备扫码访问</p>
+    </div>
 </div>
 
     <div id="settings-modal" class="modal">
@@ -151,7 +158,7 @@
 
     <script src="/static/index_js/index_utils.js"></script>
     <script src="/static/index_js/index_sidebar.js"></script>
-
+    <script src="/static/index_js/qrcode.min.js"></script>
     <script src="/static/index_js/index_modal.js"></script>
     <script src="/static/index_js/index_form.js"></script>
     <script src="/static/index_js/index_inputEvents.js"></script>

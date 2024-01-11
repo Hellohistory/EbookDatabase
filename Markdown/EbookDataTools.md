@@ -12,3 +12,14 @@ Python版本项目地址：
 C++版本项目地址：
 1. [Github](https://github.com/Hellohistory/EbookDataRename.cpp)
 2. [Gitee](https://gitee.com/etojsyc/EbookDataRename.cpp)
+
+---
+
+## EbookDataGeter
+
+EbookDataGeter是一款可以获取电子书信息的工具，同时也支持获取电子书书签
+
+项目地址：
+1. [Github](https://github.com/Hellohistory/EbookDataGeter)
+2. [Gitee](https://github.com/Hellohistory/EbookDataGeter)
+3. [快速下载地址](https://xmy521.lanzn.com/i02GM1kr1s8b)

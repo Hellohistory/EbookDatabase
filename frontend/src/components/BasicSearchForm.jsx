@@ -15,7 +15,6 @@ const buttonClasses =
 
 const BasicSearchForm = () => {
   const navigate = useNavigate()
-  const selectedDBs = useGlobalStore((state) => state.selectedDBs)
   const settings = useGlobalStore((state) => state.settings)
 
   const [field, setField] = useState('title')
@@ -35,7 +34,6 @@ const BasicSearchForm = () => {
       return
     }
     const params = new URLSearchParams()
-    selectedDBs.forEach((db) => params.append('db_names', db))
     params.append('query', query.trim())
     if (field) {
       params.append('field', field)

@@ -2,15 +2,10 @@
 import { create } from 'zustand'
 import type { Settings } from '../types/Settings'
 
-type LoadingKey = 'dbs' | 'settings'
+type LoadingKey = 'settings'
 
 interface LoadingState {
-  dbs: boolean
   settings: boolean
-}
-
-interface AvailableDBResponse {
-  available_dbs?: unknown
 }
 
 interface SearchSettingsPayload {
@@ -19,15 +14,27 @@ interface SearchSettingsPayload {
   [key: string]: unknown
 }
 
+interface LoginResponse {
+  token?: unknown
+}
+
 export interface GlobalState {
-  availableDBs: string[]
-  selectedDBs: string[]
+  token: string | null
   settings: Partial<Settings>
   loading: LoadingState
-  fetchAvailableDBs: () => Promise<void>
   fetchSettings: () => Promise<void>
-  toggleDB: (dbPath: string) => void
-  setSelectedDBs: (dbs: string[]) => void
+  login: (password: string) => Promise<boolean>
+  logout: () => void
+}
+
+const TOKEN_STORAGE_KEY = 'ebookdatabase_admin_token'
+
+const getInitialToken = (): string | null => {
+  if (typeof window === 'undefined') {
+    return null
+  }
+  const stored = window.localStorage.getItem(TOKEN_STORAGE_KEY)
+  return stored && stored.trim() !== '' ? stored : null
 }
 
 const normalizeSettings = (payload: SearchSettingsPayload): Partial<Settings> => {
@@ -58,32 +65,10 @@ const updateLoading = (key: LoadingKey, value: boolean) =>
     }
   })
 
-const useGlobalStore = create<GlobalState>((set, get) => ({
-  availableDBs: [],
-  selectedDBs: [],
+const useGlobalStore = create<GlobalState>((set) => ({
+  token: getInitialToken(),
   settings: {},
-  loading: { dbs: false, settings: false },
-  fetchAvailableDBs: async () => {
-    set(updateLoading('dbs', true))
-    try {
-      const response = await fetch('/api/v1/available-dbs')
-      if (!response.ok) {
-        throw new Error('无法获取数据库列表')
-      }
-      const data = (await response.json()) as AvailableDBResponse
-      const availableDBs = Array.isArray(data.available_dbs)
-        ? data.available_dbs.filter((item): item is string => typeof item === 'string')
-        : []
-      set({
-        availableDBs,
-        selectedDBs: availableDBs
-      })
-    } catch (error) {
-      console.error(error)
-    } finally {
-      set(updateLoading('dbs', false))
-    }
-  },
+  loading: { settings: false },
   fetchSettings: async () => {
     set(updateLoading('settings', true))
     try {
@@ -99,15 +84,43 @@ const useGlobalStore = create<GlobalState>((set, get) => ({
       set(updateLoading('settings', false))
     }
   },
-  toggleDB: (dbPath: string) => {
-    const { selectedDBs } = get()
-    if (selectedDBs.includes(dbPath)) {
-      set({ selectedDBs: selectedDBs.filter((db) => db !== dbPath) })
-    } else {
-      set({ selectedDBs: [...selectedDBs, dbPath] })
+  login: async (password: string) => {
+    try {
+      const response = await fetch('/api/v1/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ password })
+      })
+      if (!response.ok) {
+        throw new Error('登录失败')
+      }
+      const data = (await response.json()) as LoginResponse
+      const token = typeof data.token === 'string' ? data.token : ''
+      if (!token) {
+        throw new Error('登录失败')
+      }
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(TOKEN_STORAGE_KEY, token)
+      }
+      set({ token })
+      return true
+    } catch (error) {
+      console.error(error)
+      set({ token: null })
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(TOKEN_STORAGE_KEY)
+      }
+      return false
     }
   },
-  setSelectedDBs: (dbs: string[]) => set({ selectedDBs: dbs })
+  logout: () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(TOKEN_STORAGE_KEY)
+    }
+    set({ token: null })
+  }
 }))
 
 export default useGlobalStore

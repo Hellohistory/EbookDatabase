@@ -3,6 +3,7 @@ package main
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,7 +11,6 @@ import (
 	"math"
 	"net/http"
 	"os"
-	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -19,12 +19,14 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 
 	"ebookdatabase/config"
 	"ebookdatabase/database"
 	"ebookdatabase/logger"
 	"ebookdatabase/search"
 	"ebookdatabase/utils"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -36,6 +38,7 @@ type server struct {
 	dbManager  *database.DBManager
 	config     *config.Config
 	configPath string
+	jwtSecret  []byte
 }
 
 func main() {
@@ -65,6 +68,7 @@ func main() {
 		dbManager:  mgr,
 		config:     cfg,
 		configPath: defaultSettingsRel,
+		jwtSecret:  []byte(cfg.AdminPassword),
 	}
 
 	router := gin.New()
@@ -76,7 +80,6 @@ func main() {
 	router.StaticFile("/gitee-svgrepo-com.svg", "./frontend/dist/gitee-svgrepo-com.svg")
 	router.StaticFile("/settings-icon.svg", "./frontend/dist/settings-icon.svg")
 	router.StaticFile("/setting_logo.svg", "./frontend/dist/setting_logo.svg")
-	router.StaticFile("/about.svg", "./frontend/dist/about.svg")
 	router.GET("/", serveSPAIndex)
 	router.NoRoute(serveSPAIndex)
 
@@ -85,11 +88,17 @@ func main() {
 		apiV1.GET("/search", srv.handleSearch)
 		apiV1.GET("/available-dbs", srv.handleGetDatasources)
 		apiV1.GET("/settings", srv.handleGetSettings)
-		apiV1.POST("/settings", srv.handleSetSettings)
-		apiV1.GET("/about-content", srv.handleGetAboutContent)
+		apiV1.POST("/login", srv.handleLogin)
 		apiV1.GET("/qr-code-url", handleGetQRCodeURL)
 		apiV1.GET("/download", srv.handleDownload)
 		apiV1.GET("/cover", srv.handleCover)
+	}
+
+	adminApi := apiV1.Group("/admin")
+	adminApi.Use(srv.AuthMiddleware())
+	{
+		adminApi.GET("/config", srv.handleGetFullConfig)
+		adminApi.POST("/config", srv.handleSetFullConfig)
 	}
 
 	if err := router.Run(defaultListenAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -118,15 +127,64 @@ func (s *server) handleGetDatasources(c *gin.Context) {
 }
 
 func (s *server) handleGetSettings(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"pageSize":           s.config.PageSize,
+		"defaultSearchField": s.config.DefaultSearchField,
+	})
+}
+
+func (s *server) handleLogin(c *gin.Context) {
+	if len(s.jwtSecret) == 0 {
+		slog.Error("管理员密码未配置或为空")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "管理员密码未配置"})
+		return
+	}
+
+	var payload struct {
+		Password string `json:"password"`
+	}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请求体格式错误"})
+		return
+	}
+
+	if payload.Password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "密码不能为空"})
+		return
+	}
+
+	if !s.verifyPassword(payload.Password) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "密码错误"})
+		return
+	}
+
+	claims := jwt.MapClaims{
+		"sub": "admin",
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(24 * time.Hour).Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signed, err := token.SignedString(s.jwtSecret)
+	if err != nil {
+		slog.Error("生成 JWT 失败", slog.String("error", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "生成凭证失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": signed})
+}
+
+func (s *server) handleGetFullConfig(c *gin.Context) {
 	payload, err := s.readSettings()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, payload)
 }
 
-func (s *server) handleSetSettings(c *gin.Context) {
+func (s *server) handleSetFullConfig(c *gin.Context) {
 	var payload map[string]any
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "请求体格式错误"})
@@ -135,20 +193,20 @@ func (s *server) handleSetSettings(c *gin.Context) {
 
 	bytes, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
-		slog.Error("序列化设置失败", slog.String("error", err.Error()))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "保存设置失败"})
+		slog.Error("序列化配置失败", slog.String("error", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "保存配置失败"})
 		return
 	}
 
 	if err := os.WriteFile(s.configPath, bytes, 0o644); err != nil {
-		slog.Error("写入设置失败", slog.String("error", err.Error()))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "写入设置文件失败"})
+		slog.Error("写入配置失败", slog.String("error", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "写入配置文件失败"})
 		return
 	}
 
 	cfg, err := config.LoadConfig(s.configPath)
 	if err != nil {
-		slog.Error("重新加载设置失败", slog.String("error", err.Error()))
+		slog.Error("重新加载配置失败", slog.String("error", err.Error()))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "配置刷新失败"})
 		return
 	}
@@ -160,6 +218,7 @@ func (s *server) handleSetSettings(c *gin.Context) {
 	}
 
 	s.config = cfg
+	s.jwtSecret = []byte(cfg.AdminPassword)
 
 	latest, err := s.readSettings()
 	if err != nil {
@@ -186,35 +245,63 @@ func (s *server) readSettings() (map[string]any, error) {
 	return payload, nil
 }
 
-func (s *server) handleGetAboutContent(c *gin.Context) {
-	id := c.Query("id")
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "缺少 id 参数"})
-		return
+func (s *server) AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		secret := s.jwtSecret
+		if len(secret) == 0 {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+			return
+		}
+
+		header := c.GetHeader("Authorization")
+		if header == "" || !strings.HasPrefix(header, "Bearer ") {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+			return
+		}
+
+		tokenString := strings.TrimSpace(strings.TrimPrefix(header, "Bearer "))
+		if tokenString == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+			return
+		}
+
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %T", token.Method)
+			}
+			return secret, nil
+		})
+		if err != nil || !token.Valid {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+			return
+		}
+
+		c.Next()
+	}
+}
+
+func (s *server) verifyPassword(candidate string) bool {
+	stored := s.config.AdminPassword
+	if stored == "" {
+		return false
 	}
 
-	filename := map[string]string{
-		"content1": "Pillory.md",
-		"content2": "EbookDataTools.md",
-		"content3": "UpdateLog.md",
-		"content4": "DatabaseDownload.md",
-		"content5": "LICENSE.txt",
-	}[id]
-
-	if filename == "" {
-		c.JSON(http.StatusNotFound, gin.H{"error": "未找到对应的内容"})
-		return
+	if isBcryptHash(stored) {
+		if err := bcrypt.CompareHashAndPassword([]byte(stored), []byte(candidate)); err != nil {
+			return false
+		}
+		return true
 	}
 
-	path := filepath.Join("Markdown", filename)
-	data, err := os.ReadFile(path)
-	if err != nil {
-		slog.Error("读取 About 内容失败", slog.String("error", err.Error()), slog.String("path", path))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "读取内容失败"})
-		return
+	if len(candidate) != len(stored) {
+		return false
 	}
 
-	c.Data(http.StatusOK, "text/plain; charset=utf-8", data)
+	return subtle.ConstantTimeCompare([]byte(candidate), []byte(stored)) == 1
+}
+
+func isBcryptHash(value string) bool {
+	return strings.HasPrefix(value, "$2a$") || strings.HasPrefix(value, "$2b$") || strings.HasPrefix(value, "$2y$")
 }
 
 func handleGetQRCodeURL(c *gin.Context) {
@@ -242,7 +329,7 @@ func (s *server) handleSearch(c *gin.Context) {
 	searchParams := *params
 	searchParams.DisablePagination = true
 
-	sources := s.resolveSources(c)
+	sources := s.resolveSources()
 	if len(sources) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "没有可用的数据源"})
 		return
@@ -408,28 +495,7 @@ func (s *server) handleCover(c *gin.Context) {
 	c.File(path)
 }
 
-func (s *server) resolveSources(c *gin.Context) []string {
-	candidates := [][]string{
-		c.QueryArray("dbs[]"),
-		c.QueryArray("dbs"),
-		c.QueryArray("dbNames[]"),
-		c.QueryArray("dbNames"),
-		c.QueryArray("db_names[]"),
-		c.QueryArray("db_names"),
-	}
-	for _, list := range candidates {
-		if len(list) > 0 {
-			cleaned := make([]string, 0, len(list))
-			for _, name := range list {
-				if trimmed := strings.TrimSpace(name); trimmed != "" {
-					cleaned = append(cleaned, trimmed)
-				}
-			}
-			if len(cleaned) > 0 {
-				return cleaned
-			}
-		}
-	}
+func (s *server) resolveSources() []string {
 	return s.dbManager.ListSources()
 }
 

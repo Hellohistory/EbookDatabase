@@ -76,7 +76,6 @@ const conditionsReducer = (state: Condition[], action: ConditionAction): Conditi
 
 const AdvancedSearchForm = () => {
   const navigate = useNavigate()
-  const selectedDBs = useGlobalStore((state) => state.selectedDBs)
   const settings = useGlobalStore((state) => state.settings)
 
   const [conditions, dispatch] = useReducer(conditionsReducer, [{ ...defaultCondition }])
@@ -106,7 +105,6 @@ const AdvancedSearchForm = () => {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const params = new URLSearchParams()
-    selectedDBs.forEach((db) => params.append('db_names', db))
 
     let validConditions = 0
 

@@ -11,6 +11,9 @@ on:
 jobs:
   publish-image:
     runs-on: ubuntu-latest
+    permissions: # <--- 关键修改
+      contents: read   # 允许 checkout 代码
+      packages: write  # 允许推送到 ghcr.io
     steps:
       - name: Checkout source
         uses: actions/checkout@v4

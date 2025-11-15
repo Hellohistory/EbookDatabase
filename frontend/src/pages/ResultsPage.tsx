@@ -1,25 +1,44 @@
-// path: frontend/src/pages/ResultsPage.jsx
+// path: frontend/src/pages/ResultsPage.tsx
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import CopyTools from '../components/CopyTools'
 import Pagination from '../components/Pagination'
 import ResultsList from '../components/ResultsList'
+import type { Book } from '../types/Book'
 
-const createItemKey = (book, index) => {
+interface ResultItem {
+  key: string
+  book: Book
+}
+
+interface ResultsMeta {
+  totalPages: number
+  totalRecords: number
+  searchTimeMs: number
+}
+
+interface SearchResponse {
+  books?: Book[]
+  totalPages?: number
+  totalRecords?: number
+  searchTimeMs?: number
+}
+
+const createItemKey = (book: Book, index: number): string => {
   const base = book.second_pass_code || book.title || 'book'
   return `${base}-${index}`
 }
 
 const ResultsPage = () => {
   const [searchParams] = useSearchParams()
-  const [items, setItems] = useState([])
-  const [meta, setMeta] = useState({
+  const [items, setItems] = useState<ResultItem[]>([])
+  const [meta, setMeta] = useState<ResultsMeta>({
     totalPages: 0,
     totalRecords: 0,
     searchTimeMs: 0
   })
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
 
   const queryString = useMemo(() => searchParams.toString(), [searchParams])
 
@@ -35,8 +54,8 @@ const ResultsPage = () => {
         if (!response.ok) {
           throw new Error('检索失败，请稍后再试。')
         }
-        const data = await response.json()
-        const books = Array.isArray(data.books) ? data.books : []
+        const data = (await response.json()) as SearchResponse
+        const books = Array.isArray(data.books) ? (data.books as Book[]) : []
         setItems(
           books.map((book, index) => ({
             key: createItemKey(book, index),
@@ -44,13 +63,18 @@ const ResultsPage = () => {
           }))
         )
         setMeta({
-          totalPages: data.totalPages || 0,
-          totalRecords: data.totalRecords || 0,
-          searchTimeMs: data.searchTimeMs || 0
+          totalPages: typeof data.totalPages === 'number' ? data.totalPages : 0,
+          totalRecords: typeof data.totalRecords === 'number' ? data.totalRecords : 0,
+          searchTimeMs: typeof data.searchTimeMs === 'number' ? data.searchTimeMs : 0
         })
       } catch (err) {
-        if (err.name !== 'AbortError') {
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          return
+        }
+        if (err instanceof Error) {
           setError(err.message)
+        } else {
+          setError('检索失败，请稍后再试。')
         }
       } finally {
         setLoading(false)
@@ -58,7 +82,7 @@ const ResultsPage = () => {
     }
 
     if (queryString) {
-      fetchResults()
+      void fetchResults()
     }
 
     return () => controller.abort()

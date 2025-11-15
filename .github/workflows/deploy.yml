@@ -18,6 +18,13 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Set lowercase owner
+        id: owner
+        run: |
+          echo "owner_lc=${OWNER,,}" >> "$GITHUB_OUTPUT"
+        env:
+          OWNER: ${{ github.repository_owner }}
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -36,7 +43,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/ebookdatabase
+          images: ghcr.io/${{ steps.owner.outputs.owner_lc }}/ebookdatabase
           tags: |
             type=ref,event=branch
             type=ref,event=tag
@@ -50,7 +57,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/ebookdatabase:build-cache
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/ebookdatabase:build-cache,mode=max
+          cache-from: type=registry,ref=ghcr.io/${{ steps.owner.outputs.owner_lc }}/ebookdatabase:build-cache
+          cache-to: type=registry,ref=ghcr.io/${{ steps.owner.outputs.owner_lc }}/ebookdatabase:build-cache,mode=max
         env:
           DOCKER_CLI_EXPERIMENTAL: enabled

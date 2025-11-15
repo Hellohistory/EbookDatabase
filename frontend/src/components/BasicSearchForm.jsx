@@ -1,6 +1,7 @@
 // path: frontend/src/components/BasicSearchForm.jsx
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-hot-toast'
 import useGlobalStore from '../store/useGlobalStore'
 
 const BasicSearchForm = () => {
@@ -21,7 +22,7 @@ const BasicSearchForm = () => {
   const handleSubmit = (event) => {
     event.preventDefault()
     if (!query.trim()) {
-      window.alert('请输入关键词。')
+      toast.error('请输入关键词。')
       return
     }
     const params = new URLSearchParams()

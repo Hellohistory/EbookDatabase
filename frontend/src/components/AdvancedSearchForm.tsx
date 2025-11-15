@@ -1,7 +1,8 @@
 // path: frontend/src/components/AdvancedSearchForm.tsx
-import { useEffect, useState } from 'react'
+import { useEffect, useReducer } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-hot-toast'
 import useGlobalStore from '../store/useGlobalStore'
 
 const MAX_CONDITIONS = 6
@@ -32,47 +33,59 @@ const defaultCondition: Condition = {
   fuzzy: true
 }
 
+type ConditionAction =
+  | { type: 'ADD_CONDITION' }
+  | { type: 'REMOVE_CONDITION'; index: number }
+  | { type: 'UPDATE_CONDITION'; index: number; key: keyof Condition; value: Condition[keyof Condition] }
+  | { type: 'SET_FIRST_FIELD'; field: SearchField }
+
+const conditionsReducer = (state: Condition[], action: ConditionAction): Condition[] => {
+  switch (action.type) {
+    case 'ADD_CONDITION':
+      return [...state, { ...defaultCondition, field: 'title', fuzzy: false }]
+    case 'REMOVE_CONDITION':
+      return state.filter((_, idx) => idx !== action.index)
+    case 'UPDATE_CONDITION':
+      return state.map((condition, idx) =>
+        idx === action.index ? { ...condition, [action.key]: action.value } : condition
+      )
+    case 'SET_FIRST_FIELD':
+      if (state.length === 0) {
+        return [{ ...defaultCondition, field: action.field }]
+      }
+      return state.map((condition, idx) => (idx === 0 ? { ...condition, field: action.field } : condition))
+    default:
+      return state
+  }
+}
+
 const AdvancedSearchForm = () => {
   const navigate = useNavigate()
   const selectedDBs = useGlobalStore((state) => state.selectedDBs)
   const settings = useGlobalStore((state) => state.settings)
 
-  const [conditions, setConditions] = useState<Condition[]>([defaultCondition])
+  const [conditions, dispatch] = useReducer(conditionsReducer, [{ ...defaultCondition }])
 
   useEffect(() => {
     if (settings?.defaultSearchField) {
-      setConditions((prev) =>
-        prev.map((condition, index) =>
-          index === 0
-            ? {
-                ...condition,
-                field: settings.defaultSearchField as SearchField
-              }
-            : condition
-        )
-      )
+      dispatch({ type: 'SET_FIRST_FIELD', field: settings.defaultSearchField as SearchField })
     }
   }, [settings])
 
   const updateCondition = <K extends keyof Condition>(index: number, key: K, value: Condition[K]) => {
-    setConditions((prev) =>
-      prev.map((condition, idx) => (idx === index ? { ...condition, [key]: value } : condition))
-    )
+    dispatch({ type: 'UPDATE_CONDITION', index, key, value })
   }
 
   const addCondition = () => {
     if (conditions.length >= MAX_CONDITIONS) {
-      window.alert('最多只能添加六个搜索条件。')
+      toast.error('最多只能添加六个搜索条件。')
       return
     }
-    setConditions((prev) => [
-      ...prev,
-      { ...defaultCondition, field: 'title', fuzzy: false }
-    ])
+    dispatch({ type: 'ADD_CONDITION' })
   }
 
   const removeCondition = (index: number) => {
-    setConditions((prev) => prev.filter((_, idx) => idx !== index))
+    dispatch({ type: 'REMOVE_CONDITION', index })
   }
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -97,7 +110,7 @@ const AdvancedSearchForm = () => {
     })
 
     if (validConditions === 0) {
-      window.alert('请至少输入一个搜索条件。')
+      toast.error('请至少输入一个搜索条件。')
       return
     }
 

@@ -1,0 +1,23 @@
+# path: .dockerignore
+
+# Git 和 GitHub
+.git
+.github
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# 依赖和构建产物
+node_modules
+frontend/dist
+*.log
+
+# 静态资源和文档 (Go 构建器不需要它们)
+frontend/
+Markdown/
+static/
+
+# 实例数据
+instance/

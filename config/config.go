@@ -1,4 +1,4 @@
-// Path: config/config.go
+// Package config Path: config/config.go
 package config
 
 import (

@@ -1,4 +1,4 @@
-// path: search/builder.go
+// Package search path: search/builder.go
 package search
 
 import (

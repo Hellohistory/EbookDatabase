@@ -1,4 +1,4 @@
-// path: utils/net.go
+// Package utils path: utils/net.go
 package utils
 
 import (

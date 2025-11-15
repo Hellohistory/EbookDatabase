@@ -1,49 +1,38 @@
-// path: frontend/src/components/CopyTools.jsx
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
+// path: frontend/src/components/CopyTools.tsx
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode
+} from 'react'
+import { toast } from 'react-hot-toast'
+import type { Book } from '../types/Book'
+import { ensureFilename } from '../utils/filename'
 
-const CopyToolsContext = createContext(null)
-
-const deriveKey = (item) => item.key
-
-const ensureFilename = (store, filename) => {
-  if (!filename) {
-    return ''
-  }
-  const match = filename.match(/(.+)(\.[^.]*)$/)
-  if (!match) {
-    if (!store[filename]) {
-      store[filename] = 1
-      return filename
-    }
-    let counter = store[filename]
-    let candidate
-    do {
-      counter += 1
-      candidate = `${filename}(${counter})`
-    } while (store[candidate])
-    store[filename] = counter
-    store[candidate] = 1
-    return candidate
-  }
-  const [, name, extension] = match
-  if (!store[filename]) {
-    store[filename] = 1
-    return filename
-  }
-  let counter = store[filename]
-  let newName
-  do {
-    counter += 1
-    newName = `${name}(${counter})${extension}`
-  } while (store[newName])
-  store[filename] = counter
-  store[newName] = 1
-  return newName
+interface CopyToolsItem {
+  key: string
+  book: Book
 }
 
-const CopyTools = ({ items, children }) => {
-  const [selectedIds, setSelectedIds] = useState(() => new Set())
-  const filenameStore = useRef({})
+interface CopyToolsProps {
+  items: CopyToolsItem[]
+  children: ReactNode
+}
+
+interface CopyToolsContextValue {
+  isSelected: (key: string) => boolean
+  toggleSelection: (key: string) => void
+  copySingle: (key: string) => Promise<void>
+}
+
+const CopyToolsContext = createContext<CopyToolsContextValue | null>(null)
+
+const CopyTools = ({ items, children }: CopyToolsProps) => {
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
+  const filenameStore = useRef<Record<string, number>>({})
 
   useEffect(() => {
     setSelectedIds(new Set())
@@ -51,7 +40,7 @@ const CopyTools = ({ items, children }) => {
   }, [items])
 
   const itemMap = useMemo(() => {
-    const map = new Map()
+    const map = new Map<string, Book | undefined>()
     items.forEach((item) => {
       map.set(item.key, item.book)
     })
@@ -59,14 +48,14 @@ const CopyTools = ({ items, children }) => {
   }, [items])
 
   const selectAll = () => {
-    setSelectedIds(new Set(items.map(deriveKey)))
+    setSelectedIds(new Set(items.map((item) => item.key)))
   }
 
   const deselectAll = () => {
     setSelectedIds(new Set())
   }
 
-  const toggleSelection = (key) => {
+  const toggleSelection = (key: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev)
       if (next.has(key)) {
@@ -78,9 +67,9 @@ const CopyTools = ({ items, children }) => {
     })
   }
 
-  const isSelected = (key) => selectedIds.has(key)
+  const isSelected = (key: string) => selectedIds.has(key)
 
-  const copyToClipboard = async (text) => {
+  const copyToClipboard = async (text: string) => {
     if (!navigator.clipboard) {
       throw new Error('浏览器不支持剪贴板操作')
     }
@@ -88,40 +77,45 @@ const CopyTools = ({ items, children }) => {
   }
 
   const copySelected = async () => {
-    const lines = []
+    const lines: string[] = []
     selectedIds.forEach((key) => {
       const book = itemMap.get(key)
       if (book?.second_pass_code) {
         lines.push(ensureFilename(filenameStore.current, book.second_pass_code))
       }
     })
+
     if (lines.length === 0) {
-      window.alert('请选择至少一个条目。')
+      toast.error('请选择至少一个条目。')
       return
     }
+
     try {
       await copyToClipboard(lines.join('\n'))
-      window.alert('复制成功！')
+      toast.success('复制成功！')
     } catch (error) {
-      window.alert(`复制失败：${error.message}`)
+      const message = error instanceof Error ? error.message : String(error)
+      toast.error(`复制失败：${message}`)
     }
   }
 
-  const copySingle = async (key) => {
+  const copySingle = async (key: string) => {
     const book = itemMap.get(key)
     if (!book?.second_pass_code) {
       return
     }
+
     try {
       const filename = ensureFilename(filenameStore.current, book.second_pass_code)
       await copyToClipboard(filename)
-      window.alert(`复制成功：${filename}`)
+      toast.success(`复制成功：${filename}`)
     } catch (error) {
-      window.alert(`复制失败：${error.message}`)
+      const message = error instanceof Error ? error.message : String(error)
+      toast.error(`复制失败：${message}`)
     }
   }
 
-  const contextValue = {
+  const contextValue: CopyToolsContextValue = {
     isSelected,
     toggleSelection,
     copySingle

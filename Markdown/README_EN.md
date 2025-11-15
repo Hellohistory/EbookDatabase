@@ -6,7 +6,7 @@
 
 This is a localized electronic book retrieval system that supports advanced search queries.
 
-The project is built using FastAPI and a SQLite database and can be easily deployed with the distribution package provided by this project.
+The project is built with a Go (Gin) backend, a React frontend, and SQLite for data storage. It can be easily deployed with the official release package provided by this project.
 
 The database provided by this project is aggregated from many channels, so there may be incomplete information and other issues. Please understand.
 
@@ -55,67 +55,19 @@ Other repository address: https://gitee.com/etojsyc/EbookDatabase
 
 #### Method 2 (Run using source code)
 
-1. Open a terminal or command prompt, and navigate to the root directory of your project.
-
-2. Create a new virtual environment. You can use the following command:
-
-```python
-python -m venv venv
-```
-
-This will create a new virtual environment named `venv` in the project root directory.
-
-3. Activate the virtual environment. On Windows, use the following command:
-
-```python
-venv\Scripts\activate
-```
-
-On macOS and Linux, use the following command:
-
-```python
-source venv/bin/activate
-```
-
-Once the virtual environment is activated, the virtual environment name will appear in front of the terminal prompt, indicating that it is active.
-
-4. Next, install the dependencies required for the project. Use the following command to install dependencies in the virtual environment:
-
-```python
-pip install -r requirements.txt
-```
-
-This will install all the dependencies required for the project according to the `requirements.txt` file, and these dependencies will only be available in the virtual environment.
-
-5. Finally, run the application. Use the following command to start the application:
-
-```python
-python app.py
-```
-This will run the application in the virtual environment, and then use it at http://127.0.0.1:10223/.
+1. Install Node.js 18+, npm, and Go 1.21+.
+2. Run `cd frontend && npm install && npm run build` to produce the frontend assets.
+3. Return to the repository root and execute `go build -o ebook-server .` (or run `go run .` for development).
+4. Place the database files in the `instance` directory, then launch the binary with `./ebook-server` (use `ebook-server.exe` on Windows). The service listens on `http://127.0.0.1:10223/` by default.
+5. For frontend development mode, run `npm run dev` inside `frontend` and proxy API requests to the Go server.
 
 ---
-#### Method 3 (Build a Windows executable using source code)
-
-Build a Windows executable using source code.
-
-1. Make sure you are executing this step on Windows.
-
-2. Operate the same as in Method 2, but in the fifth step, use the following command to build the application:
-
-```python
-python setup.py build
-```
-
-This will create a new directory named `build` in the project root directory, which contains the built application.
-
----
-#### Method 4 (Deploy using Docker)
+#### Method 3 (Deploy using Docker)
 
 1. Pull the image directly from dockerhub
 
    ```bash
-   docker push hellohistory/ebookdatabase:tagname
+   docker pull hellohistory/ebookdatabase:tagname
    ```
 2. After the build is complete, run the following command to start the container:
 
@@ -130,7 +82,7 @@ This will start a Docker container named `ebookdatabase` and map the container's
 
 
 ---
-#### Method 5 (Build and use a Docker container on your own)
+#### Method 4 (Build and use a Docker container on your own)
 
 Build and use a Docker container on your own.
 

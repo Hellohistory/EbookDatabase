@@ -1,4 +1,3 @@
-# path: .github/workflows/deploy.yml
 name: Deploy
 
 on:
@@ -19,6 +18,13 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Set lowercase owner
+        id: owner
+        run: |
+          echo "owner_lc=${OWNER,,}" >> "$GITHUB_OUTPUT"
+        env:
+          OWNER: ${{ github.repository_owner }}
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -37,16 +43,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/ebookdatabase
+          images: ghcr.io/${{ steps.owner.outputs.owner_lc }}/ebookdatabase
           tags: |
-            type=branch,pattern=main
-            type=ref,event=tag
             type=ref,event=branch
-          cache-from: |
-            type=registry,ref=ghcr.io/${{ github.repository_owner }}/ebookdatabase:build-cache
-
-          cache-to: |
-            type=registry,ref=ghcr.io/${{ github.repository_owner }}/ebookdatabase:build-cache,mode=max
+            type=ref,event=tag
 
       - name: Build and push image
         uses: docker/build-push-action@v6
@@ -55,11 +55,9 @@ jobs:
           push: true
           file: Dockerfile
           platforms: linux/amd64,linux/arm64
-          # 使用 'meta' 步骤自动生成的标签
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # 启用缓存
-          cache-from: ${{ steps.meta.outputs.cache-from }}
-          cache-to: ${{ steps.meta.outputs.cache-to }}
+          cache-from: type=registry,ref=ghcr.io/${{ steps.owner.outputs.owner_lc }}/ebookdatabase:build-cache
+          cache-to: type=registry,ref=ghcr.io/${{ steps.owner.outputs.owner_lc }}/ebookdatabase:build-cache,mode=max
         env:
           DOCKER_CLI_EXPERIMENTAL: enabled

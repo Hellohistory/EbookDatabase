@@ -33,18 +33,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # --- 关键修复：确保 'tags' 和 'cache' 的 ' | ' 字符和缩进正确 ---
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository_owner }}/ebookdatabase
-
           tags: |
             type=branch,pattern=main
             type=ref,event=tag
             type=ref,event=branch
-
           cache-from: |
             type=registry,ref=ghcr.io/${{ github.repository_owner }}/ebookdatabase:build-cache
 

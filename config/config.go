@@ -4,6 +4,8 @@ package config
 import (
 	"fmt"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -12,15 +14,24 @@ const (
 	defaultConfigDirectory = "static"
 	defaultConfigName      = "settings"
 	defaultConfigType      = "json"
+	defaultPageSize        = 20
 )
+
+// DatasourceConfig 描述单个数据源的必要信息。
+type DatasourceConfig struct {
+	Name string `mapstructure:"name"`
+	Type string `mapstructure:"type"`
+	Path string `mapstructure:"path"`
+}
 
 // Config 描述 static/settings.json 中的关键配置项。
 type Config struct {
-	PageSize           int    `mapstructure:"pageSize"`
-	DefaultSearchField string `mapstructure:"defaultSearchField"`
+	PageSize           int                `mapstructure:"pageSize"`
+	DefaultSearchField string             `mapstructure:"defaultSearchField"`
+	Datasources        []DatasourceConfig `mapstructure:"datasources"`
 }
 
-// LoadConfig 读取配置文件并解析为 Config 结构体。configPath 参数允许调用方指定自定义配置路径。若为空，函数会在默认目录中查找 settings.json。
+// LoadConfig 读取配置文件并解析为 Config 结构体。configPath 参数允许调用方指定自定义配置路径。
 func LoadConfig(configPath string) (*Config, error) {
 	v := viper.New()
 
@@ -45,9 +56,16 @@ func LoadConfig(configPath string) (*Config, error) {
 		return nil, fmt.Errorf("解析配置失败: %w", err)
 	}
 
-	// 强制转换数值字段，兼容字符串形式的配置。
 	if cfg.PageSize <= 0 {
-		cfg.PageSize = v.GetInt("pageSize")
+		raw := v.Get("pageSize")
+		parsed, err := parsePageSize(raw)
+		if err != nil {
+			return nil, err
+		}
+		cfg.PageSize = parsed
+	}
+	if cfg.PageSize <= 0 {
+		cfg.PageSize = defaultPageSize
 	}
 
 	if cfg.PageSize <= 0 {
@@ -55,19 +73,86 @@ func LoadConfig(configPath string) (*Config, error) {
 	}
 
 	if cfg.DefaultSearchField == "" {
-		cfg.DefaultSearchField = v.GetString("defaultSearchField")
+		cfg.DefaultSearchField = strings.TrimSpace(v.GetString("defaultSearchField"))
 	}
-
 	if cfg.DefaultSearchField == "" {
-		return nil, fmt.Errorf("配置项 defaultSearchField 不能为空")
+		cfg.DefaultSearchField = "title"
 	}
 
-	// 将最终生效的配置文件路径写入绝对路径，便于日志与错误定位。
+	normalized, err := normalizeDatasources(cfg.Datasources)
+	if err != nil {
+		return nil, err
+	}
+	cfg.Datasources = normalized
+
 	if path := v.ConfigFileUsed(); path != "" {
 		if absPath, err := filepath.Abs(path); err == nil {
-			_ = absPath // 保留在此便于未来扩展，例如记录日志
+			_ = absPath // 预留位置以便未来记录日志
 		}
 	}
 
 	return &cfg, nil
+}
+
+func parsePageSize(value any) (int, error) {
+	switch v := value.(type) {
+	case nil:
+		return defaultPageSize, nil
+	case int:
+		return v, nil
+	case int64:
+		return int(v), nil
+	case float64:
+		return int(v), nil
+	case string:
+		trimmed := strings.TrimSpace(v)
+		if trimmed == "" {
+			return defaultPageSize, nil
+		}
+		parsed, err := strconv.Atoi(trimmed)
+		if err != nil {
+			return 0, fmt.Errorf("配置项 pageSize 无法解析为整数: %w", err)
+		}
+		return parsed, nil
+	default:
+		return 0, fmt.Errorf("配置项 pageSize 类型不受支持: %T", value)
+	}
+}
+
+func normalizeDatasources(items []DatasourceConfig) ([]DatasourceConfig, error) {
+	if len(items) == 0 {
+		return nil, nil
+	}
+
+	normalized := make([]DatasourceConfig, 0, len(items))
+	seen := make(map[string]struct{})
+
+	for _, item := range items {
+		name := strings.TrimSpace(item.Name)
+		if name == "" {
+			return nil, fmt.Errorf("数据源名称不能为空")
+		}
+		if _, ok := seen[name]; ok {
+			return nil, fmt.Errorf("数据源名称重复: %s", name)
+		}
+		seen[name] = struct{}{}
+
+		dsType := strings.TrimSpace(item.Type)
+		if dsType == "" {
+			return nil, fmt.Errorf("数据源 %s 的类型不能为空", name)
+		}
+
+		path := strings.TrimSpace(item.Path)
+		if path == "" {
+			return nil, fmt.Errorf("数据源 %s 的路径不能为空", name)
+		}
+
+		normalized = append(normalized, DatasourceConfig{
+			Name: name,
+			Type: dsType,
+			Path: path,
+		})
+	}
+
+	return normalized, nil
 }

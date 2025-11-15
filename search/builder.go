@@ -7,12 +7,13 @@ import (
 
 // QueryParams 定义构建查询所需的参数集合。
 type QueryParams struct {
-	Fields   []string
-	Queries  []string
-	Logics   []string
-	Fuzzies  []*bool
-	Page     int
-	PageSize int
+        Fields            []string
+        Queries           []string
+        Logics            []string
+        Fuzzies           []*bool
+        Page              int
+        PageSize          int
+        DisablePagination bool
 }
 
 var fieldColumnMap = map[string]string{
@@ -27,25 +28,41 @@ var fieldColumnMap = map[string]string{
 
 // BuildSQLQuery 根据查询参数构建查询与统计 SQL 及其参数，复现 Python 版本的逻辑。
 func BuildSQLQuery(params QueryParams) (string, string, []any) {
-	pageSize := params.PageSize
-	if pageSize <= 0 {
-		panic("page size must be positive")
-	}
+        usePagination := !params.DisablePagination
 
-	page := params.Page
-	if page <= 0 {
-		page = 1
-	}
+        pageSize := params.PageSize
+        if usePagination {
+                if pageSize <= 0 {
+                        panic("page size must be positive")
+                }
+        } else if pageSize <= 0 {
+                pageSize = 0
+        }
 
-	limitArgs := []any{pageSize, (page - 1) * pageSize}
+        page := params.Page
+        if page <= 0 {
+                page = 1
+        }
+
+        var limitArgs []any
+        if usePagination {
+                limitArgs = []any{pageSize, (page - 1) * pageSize}
+        }
 
 	if len(params.Fields) == 0 {
-		queryBuilder := strings.Builder{}
-		queryBuilder.WriteString("SELECT * FROM books LIMIT ? OFFSET ?")
+                queryBuilder := strings.Builder{}
+                queryBuilder.WriteString("SELECT * FROM books")
+                if usePagination {
+                        queryBuilder.WriteString(" LIMIT ? OFFSET ?")
+                }
 
-		countBuilder := strings.Builder{}
-		countBuilder.WriteString("SELECT COUNT(*) FROM books")
-		return queryBuilder.String(), countBuilder.String(), limitArgs
+                countBuilder := strings.Builder{}
+                countBuilder.WriteString("SELECT COUNT(*) FROM books")
+
+                if usePagination {
+                        return queryBuilder.String(), countBuilder.String(), limitArgs
+                }
+                return queryBuilder.String(), countBuilder.String(), nil
 	}
 
 	if len(params.Queries) != len(params.Fields) {
@@ -110,8 +127,10 @@ func BuildSQLQuery(params QueryParams) (string, string, []any) {
 		}
 	}
 
-	queryBuilder.WriteString(" LIMIT ? OFFSET ?")
-	args = append(args, limitArgs...)
+        if usePagination {
+                queryBuilder.WriteString(" LIMIT ? OFFSET ?")
+                args = append(args, limitArgs...)
+        }
 
-	return queryBuilder.String(), countBuilder.String(), args
+        return queryBuilder.String(), countBuilder.String(), args
 }

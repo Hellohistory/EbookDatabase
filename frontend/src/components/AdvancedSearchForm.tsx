@@ -15,6 +15,7 @@ type SearchField =
   | 'publisher'
   | 'publishdate'
   | 'isbn'
+  | 'tags'
   | 'sscode'
   | 'dxid'
   | 'identifier'
@@ -136,6 +137,7 @@ const AdvancedSearchForm = () => {
                 <option value="publisher">出版商</option>
                 <option value="publishdate">出版时间</option>
                 <option value="isbn">ISBN码</option>
+                <option value="tags">标签</option>
                 <option value="sscode">SS码</option>
                 <option value="dxid">DXID</option>
               </select>

@@ -1,4 +1,16 @@
 {
     "pageSize": "20",
-    "defaultSearchField": "title"
+    "defaultSearchField": "title",
+    "datasources": [
+        {
+            "name": "我的 Calibre 书库",
+            "type": "calibre",
+            "path": "/path/to/my/calibre/library"
+        },
+        {
+            "name": "DX 历史存档",
+            "type": "legacy_db",
+            "path": "/path/to/instance/DX_6.0.db"
+        }
+    ]
 }

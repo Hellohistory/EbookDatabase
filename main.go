@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -22,13 +23,11 @@ import (
 	"ebookdatabase/config"
 	"ebookdatabase/database"
 	"ebookdatabase/logger"
-	"ebookdatabase/models"
 	"ebookdatabase/search"
 	"ebookdatabase/utils"
 )
 
 const (
-	defaultInstanceDir = "instance"
 	defaultSettingsRel = "static/settings.json"
 	defaultListenAddr  = ":10223"
 )
@@ -53,12 +52,12 @@ func main() {
 	}
 
 	mgr := database.NewDBManager()
-	if err := mgr.Init(defaultInstanceDir); err != nil {
-		slog.Error("初始化数据库连接池失败", slog.String("error", err.Error()))
+	if err := mgr.InitFromConfig(cfg); err != nil {
+		slog.Error("初始化数据源失败", slog.String("error", err.Error()))
 	}
 	defer func() {
 		if err := mgr.Close(); err != nil {
-			slog.Error("关闭数据库连接失败", slog.String("error", err.Error()))
+			slog.Error("关闭数据源失败", slog.String("error", err.Error()))
 		}
 	}()
 
@@ -84,11 +83,13 @@ func main() {
 	apiV1 := router.Group("/api/v1")
 	{
 		apiV1.GET("/search", srv.handleSearch)
-		apiV1.GET("/available-dbs", srv.handleGetDBs)
+		apiV1.GET("/available-dbs", srv.handleGetDatasources)
 		apiV1.GET("/settings", srv.handleGetSettings)
 		apiV1.POST("/settings", srv.handleSetSettings)
 		apiV1.GET("/about-content", srv.handleGetAboutContent)
 		apiV1.GET("/qr-code-url", handleGetQRCodeURL)
+		apiV1.GET("/download", srv.handleDownload)
+		apiV1.GET("/cover", srv.handleCover)
 	}
 
 	if err := router.Run(defaultListenAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -109,8 +110,8 @@ func serveSPAIndex(c *gin.Context) {
 	c.File("./frontend/dist/index.html")
 }
 
-func (s *server) handleGetDBs(c *gin.Context) {
-	names := s.dbManager.GetDBList()
+func (s *server) handleGetDatasources(c *gin.Context) {
+	names := s.dbManager.ListSources()
 	c.JSON(http.StatusOK, gin.H{
 		"available_dbs": names,
 	})
@@ -122,7 +123,6 @@ func (s *server) handleGetSettings(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
 	c.JSON(http.StatusOK, payload)
 }
 
@@ -152,6 +152,13 @@ func (s *server) handleSetSettings(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "配置刷新失败"})
 		return
 	}
+
+	if err := s.dbManager.InitFromConfig(cfg); err != nil {
+		slog.Error("重新初始化数据源失败", slog.String("error", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "数据源初始化失败"})
+		return
+	}
+
 	s.config = cfg
 
 	latest, err := s.readSettings()
@@ -229,22 +236,15 @@ func (s *server) handleSearch(c *gin.Context) {
 		return
 	}
 
-	querySQL, countSQL, args, err := buildSQLSafe(params)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	if len(args) < 2 {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "构建查询参数失败"})
-		return
-	}
+	page := params.Page
+	pageSize := params.PageSize
 
-	queryArgs := append([]any(nil), args...)
-	countArgs := append([]any(nil), args[:len(args)-2]...)
+	searchParams := *params
+	searchParams.DisablePagination = true
 
-	dbNames := s.resolveDBNames(c)
-	if len(dbNames) == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "没有可用的数据库"})
+	sources := s.resolveSources(c)
+	if len(sources) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "没有可用的数据源"})
 		return
 	}
 
@@ -253,50 +253,162 @@ func (s *server) handleSearch(c *gin.Context) {
 
 	start := time.Now()
 
-	var (
-		books        []models.Book
-		totalRecords int64
-		queryErr     error
-		countErr     error
-	)
+	type searchResult struct {
+		books []database.CanonicalBook
+		total int64
+		err   error
+	}
 
+	results := make(chan searchResult, len(sources))
 	var wg sync.WaitGroup
-	wg.Add(2)
 
-	go func() {
-		defer wg.Done()
-		books, queryErr = s.dbManager.QueryConcurrent(ctx, dbNames, querySQL, queryArgs)
-	}()
+	for _, name := range sources {
+		datasource, ok := s.dbManager.GetDatasource(name)
+		if !ok {
+			results <- searchResult{err: fmt.Errorf("数据源 %s 未初始化", name)}
+			continue
+		}
 
-	go func() {
-		defer wg.Done()
-		totalRecords, countErr = s.dbManager.QueryConcurrentCount(ctx, dbNames, countSQL, countArgs)
-	}()
+		wg.Add(1)
+		go func(dsName string, src database.Datasource) {
+			defer wg.Done()
+			books, total, err := src.Search(ctx, &searchParams)
+			if err != nil {
+				results <- searchResult{err: fmt.Errorf("数据源 %s 搜索失败: %w", dsName, err)}
+				return
+			}
+
+			normalized := make([]database.CanonicalBook, len(books))
+			copy(normalized, books)
+			for i := range normalized {
+				if normalized[i].Source == "" {
+					normalized[i].Source = dsName
+				}
+			}
+
+			results <- searchResult{books: normalized, total: total}
+		}(name, datasource)
+	}
 
 	wg.Wait()
+	close(results)
 
-	if queryErr != nil || countErr != nil {
-		combined := errors.Join(queryErr, countErr)
-		slog.Error("搜索失败", slog.String("error", combined.Error()))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": combined.Error()})
+	var (
+		combined     []database.CanonicalBook
+		totalRecords int64
+		errs         []error
+	)
+
+	for res := range results {
+		if res.err != nil {
+			errs = append(errs, res.err)
+			continue
+		}
+		totalRecords += res.total
+		combined = append(combined, res.books...)
+	}
+
+	if len(errs) > 0 {
+		combinedErr := errors.Join(errs...)
+		slog.Error("搜索失败", slog.String("error", combinedErr.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": combinedErr.Error()})
 		return
 	}
 
-	elapsed := time.Since(start).Milliseconds()
-	totalPages := 0
-	if params.PageSize > 0 {
-		totalPages = int(math.Ceil(float64(totalRecords) / float64(params.PageSize)))
+	sort.SliceStable(combined, func(i, j int) bool {
+		left := strings.ToLower(combined[i].Title)
+		right := strings.ToLower(combined[j].Title)
+		if left == right {
+			if combined[i].Source == combined[j].Source {
+				return combined[i].ID < combined[j].ID
+			}
+			return combined[i].Source < combined[j].Source
+		}
+		return left < right
+	})
+
+	if totalRecords < int64(len(combined)) {
+		totalRecords = int64(len(combined))
 	}
 
+	startIndex := (page - 1) * pageSize
+	if startIndex < 0 {
+		startIndex = 0
+	}
+	endIndex := startIndex + pageSize
+	if endIndex > len(combined) {
+		endIndex = len(combined)
+	}
+
+	var pageItems []database.CanonicalBook
+	if startIndex >= len(combined) {
+		pageItems = []database.CanonicalBook{}
+	} else {
+		pageItems = combined[startIndex:endIndex]
+	}
+
+	totalPages := 0
+	if pageSize > 0 {
+		totalPages = int(math.Ceil(float64(totalRecords) / float64(pageSize)))
+	}
+
+	elapsed := time.Since(start).Milliseconds()
+
 	c.JSON(http.StatusOK, gin.H{
-		"books":        books,
+		"books":        pageItems,
 		"totalPages":   totalPages,
 		"totalRecords": totalRecords,
 		"searchTimeMs": elapsed,
 	})
 }
 
-func (s *server) resolveDBNames(c *gin.Context) []string {
+func (s *server) handleDownload(c *gin.Context) {
+	source := strings.TrimSpace(c.Query("source"))
+	bookID := strings.TrimSpace(c.Query("id"))
+	if source == "" || bookID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "缺少必要参数"})
+		return
+	}
+
+	datasource, ok := s.dbManager.GetDatasource(source)
+	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "数据源不存在"})
+		return
+	}
+
+	path, err := datasource.GetBookFile(bookID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.File(path)
+}
+
+func (s *server) handleCover(c *gin.Context) {
+	source := strings.TrimSpace(c.Query("source"))
+	bookID := strings.TrimSpace(c.Query("id"))
+	if source == "" || bookID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "缺少必要参数"})
+		return
+	}
+
+	datasource, ok := s.dbManager.GetDatasource(source)
+	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "数据源不存在"})
+		return
+	}
+
+	path, err := datasource.GetBookCover(bookID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.File(path)
+}
+
+func (s *server) resolveSources(c *gin.Context) []string {
 	candidates := [][]string{
 		c.QueryArray("dbs[]"),
 		c.QueryArray("dbs"),
@@ -318,7 +430,7 @@ func (s *server) resolveDBNames(c *gin.Context) []string {
 			}
 		}
 	}
-	return s.dbManager.GetDBList()
+	return s.dbManager.ListSources()
 }
 
 func (s *server) buildQueryParams(c *gin.Context) (*search.QueryParams, error) {
@@ -386,12 +498,13 @@ func (s *server) buildQueryParams(c *gin.Context) (*search.QueryParams, error) {
 	}
 
 	return &search.QueryParams{
-		Fields:   fields,
-		Queries:  queries,
-		Logics:   logics,
-		Fuzzies:  fuzzies,
-		Page:     page,
-		PageSize: pageSize,
+		Fields:            fields,
+		Queries:           queries,
+		Logics:            logics,
+		Fuzzies:           fuzzies,
+		Page:              page,
+		PageSize:          pageSize,
+		DisablePagination: false,
 	}, nil
 }
 
@@ -433,19 +546,4 @@ func normalizeValues(values []string) []string {
 		}
 	}
 	return normalized
-}
-
-func buildSQLSafe(params *search.QueryParams) (query string, count string, args []any, err error) {
-	if params == nil {
-		return "", "", nil, fmt.Errorf("查询参数不能为空")
-	}
-
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("构建查询失败: %v", r)
-		}
-	}()
-
-	query, count, args = search.BuildSQLQuery(*params)
-	return
 }

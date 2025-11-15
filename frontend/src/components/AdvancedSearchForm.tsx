@@ -136,12 +136,12 @@ const AdvancedSearchForm = () => {
         {conditions.map((condition, index) => (
           <div
             key={index}
-            className="flex flex-col gap-4 rounded-2xl bg-gray-50 p-4 shadow-sm md:flex-row md:items-center"
+            className="flex flex-col space-y-4 rounded-2xl bg-gray-50 p-4 shadow-sm md:flex-row md:items-center md:space-y-0"
           >
-            <div className="flex flex-1 flex-col gap-4 md:flex-row md:items-center">
+            <div className="flex flex-1 flex-col space-y-3 md:flex-row md:items-center md:space-y-0 md:space-x-3">
               <select
                 name={`field-${index}`}
-                className={`${selectClasses} md:w-40`}
+                className={`${selectClasses} md:w-44`}
                 value={condition.field}
                 onChange={(event) => updateCondition(index, 'field', event.target.value as Condition['field'])}
               >
@@ -154,7 +154,6 @@ const AdvancedSearchForm = () => {
                 <option value="sscode">SS码</option>
                 <option value="dxid">DXID</option>
               </select>
-              <span className="hidden text-gray-400 md:block">—</span>
               <input
                 type="text"
                 name={`query-${index}`}
@@ -165,7 +164,7 @@ const AdvancedSearchForm = () => {
                 onChange={(event) => updateCondition(index, 'query', event.target.value)}
               />
             </div>
-            <div className="flex flex-col items-start gap-3 md:w-auto md:flex-row md:items-center">
+            <div className="flex flex-col items-start space-y-3 md:w-auto md:flex-row md:items-center md:space-y-0 md:space-x-3">
               {index > 0 && (
                 <select
                   name={`logic-${index}`}
@@ -177,7 +176,7 @@ const AdvancedSearchForm = () => {
                   <option value="OR">或 (OR)</option>
                 </select>
               )}
-              <label className="inline-flex items-center gap-2 text-sm text-gray-600">
+              <label className="inline-flex items-center space-x-2 text-sm text-gray-600">
                 <input
                   type="checkbox"
                   className={checkboxClasses}

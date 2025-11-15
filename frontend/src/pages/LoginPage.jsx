@@ -42,14 +42,14 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-160px)] items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-16">
       <form
-        className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg ring-1 ring-gray-100"
+        className="w-full max-w-md rounded-2xl bg-white p-10 shadow-xl ring-1 ring-gray-100"
         onSubmit={handleSubmit}
       >
-        <h1 className="text-2xl font-semibold text-gray-900">后台登录</h1>
-        <p className="mt-2 text-sm text-gray-500">请输入管理员密码以进入后台管理。</p>
-        <div className="mt-6 space-y-4">
+        <h1 className="text-3xl font-bold text-gray-900">后台登录</h1>
+        <p className="mt-3 text-sm text-gray-500">请输入管理员密码以进入后台管理。</p>
+        <div className="mt-8 space-y-5">
           <div>
             <label htmlFor="adminPassword" className="block text-sm font-medium text-gray-700">
               管理员密码

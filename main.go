@@ -72,7 +72,12 @@ func main() {
 	router.Use(gin.Recovery())
 	router.Use(corsMiddleware())
 
-	router.Static("/static", "./static/static")
+	router.Static("/assets", "./frontend/dist/assets")
+	router.StaticFile("/github-mark.svg", "./frontend/dist/github-mark.svg")
+	router.StaticFile("/gitee-svgrepo-com.svg", "./frontend/dist/gitee-svgrepo-com.svg")
+	router.StaticFile("/settings-icon.svg", "./frontend/dist/settings-icon.svg")
+	router.StaticFile("/setting_logo.svg", "./frontend/dist/setting_logo.svg")
+	router.StaticFile("/about.svg", "./frontend/dist/about.svg")
 	router.GET("/", serveSPAIndex)
 	router.NoRoute(serveSPAIndex)
 
@@ -101,30 +106,24 @@ func corsMiddleware() gin.HandlerFunc {
 }
 
 func serveSPAIndex(c *gin.Context) {
-	c.File("./static/index.html")
+	c.File("./frontend/dist/index.html")
 }
 
 func (s *server) handleGetDBs(c *gin.Context) {
 	names := s.dbManager.GetDBList()
-	c.JSON(http.StatusOK, gin.H{"databases": names})
+	c.JSON(http.StatusOK, gin.H{
+		"available_dbs": names,
+	})
 }
 
 func (s *server) handleGetSettings(c *gin.Context) {
-	data, err := os.ReadFile(s.configPath)
+	payload, err := s.readSettings()
 	if err != nil {
-		slog.Error("读取设置失败", slog.String("error", err.Error()))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "读取设置文件失败"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	var payload any
-	if err := json.Unmarshal(data, &payload); err != nil {
-		slog.Error("解析设置失败", slog.String("error", err.Error()))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "解析设置文件失败"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"status": "success", "data": payload})
+	c.JSON(http.StatusOK, payload)
 }
 
 func (s *server) handleSetSettings(c *gin.Context) {
@@ -155,7 +154,29 @@ func (s *server) handleSetSettings(c *gin.Context) {
 	}
 	s.config = cfg
 
-	c.JSON(http.StatusOK, gin.H{"status": "success"})
+	latest, err := s.readSettings()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, latest)
+}
+
+func (s *server) readSettings() (map[string]any, error) {
+	data, err := os.ReadFile(s.configPath)
+	if err != nil {
+		slog.Error("读取设置失败", slog.String("error", err.Error()))
+		return nil, fmt.Errorf("读取设置文件失败")
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(data, &payload); err != nil {
+		slog.Error("解析设置失败", slog.String("error", err.Error()))
+		return nil, fmt.Errorf("解析设置文件失败")
+	}
+
+	return payload, nil
 }
 
 func (s *server) handleGetAboutContent(c *gin.Context) {

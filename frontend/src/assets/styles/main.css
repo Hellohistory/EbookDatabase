@@ -1,0 +1,887 @@
+/* path: frontend/src/assets/styles/main.css */
+/* 全局元素样式 */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f9;
+    margin: 0;
+    padding: 0;
+}
+
+#container {
+    max-width: 90%;
+    width: 630px;
+    padding: 20px;
+    background-color: #ffffff;
+    border: 2px solid #4A90E2;
+    border-radius: 8px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    margin: 50px auto 0;
+}
+
+h1 {
+    text-align: center;
+    color: #4A90E2;
+}
+
+/* 表单控制样式 */
+.form-control,
+.form-select {
+    width: 100%; /* 为小屏幕设定宽度 */
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #BDC3C7;
+    border-radius: 4px;
+    outline: none;
+    box-shadow: none;
+    box-sizing: border-box;
+}
+
+/* 表单聚焦时的样式 */
+.form-control:focus,
+.form-select:focus {
+    border-color: #4A90E2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, .2);
+}
+
+/* 表单标签样式 */
+.form-label {
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+/* 调整下拉选择框和输入框的布局 */
+.mb-3.d-flex.align-items-center {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* 选择框样式 */
+.form-select {
+    flex-grow: 0; /* 防止选择框拉伸 */
+    margin-right: 10px; /* 添加右边距 */
+}
+
+/* 输入框样式 */
+.form-control {
+    flex-grow: 1; /* 输入框拉伸以填充剩余空间 */
+}
+
+/* 搜索选项卡样式 */
+.search-tab {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 20px;
+    display: flex;
+    border-bottom: 2px solid #0084ff;
+}
+
+.search-tab li {
+    padding: 10px 20px;
+    color: #0084ff;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.search-tab li.on {
+    border-bottom: 2px solid #0084ff;
+}
+
+/* 搜索条件样式 */
+.advanced-search-default,
+.search-condition {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+.search-condition label {
+    margin-bottom: 0;
+}
+
+.search-condition label > span {
+    padding: 0 10px;
+}
+
+/* 自定义按钮样式 */
+.custom-button {
+    background-color: #4A90E2;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.custom-button:hover {
+    background-color: #357ABD;
+}
+
+/* 表单开关样式 */
+.form-check.form-switch {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.form-check-input {
+    width: auto;
+}
+
+/* 搜索条件的选择框和输入框样式 */
+#searchConditions .form-select,
+#searchConditions .form-control {
+    width: auto; /* 非小屏幕设定宽度 */
+    flex-grow: 0;
+    margin-right: 10px; /* 添加右边距 */
+}
+
+/* 添加条件按钮样式 */
+#addCondition {
+    background-color: #5cb85c;
+    border-color: #4cae4c;
+    color: white;
+    margin-top: 20px; /* 对齐上边距 */
+    margin-left: 10px; /* 对齐左边距 */
+}
+
+#addCondition:hover {
+    background-color: #4cae4c;
+}
+
+/* 响应式设计：小屏幕样式调整 */
+@media (max-width: 768px) {
+    .search-condition {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .search-condition label > span {
+        display: none;
+    }
+
+    #searchConditions .form-select,
+    #searchConditions .form-control {
+        width: 100%; /* 小屏幕设定宽度为100% */
+        flex-grow: 1;
+    }
+
+    #addCondition {
+        margin-left: 0; /* 小屏幕移除左边距 */
+    }
+}
+
+/* 表单选择框和输入框组合样式 */
+.form-select-and-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* 表单检查样式 */
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* 删除按钮样式 */
+.custom-delete-btn {
+    background-color: #f44336;
+    color: #ffffff;
+    padding: 4px 6px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 12px;
+    text-align: center;
+    margin-left: 10px; /* 对齐左边距 */
+}
+
+.custom-delete-btn:hover {
+    background-color: #d32f2f;
+    transform: scale(1.05);
+}
+
+/* 工具类样式 */
+.mt-4 {
+    margin-top: 20px;
+}
+
+.mb-3 {
+    margin-bottom: 15px;
+}
+/* 上边距为20px的工具类 */
+.mt-4 {
+    margin-top: 20px;
+}
+
+/* 下边距为15px的工具类 */
+.mb-3 {
+    margin-bottom: 15px;
+}
+
+/* 搜索条件的上下外边距 */
+.search-condition {
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+/* 添加条件按钮与搜索条件上边距对齐 */
+#addCondition {
+    margin-top: 20px;
+}
+
+/* 如果添加按钮需要左边距来水平对齐，可以添加此规则 */
+#addCondition {
+    margin-left: 10px;
+}
+
+/* 可以为所有表单控件添加统一的左右外边距 */
+.form-select,
+.form-control,
+.form-check-input,
+.form-check.form-switch {
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+#remote-access {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    text-align: center;
+    margin: auto; /* 居中容器 */
+    width: 100%;
+}
+
+#qr-code-container {
+    margin-bottom: 20px;
+    display: flex; /* 应用 flex 布局 */
+    justify-content: center; /* 水平居中 */
+}
+
+#access-url {
+    font-size: 16px;
+}
+
+/* 按钮的基础样式 */
+.btn {
+    background-color: #4A90E2;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.btn:hover {
+    background-color: #357ABD;
+}
+
+.form-check-input {
+    margin-right: 10px;
+}
+
+.custom-button {
+    background-color: #4a90e2;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.custom-button:hover {
+    background-color: #5ca2f8;
+}
+
+.custom-button:active {
+    background-color: #4a90e2;
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+    transform: translateY(2px);
+}
+/* 保持原有的图标容器样式不变 */
+#icon-container,
+#settings-icon,
+#menu-icon,
+#close-icon,
+#platform-icons {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+#menu-icon {
+    left: 10px;
+}
+
+#close-icon {
+    display: none;
+}
+
+.about-container {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    text-align: right;
+}
+
+.version-display {
+    text-align: center;
+    margin-top: 5px;
+}
+/* 侧边栏基础样式 */
+#sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 240px;
+    height: 100vh;
+    background-color: #f5f5f5;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(-100%);
+    z-index: 2;
+    border-right: 1px solid #c5d0e6;
+    border-radius: 0 10px 10px 0;
+    padding: 10px;
+}
+
+input[type="checkbox"] {
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+label {
+    display: block;
+    margin: 8px 0;
+    font-size: 14px;
+    cursor: pointer;
+    color: #333;
+}
+
+#sidebar button {
+    background-color: #4a90e2;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+#sidebar button:hover {
+    background-color: #3e79b4;
+}
+/* 侧边栏整体样式 */
+#sidebar {
+    background-color: #f9f9f9;
+    padding: 15px 20px;
+    border-right: 1px solid #ccc;
+    height: 100vh;
+    overflow-y: auto;
+    font-family: 'Arial', sans-serif;
+}
+
+.close-icon-style:hover {
+    cursor: pointer;
+    color: #7f8c8d;
+    font-size: 30px;
+    margin-bottom: 15px;
+}
+
+label.form-label {
+    display: block;
+    margin-bottom: 10px;
+    color: #34495e;
+    font-weight: bold;
+}
+
+#database-checkboxes {
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+input[type=checkbox] {
+    margin-right: 5px;
+}
+
+label {
+    margin-right: 15px;
+    user-select: none;
+}
+
+#database-checkboxes::-webkit-scrollbar {
+    width: 5px;
+}
+
+#database-checkboxes::-webkit-scrollbar-track {
+    background: #f4f4f4;
+}
+
+#database-checkboxes::-webkit-scrollbar-thumb {
+    background: #bdc3c7;
+}
+/* 在模态框显示时添加渐变效果 */
+.modal {
+    display: none; /* 默认不显示 */
+    position: fixed;
+    z-index: 1000; /* 提高层级确保在最上层 */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4); /* 黑色半透明背景 */
+    animation: fadeIn 0.5s; /* 添加淡入效果 */
+}
+
+/* 设置设置项的容器，使用flex布局对齐 */
+.setting-item {
+    display: flex;
+    align-items: center; /* 垂直居中 */
+    margin-bottom: 15px; /* 设置一些底部外边距 */
+}
+
+/* 调整label的宽度和对齐方式 */
+.setting-item label {
+    flex-shrink: 0; /* 防止标签缩小 */
+    width: 120px; /* 设置一个固定宽度，以便所有标签对齐 */
+    margin-right: 10px; /* 在标签和下拉框之间设置一些间距 */
+    text-align: right; /* 文本右对齐 */
+}
+
+/* 统一select元素的样式 */
+.setting-item select {
+    flex-grow: 1; /* select元素会占据剩余空间 */
+    padding: 8px 10px; /* 增加内边距以提供更好的点击区域 */
+    font-size: 16px; /* 可适当调整字体大小 */
+    border-radius: 4px; /* 统一圆角 */
+    border: 1px solid #ccc; /* 统一边框 */
+    background-color: white; /* 背景色 */
+}
+
+/* 确保按钮与下拉框底部对齐 */
+#confirmButton {
+    align-self: flex-end; /* 对齐到容器的底部 */
+    width: 100%; /* 让按钮宽度与容器相同 */
+    box-sizing: border-box; /* 防止内边距影响宽度 */
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto; /* 调整为屏幕顶端5%的位置 */
+    padding: 20px;
+    border-radius: 5px; /* 添加圆角边框 */
+    width: 80%; /* 调整宽度为80% */
+    max-width: 600px; /* 最大宽度为600px */
+    animation: slideIn 0.5s; /* 添加滑动效果 */
+}
+
+@keyframes slideIn {
+    from {top: -300px; opacity: 0;}
+    to {top: 5%; opacity: 1;}
+}
+
+/* 模态框关闭按钮样式 */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer; /* 添加这行代码 */
+}
+
+/* 增强按钮的视觉效果 */
+button {
+    background-color: #4CAF50; /* 绿色背景 */
+    color: white;
+    padding: 10px 20px;
+    margin: 10px 0;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px; /* 圆角边框 */
+    transition: background-color 0.3s ease; /* 添加过渡效果 */
+}
+
+button:hover {
+    background-color: #45a049; /* 深绿色背景 */
+}
+
+/* 下拉框样式 */
+#page-size {
+    padding: 5px 10px;
+    font-size: 16px;
+    border-radius: 4px; /* 圆角 */
+    border: 1px solid #ccc; /* 边框颜色 */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* 内阴影 */
+    transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* 过渡效果 */
+}
+
+/* 当下拉框获取焦点时的样式 */
+#page-size:focus {
+    outline: none; /* 移除焦点轮廓 */
+    border-color: #4CAF50; /* 边框颜色变为主题色 */
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.4); /* 外阴影效果 */
+}
+
+/* 下拉选项的样式 */
+#page-size option {
+    padding: 5px;
+    font-size: 16px;
+}
+
+.custom-alert {
+    display: none; /* 默认不显示 */
+    position: fixed; /* 固定位置 */
+    top: 50%; /* 顶部50%的位置 */
+    left: 50%; /* 左边50%的位置 */
+    transform: translate(-50%, -50%); /* 向上和向左各偏移50%自身尺寸，实现居中 */
+    z-index: 10000; /* 确保在最上面 */
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,.5);
+    text-align: center; /* 文本居中 */
+    cursor: pointer; /* 点击即关闭 */
+    min-width: 200px; /* 最小宽度 */
+}
+
+.custom-alert.success {
+    background-color: #28a745; /* 绿色背景表示成功 */
+}
+
+.custom-alert.error {
+    background-color: #dc3545; /* 红色背景表示错误 */
+}
+/* 警告框样式，用于显示警告或通知 */
+.alert {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 15px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 5px;
+    z-index: 1001;
+}
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-top: 20px;
+}
+
+.search-time {
+    text-align: center;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.total-records {
+    text-align: center;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.book-container {
+    background-color: #fff;
+    margin: 10px 20px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.book-title {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+.book-details p {
+    margin: 5px 0;
+    color: #34495e;
+}
+
+.no-results {
+    text-align: center;
+    color: #666;
+    margin: 20px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+li::marker {
+    content: none;
+}
+
+.page-item a {
+    margin: 0 5px;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: #333;
+    text-decoration: none;
+}
+
+.page-item a:hover {
+    background-color: #eee;
+}
+
+.page-item.active a {
+    background-color: #3498db;
+    color: #fff;
+}
+
+.page-item.disabled a {
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+.button-container {
+    margin-left: 20px;
+    margin-bottom: 20px;
+}
+
+#select-all-btn,
+#deselect-all-btn,
+#copy-selected-btn {
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.home-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+
+/* 非商业性质声明样式 */
+.non-commercial-notice {
+    font-size: 14px;
+    color: red;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.jump-container {
+display: flex;
+align-items: center;
+justify-content: center;
+margin-top: 20px;
+margin-bottom: 20px;
+padding: 10px;
+border: 1px solid #ccc;
+border-radius: 5px;
+
+}
+
+.jump-container label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.jump-container input {
+    width: 60px;
+    padding: 5px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.jump-container button {
+    padding: 6px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.jump-container button:hover {
+    background-color: #0056b3;
+}
+
+.select-all-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.deselect-all-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.copy-selected-btn {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.copy-link-btn {
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.copy-link-btn:hover {
+    background-color: #0056b3;
+}
+
+.icon-button {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.icon-button:focus {
+    outline: none;
+}
+.about-page {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f4f4f4;
+    padding: 20px;
+}
+
+.about-nav {
+    background: #add8e6;
+    color: #fff;
+    padding: 10px 0;
+    text-align: center;
+}
+
+.about-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.about-nav li {
+    display: inline;
+    margin: 0 20px;
+}
+
+.about-nav button {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.about-nav button:hover {
+    color: #ddd;
+}
+
+.about-nav .active button {
+    text-decoration: underline;
+}
+
+.about-content {
+    background: #fff;
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: none;
+    white-space: pre-wrap;
+}
+
+.about-content.active {
+    display: block;
+}
+
+@media (max-width: 600px) {
+    .about-content {
+        margin: 10px 0;
+        padding: 15px;
+    }
+}

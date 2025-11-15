@@ -208,6 +208,57 @@ h1 {
     transform: scale(1.05);
 }
 
+.datasource-section {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.datasource-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.datasource-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 12px;
+    background-color: #fafafa;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    align-items: end;
+}
+
+.datasource-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.datasource-field label {
+    font-weight: 600;
+    color: #444;
+}
+
+.datasource-field input,
+.datasource-field select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.datasource-item .custom-delete-btn {
+    margin-left: 0;
+    height: 40px;
+    align-self: center;
+}
+
 /* 工具类样式 */
 .mt-4 {
     margin-top: 20px;
@@ -623,6 +674,29 @@ h1 {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 20px;
+}
+
+.book-cover-wrapper {
+    width: 140px;
+    flex-shrink: 0;
+}
+
+.book-cover {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    background-color: #f5f5f5;
+}
+
+.book-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .book-title {
@@ -634,6 +708,54 @@ h1 {
 .book-details p {
     margin: 5px 0;
     color: #34495e;
+}
+
+.book-description {
+    margin-top: 10px;
+    line-height: 1.5;
+    color: #4a4a4a;
+}
+
+.book-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.book-tag {
+    background-color: #eef4ff;
+    color: #3366cc;
+    border: 1px solid #ccd9ff;
+    border-radius: 12px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+}
+
+.book-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    gap: 12px;
+}
+
+.book-source {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.download-button {
+    background-color: #4A90E2;
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.download-button:hover {
+    background-color: #357ABD;
 }
 
 .no-results {

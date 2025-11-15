@@ -9,11 +9,6 @@ interface LoadingState {
   settings: boolean
 }
 
-interface UpdateResult {
-  success: boolean
-  message?: string
-}
-
 interface AvailableDBResponse {
   available_dbs?: unknown
 }
@@ -33,7 +28,6 @@ export interface GlobalState {
   fetchSettings: () => Promise<void>
   toggleDB: (dbPath: string) => void
   setSelectedDBs: (dbs: string[]) => void
-  updateSettings: (newSettings: Record<string, unknown>) => Promise<UpdateResult>
 }
 
 const normalizeSettings = (payload: SearchSettingsPayload): Partial<Settings> => {
@@ -113,30 +107,7 @@ const useGlobalStore = create<GlobalState>((set, get) => ({
       set({ selectedDBs: [...selectedDBs, dbPath] })
     }
   },
-  setSelectedDBs: (dbs: string[]) => set({ selectedDBs: dbs }),
-  updateSettings: async (newSettings: Record<string, unknown>) => {
-    try {
-      const response = await fetch('/api/v1/settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(newSettings)
-      })
-      if (!response.ok) {
-        throw new Error('保存设置失败')
-      }
-      const data = (await response.json()) as SearchSettingsPayload
-      set((state) => ({ settings: { ...state.settings, ...normalizeSettings(data) } }))
-      return { success: true }
-    } catch (error) {
-      console.error(error)
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : '保存设置失败'
-      }
-    }
-  }
+  setSelectedDBs: (dbs: string[]) => set({ selectedDBs: dbs })
 }))
 
 export default useGlobalStore

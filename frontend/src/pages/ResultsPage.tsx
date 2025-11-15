@@ -1,15 +1,9 @@
 // path: frontend/src/pages/ResultsPage.tsx
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import CopyTools from '../components/CopyTools'
 import Pagination from '../components/Pagination'
 import ResultsList from '../components/ResultsList'
 import type { Book } from '../types/Book'
-
-interface ResultItem {
-  key: string
-  book: Book
-}
 
 interface ResultsMeta {
   totalPages: number
@@ -24,14 +18,9 @@ interface SearchResponse {
   searchTimeMs?: number
 }
 
-const createItemKey = (book: Book, index: number): string => {
-  const base = book.second_pass_code || book.title || 'book'
-  return `${base}-${index}`
-}
-
 const ResultsPage = () => {
   const [searchParams] = useSearchParams()
-  const [items, setItems] = useState<ResultItem[]>([])
+  const [books, setBooks] = useState<Book[]>([])
   const [meta, setMeta] = useState<ResultsMeta>({
     totalPages: 0,
     totalRecords: 0,
@@ -55,13 +44,8 @@ const ResultsPage = () => {
           throw new Error('检索失败，请稍后再试。')
         }
         const data = (await response.json()) as SearchResponse
-        const books = Array.isArray(data.books) ? (data.books as Book[]) : []
-        setItems(
-          books.map((book, index) => ({
-            key: createItemKey(book, index),
-            book
-          }))
-        )
+        const bookList = Array.isArray(data.books) ? data.books : []
+        setBooks(bookList)
         setMeta({
           totalPages: typeof data.totalPages === 'number' ? data.totalPages : 0,
           totalRecords: typeof data.totalRecords === 'number' ? data.totalRecords : 0,
@@ -107,13 +91,7 @@ const ResultsPage = () => {
           <p className="non-commercial-notice">
             本项目绝不可能盈利，也不会用于任何商业场景(此场景包括论坛币等虚拟货币)，如果存在，请不要犹豫，直接举报商家或发帖人。
           </p>
-          {items.length > 0 ? (
-            <CopyTools items={items}>
-              <ResultsList items={items} />
-            </CopyTools>
-          ) : (
-            <ResultsList items={items} />
-          )}
+          <ResultsList books={books} />
           <Pagination totalPages={meta.totalPages} />
         </>
       )}

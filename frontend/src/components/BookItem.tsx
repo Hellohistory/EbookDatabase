@@ -1,95 +1,64 @@
 // path: frontend/src/components/BookItem.tsx
-import { useCopyTools } from './CopyTools'
 import type { Book } from '../types/Book'
-import { formatFileSize } from '../utils/format'
 
-interface Props {
-  item: {
-    key: string
-    book: Book
-  }
+type Props = {
+  book: Book
 }
 
-const BookItem = ({ item }: Props) => {
-  const { isSelected, toggleSelection, copySingle } = useCopyTools()
-  const { book, key } = item
-
-  const handleCheckboxChange = () => {
-    toggleSelection(key)
+const joinValues = (values?: string[]) => {
+  if (!values || values.length === 0) {
+    return ''
   }
+  return values.filter((item) => item && item.trim().length > 0).join('，')
+}
 
-  const handleCopy = () => {
-    void copySingle(key)
-  }
+const BookItem = ({ book }: Props) => {
+  const authorsText = joinValues(book.authors)
+  const hasTags = Array.isArray(book.tags) && book.tags.length > 0
+  const coverUrl = book.has_cover
+    ? `/api/v1/cover?source=${encodeURIComponent(book.source)}&id=${encodeURIComponent(book.id)}`
+    : null
+  const downloadUrl = `/api/v1/download?source=${encodeURIComponent(book.source)}&id=${encodeURIComponent(book.id)}`
 
   return (
     <div className="book-container">
-      <div className="checkbox-container">
-        <label>
-          <input
-            type="checkbox"
-            className="copy-checkbox"
-            checked={isSelected(key)}
-            onChange={handleCheckboxChange}
-          />
-        </label>
-      </div>
-      <h2 className="book-title">{book.title || '未命名'}</h2>
-      <div className="book-details">
-        {book.author && (
-          <p>
-            <strong>作者:</strong> {book.author}
-          </p>
-        )}
-        {book.publisher && (
-          <p>
-            <strong>出版商:</strong> {book.publisher}
-          </p>
-        )}
-        {book.publish_date && (
-          <p>
-            <strong>出版日期:</strong> {book.publish_date}
-          </p>
-        )}
-        {book.page_count && (
-          <p>
-            <strong>页数:</strong> {book.page_count}
-          </p>
-        )}
-        {book.isbn && (
-          <p>
-            <strong>ISBN:</strong> {book.isbn}
-          </p>
-        )}
-        {book.ss_code && (
-          <p>
-            <strong>SS码:</strong> {book.ss_code}
-          </p>
-        )}
-        {book.dxid && (
-          <p>
-            <strong>DXID:</strong> {book.dxid}
-          </p>
-        )}
-        {book.second_pass_code && (
-          <p className="second-pass-code">
-            <strong>秒传链接:</strong>{' '}
-            <span className="actual-link">{book.second_pass_code}</span>
-            <button type="button" className="copy-link-btn" onClick={handleCopy}>
-              复制
-            </button>
-          </p>
-        )}
-        {book.size && (
-          <p className="file-size">
-            <strong>文件大小:</strong> {formatFileSize(book.size)}
-          </p>
-        )}
-        {book.file_type && (
-          <p>
-            <strong>文件类型:</strong> {book.file_type}
-          </p>
-        )}
+      {coverUrl && (
+        <div className="book-cover-wrapper">
+          <img src={coverUrl} alt={`${book.title} 封面`} className="book-cover" loading="lazy" />
+        </div>
+      )}
+      <div className="book-content">
+        <h2 className="book-title">{book.title || '未命名'}</h2>
+        <div className="book-details">
+          {authorsText && (
+            <p>
+              <strong>作者:</strong> {authorsText}
+            </p>
+          )}
+          {book.publisher && (
+            <p>
+              <strong>出版商:</strong> {book.publisher}
+            </p>
+          )}
+          {book.description && <p className="book-description">{book.description}</p>}
+          {hasTags && (
+            <div className="book-tags">
+              {book.tags?.map((tag) => (
+                <span key={tag} className="book-tag">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="book-footer">
+          <span className="book-source">来自：{book.source}</span>
+          {book.can_download && (
+            <a className="download-button" href={downloadUrl} target="_blank" rel="noopener noreferrer">
+              下载
+            </a>
+          )}
+        </div>
       </div>
     </div>
   )

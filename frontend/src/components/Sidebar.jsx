@@ -16,7 +16,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         &times;
       </div>
       <label htmlFor="db_names" className="form-label">
-        选择数据库：
+        选择数据源：
       </label>
       <div id="database-checkboxes">
         {availableDBs.map((db) => {

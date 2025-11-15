@@ -8,11 +8,15 @@ type Props = {
 
 const ResultsList = ({ books }: Props) => {
   if (!books.length) {
-    return <p className="no-results">没有找到匹配的结果。</p>
+    return (
+      <div className="rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-16 text-center text-sm text-gray-500">
+        没有找到匹配的结果。
+      </div>
+    )
   }
 
   return (
-    <div>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {books.map((book) => (
         <BookItem key={`${book.source}-${book.id}`} book={book} />
       ))}

@@ -20,30 +20,34 @@ const RemoteAccess = () => {
         }
       } catch (err) {
         if (isMounted) {
-          setError(err.message)
+          setError(err instanceof Error ? err.message : '加载失败')
         }
       }
     }
-    load()
+    void load()
     return () => {
       isMounted = false
     }
   }, [])
 
   if (error) {
-    return <p className="error-text">{error}</p>
+    return (
+      <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        {error}
+      </p>
+    )
   }
 
   if (!url) {
-    return <p>正在加载远程访问地址…</p>
+    return <p className="text-sm text-gray-500">正在加载远程访问地址…</p>
   }
 
   return (
-    <div className="remote-access">
-      <div id="qr-code-container">
+    <div className="flex flex-col items-center gap-4 text-center text-sm text-gray-600">
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
         <QRCodeCanvas value={url} size={180} />
       </div>
-      <p id="access-url">{url}</p>
+      <p className="break-all font-medium text-gray-700">{url}</p>
       <p>使用移动设备扫码访问</p>
     </div>
   )

@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "axios": "^1.7.7",
     "qrcode.react": "^3.1.0",
     "react": "^18.3.1",
@@ -19,12 +20,14 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@tailwindcss/forms": "^0.5.10",
     "@types/react": "^18.3.10",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.22",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
     "typescript": "^5.5.4",
-
     "vite": "^7.2.2"
-
   }
 }

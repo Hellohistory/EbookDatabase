@@ -40,6 +40,20 @@ type ConditionAction =
   | { type: 'UPDATE_CONDITION'; index: number; key: keyof Condition; value: Condition[keyof Condition] }
   | { type: 'SET_FIRST_FIELD'; field: SearchField }
 
+const selectClasses =
+  'rounded-lg border-gray-300 text-sm text-gray-700 shadow-sm focus:border-primary focus:ring-primary'
+
+const inputClasses =
+  'w-full rounded-lg border-gray-300 text-sm text-gray-700 shadow-sm focus:border-primary focus:ring-primary'
+
+const checkboxClasses = 'h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary'
+
+const buttonPrimaryClassName =
+  'inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+
+const buttonSecondaryClassName =
+  'inline-flex items-center justify-center rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+
 const conditionsReducer = (state: Condition[], action: ConditionAction): Condition[] => {
   switch (action.type) {
     case 'ADD_CONDITION':
@@ -119,18 +133,19 @@ const AdvancedSearchForm = () => {
   }
 
   return (
-    <form className="mt-4" onSubmit={handleSubmit}>
-      <div className="search-conditions">
+    <form className="space-y-6" onSubmit={handleSubmit}>
+      <div className="space-y-4">
         {conditions.map((condition, index) => (
-          <div key={index} className="mb-3 d-flex align-items-center search-condition">
-            <div className="form-select-and-input d-flex align-items-center">
+          <div
+            key={index}
+            className="flex flex-col gap-4 rounded-2xl bg-gray-50 p-4 shadow-sm md:flex-row md:items-center"
+          >
+            <div className="flex flex-1 flex-col gap-4 md:flex-row md:items-center">
               <select
                 name={`field-${index}`}
-                className="form-select me-2"
+                className={`${selectClasses} md:w-40`}
                 value={condition.field}
-                onChange={(event) =>
-                  updateCondition(index, 'field', event.target.value as Condition['field'])
-                }
+                onChange={(event) => updateCondition(index, 'field', event.target.value as Condition['field'])}
               >
                 <option value="title">书名</option>
                 <option value="author">作者</option>
@@ -141,53 +156,59 @@ const AdvancedSearchForm = () => {
                 <option value="sscode">SS码</option>
                 <option value="dxid">DXID</option>
               </select>
-              <span className="me-2">-</span>
+              <span className="hidden text-gray-400 md:block">—</span>
               <input
                 type="text"
                 name={`query-${index}`}
                 placeholder="请输入关键词"
-                className="form-control me-2"
+                className={inputClasses}
                 required
                 value={condition.query}
                 onChange={(event) => updateCondition(index, 'query', event.target.value)}
               />
             </div>
-            {index > 0 && (
-              <select
-                name={`logic-${index}`}
-                className="form-select ms-2 me-2"
-                value={condition.logic}
-                onChange={(event) =>
-                  updateCondition(index, 'logic', event.target.value as Condition['logic'])
-                }
-              >
-                <option value="AND">与 (AND)</option>
-                <option value="OR">或 (OR)</option>
-              </select>
-            )}
-            <div className="form-check form-switch me-2">
-              <input
-                type="checkbox"
-                className="form-check-input"
-                checked={condition.fuzzy}
-                onChange={(event) => updateCondition(index, 'fuzzy', event.target.checked)}
-              />
-              <label className="form-check-label">模糊搜索</label>
+            <div className="flex flex-col items-start gap-3 md:w-auto md:flex-row md:items-center">
+              {index > 0 && (
+                <select
+                  name={`logic-${index}`}
+                  className={`${selectClasses} md:w-28`}
+                  value={condition.logic}
+                  onChange={(event) => updateCondition(index, 'logic', event.target.value as Condition['logic'])}
+                >
+                  <option value="AND">与 (AND)</option>
+                  <option value="OR">或 (OR)</option>
+                </select>
+              )}
+              <label className="inline-flex items-center gap-2 text-sm text-gray-600">
+                <input
+                  type="checkbox"
+                  className={checkboxClasses}
+                  checked={condition.fuzzy}
+                  onChange={(event) => updateCondition(index, 'fuzzy', event.target.checked)}
+                />
+                模糊
+              </label>
+              {index > 0 && (
+                <button
+                  type="button"
+                  className={buttonSecondaryClassName}
+                  onClick={() => removeCondition(index)}
+                >
+                  删除
+                </button>
+              )}
             </div>
-            {index > 0 && (
-              <button type="button" className="custom-delete-btn ms-2" onClick={() => removeCondition(index)}>
-                删除
-              </button>
-            )}
           </div>
         ))}
       </div>
-      <button type="button" className="custom-button" onClick={addCondition}>
-        添加条件
-      </button>
-      <button type="submit" className="custom-button">
-        搜索
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button type="button" className={buttonSecondaryClassName} onClick={addCondition}>
+          添加条件
+        </button>
+        <button type="submit" className={buttonPrimaryClassName}>
+          搜索
+        </button>
+      </div>
     </form>
   )
 }

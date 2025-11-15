@@ -75,25 +75,50 @@ const ResultsPage = () => {
   const searchSeconds = (meta.searchTimeMs / 1000).toFixed(2)
 
   return (
-    <div className="results-container">
-      <h1>检索结果</h1>
-      <div className="button-container">
-        <Link to="/" className="home-button">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl font-bold text-gray-900">检索结果</h1>
+        <Link
+          to="/"
+          className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-primary hover:text-primary"
+        >
           回到主页
         </Link>
       </div>
-      {loading && <p>正在检索，请稍候…</p>}
-      {error && <p className="error-text">{error}</p>}
+
+      {loading && (
+        <div className="rounded-2xl bg-white p-6 text-sm text-gray-600 shadow-sm ring-1 ring-gray-100">
+          正在检索，请稍候…
+        </div>
+      )}
+
+      {error && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-4 text-sm text-red-600">
+          {error}
+        </div>
+      )}
+
       {!loading && !error && (
-        <>
-          <p className="search-time">检索时间: {searchSeconds} 秒</p>
-          <p className="total-records">检索到: {meta.totalRecords} 条内容</p>
-          <p className="non-commercial-notice">
-            本项目绝不可能盈利，也不会用于任何商业场景(此场景包括论坛币等虚拟货币)，如果存在，请不要犹豫，直接举报商家或发帖人。
-          </p>
+        <div className="space-y-6">
+          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+              <span>
+                检索时间:
+                <span className="ml-2 font-semibold text-gray-900">{searchSeconds}</span> 秒
+              </span>
+              <span>
+                检索到:
+                <span className="ml-2 font-semibold text-gray-900">{meta.totalRecords}</span> 条内容
+              </span>
+            </div>
+            <p className="mt-4 text-xs leading-relaxed text-gray-500">
+              本项目绝不可能盈利，也不会用于任何商业场景(此场景包括论坛币等虚拟货币)，如果存在，请不要犹豫，直接举报商家或发帖人。
+            </p>
+          </div>
+
           <ResultsList books={books} />
           <Pagination totalPages={meta.totalPages} />
-        </>
+        </div>
       )}
     </div>
   )

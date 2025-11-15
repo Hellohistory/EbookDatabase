@@ -1,6 +1,7 @@
 // path: frontend/src/components/Pagination.jsx
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { toast } from 'react-hot-toast'
 
 const Pagination = ({ totalPages }) => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -38,7 +39,7 @@ const Pagination = ({ totalPages }) => {
   const handleJump = () => {
     const value = parseInt(jumpValue, 10)
     if (Number.isNaN(value) || value < 1 || value > totalPages) {
-      window.alert('请输入有效的页数')
+      toast.error('请输入有效的页数。')
       return
     }
     updatePage(value)

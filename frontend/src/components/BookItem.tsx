@@ -1,25 +1,16 @@
-// path: frontend/src/components/BookItem.jsx
+// path: frontend/src/components/BookItem.tsx
 import { useCopyTools } from './CopyTools'
+import type { Book } from '../types/Book'
+import { formatFileSize } from '../utils/format'
 
-const formatFileSize = (sizeValue) => {
-  if (!sizeValue) {
-    return null
+interface Props {
+  item: {
+    key: string
+    book: Book
   }
-  const numeric = parseFloat(sizeValue)
-  if (Number.isNaN(numeric)) {
-    return sizeValue
-  }
-  if (numeric === 0) {
-    return '0 Byte'
-  }
-  const units = ['Bytes', 'KB', 'MB', 'GB', 'TB']
-  const exponent = Math.floor(Math.log(numeric) / Math.log(1024))
-  const index = Math.min(exponent, units.length - 1)
-  const value = numeric / Math.pow(1024, index)
-  return `${value.toFixed(2)} ${units[index]}`
 }
 
-const BookItem = ({ item }) => {
+const BookItem = ({ item }: Props) => {
   const { isSelected, toggleSelection, copySingle } = useCopyTools()
   const { book, key } = item
 
@@ -28,7 +19,7 @@ const BookItem = ({ item }) => {
   }
 
   const handleCopy = () => {
-    copySingle(key)
+    void copySingle(key)
   }
 
   return (

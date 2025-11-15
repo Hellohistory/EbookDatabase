@@ -1,6 +1,7 @@
 // path: frontend/src/pages/ResultsPage.tsx
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { toast } from 'react-hot-toast'
 import Pagination from '../components/Pagination'
 import ResultsList from '../components/ResultsList'
 import type { Book } from '../types/Book'
@@ -55,11 +56,9 @@ const ResultsPage = () => {
         if (err instanceof DOMException && err.name === 'AbortError') {
           return
         }
-        if (err instanceof Error) {
-          setError(err.message)
-        } else {
-          setError('检索失败，请稍后再试。')
-        }
+        const message = err instanceof Error ? err.message : '检索失败，请稍后再试。'
+        setError(message)
+        toast.error(message)
       } finally {
         setLoading(false)
       }
@@ -75,20 +74,52 @@ const ResultsPage = () => {
   const searchSeconds = (meta.searchTimeMs / 1000).toFixed(2)
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-3xl font-bold text-gray-900">检索结果</h1>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 sm:px-6 lg:px-0">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">检索结果</h1>
         <Link
           to="/"
-          className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-primary hover:text-primary"
+          className="inline-flex w-full items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:border-primary hover:text-primary sm:w-auto"
         >
           回到主页
         </Link>
       </div>
 
       {loading && (
-        <div className="rounded-2xl bg-white p-6 text-sm text-gray-600 shadow-sm ring-1 ring-gray-100">
-          正在检索，请稍候…
+        <div className="space-y-4">
+          <div className="flex items-center justify-center gap-3 rounded-2xl bg-white p-6 text-sm font-medium text-gray-600 shadow-sm ring-1 ring-gray-100">
+            <svg
+              className="h-5 w-5 animate-spin text-primary"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+            </svg>
+            <span>正在检索，请稍候…</span>
+          </div>
+          <div className="space-y-3">
+            {[0, 1, 2].map((index) => (
+              <div
+                key={index}
+                className="animate-pulse rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
+              >
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  <div className="h-24 w-full rounded-lg bg-gray-200 sm:w-32" />
+                  <div className="flex-1 space-y-3">
+                    <div className="h-4 w-2/3 rounded bg-gray-200" />
+                    <div className="h-3 w-1/2 rounded bg-gray-200" />
+                    <div className="flex gap-2">
+                      <div className="h-6 w-20 rounded-full bg-gray-200" />
+                      <div className="h-6 w-24 rounded-full bg-gray-200" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -101,7 +132,7 @@ const ResultsPage = () => {
       {!loading && !error && (
         <div className="space-y-6">
           <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+            <div className="flex flex-col items-start gap-2 text-sm text-gray-600 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
               <span>
                 检索时间:
                 <span className="ml-2 font-semibold text-gray-900">{searchSeconds}</span> 秒

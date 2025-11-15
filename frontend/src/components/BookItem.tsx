@@ -65,7 +65,7 @@ const BookItem = ({ book }: Props) => {
             </div>
           )}
         </div>
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-4 text-sm">
+        <div className="mt-6 flex flex-col gap-3 border-t border-gray-100 pt-4 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <span className="text-gray-500">来源：{book.source}</span>
           {book.can_download && (
             <a

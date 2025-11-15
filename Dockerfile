@@ -26,7 +26,6 @@ COPY --from=go-builder /ebook-server /app/ebook-server
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 COPY Markdown/ ./Markdown/
 COPY static/settings.json ./static/settings.json
-COPY static/LICENSE.txt ./static/LICENSE.txt
 
 RUN mkdir -p /app/instance /app/log
 

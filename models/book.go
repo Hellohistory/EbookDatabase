@@ -1,4 +1,4 @@
-// path: models/book.go
+// Package models path: models/book.go
 package models
 
 import (

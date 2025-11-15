@@ -1,4 +1,4 @@
-// path: database/manager.go
+// Package database path: database/manager.go
 package database
 
 import (

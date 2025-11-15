@@ -21,18 +21,21 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare Docker tags
         id: meta
         run: |
-          TAGS="hellohistory/ebookdatabase:latest"
+          OWNER="$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')"
+          IMAGE="ghcr.io/${OWNER}/ebookdatabase"
+          TAGS="${IMAGE}:latest"
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            TAGS="$TAGS\nhellohistory/ebookdatabase:${GITHUB_REF##*/}"
+            TAGS="$TAGS\n${IMAGE}:${GITHUB_REF##*/}"
           fi
           {
             echo "tags<<EOF"

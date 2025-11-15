@@ -1,22 +1,35 @@
-FROM python:3.9-slim
+# path: Dockerfile
+# 阶段 1: 构建 React 前端
+FROM node:18-alpine AS frontend-builder
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ ./
+RUN npm run build
 
+# 阶段 2: 构建 Go 后端
+FROM golang:1.21-alpine AS go-builder
+WORKDIR /app
+RUN apk --no-cache add build-base sqlite-dev
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=1 go build -ldflags="-w -s" -o /ebook-server .
+
+# 阶段 3: 最终镜像
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates sqlite-libs
 WORKDIR /app
 
-COPY requirements.txt .
+COPY --from=go-builder /ebook-server /app/ebook-server
+COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
+COPY Markdown/ ./Markdown/
+COPY static/settings.json ./static/settings.json
+COPY static/LICENSE.txt ./static/LICENSE.txt
 
-RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
-
-RUN which uvicorn
-
-COPY app.py .
-COPY module module/
-COPY instance instance/
-COPY search search/
-COPY templates templates/
-COPY static static/
-
-RUN mkdir -p /app/log
+RUN mkdir -p /app/instance /app/log
 
 EXPOSE 10223
+VOLUME ["/app/instance", "/app/log"]
 
-CMD ["/usr/local/bin/uvicorn", "app:app", "--host", "0.0.0.0", "--port", "10223"]
+CMD ["/app/ebook-server"]

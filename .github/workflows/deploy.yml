@@ -33,28 +33,24 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 使用 metadata-action 自动生成标签和缓存配置
+      # --- 关键修复：确保 'tags' 和 'cache' 的 ' | ' 字符和缩进正确 ---
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository_owner }}/ebookdatabase
-          # 为 "main" 分支生成 "latest" 和 "main" 标签
-          # 为 "v*" 标签生成 "v1.2.3" 和 "latest" 标签
+
           tags: |
             type=branch,pattern=main
             type=ref,event=tag
             type=ref,event=branch
 
-          # --- 重点：为缓存定义标签 ---
-          # 我们将使用一个固定的 'build-cache' 标签来存储缓存
-          # 并且在推送标签时，也使用该标签作为缓存源
           cache-from: |
             type=registry,ref=ghcr.io/${{ github.repository_owner }}/ebookdatabase:build-cache
+
           cache-to: |
             type=registry,ref=ghcr.io/${{ github.repository_owner }}/ebookdatabase:build-cache,mode=max
 
-      # 在构建时使用 cache-from 和 cache-to
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
@@ -65,7 +61,7 @@ jobs:
           # 使用 'meta' 步骤自动生成的标签
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # --- 重点：启用缓存 ---
+          # 启用缓存
           cache-from: ${{ steps.meta.outputs.cache-from }}
           cache-to: ${{ steps.meta.outputs.cache-to }}
         env:

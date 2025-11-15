@@ -64,4 +64,9 @@ jobs:
           platforms: linux/amd64,linux/arm64
           # 使用 'meta' 步骤自动生成的标签
           tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.
+          labels: ${{ steps.meta.outputs.labels }}
+          # --- 重点：启用缓存 ---
+          cache-from: ${{ steps.meta.outputs.cache-from }}
+          cache-to: ${{ steps.meta.outputs.cache-to }}
+        env:
+          DOCKER_CLI_EXPERIMENTAL: enabled

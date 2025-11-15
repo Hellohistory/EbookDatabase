@@ -1,5 +1,6 @@
 // path: frontend/src/components/SettingsModal.jsx
 import { useEffect, useState } from 'react'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 import useGlobalStore from '../store/useGlobalStore'
 
 const emptyDatasource = () => ({
@@ -7,6 +8,23 @@ const emptyDatasource = () => ({
   type: 'calibre',
   path: ''
 })
+
+const fieldOptions = [
+  { value: 'title', label: '标题' },
+  { value: 'author', label: '作者' },
+  { value: 'publisher', label: '出版社' },
+  { value: 'isbn', label: 'ISBN' },
+  { value: 'tags', label: '标签' }
+]
+
+const inputClassName =
+  'block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary'
+
+const buttonPrimaryClassName =
+  'inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+
+const buttonSecondaryClassName =
+  'inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
 
 const SettingsModal = ({ isOpen, onClose }) => {
   const fetchSettings = useGlobalStore((state) => state.fetchSettings)
@@ -52,12 +70,6 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
   if (!isOpen) {
     return null
-  }
-
-  const handleOverlayClick = (event) => {
-    if (event.target.id === 'settings-modal') {
-      onClose()
-    }
   }
 
   const handleDatasourceChange = (index, field, value) => {
@@ -119,89 +131,147 @@ const SettingsModal = ({ isOpen, onClose }) => {
   }
 
   return (
-    <div id="settings-modal" className="modal" onClick={handleOverlayClick}>
-      <div className="modal-content">
-        <span className="close" onClick={onClose}>
-          &times;
-        </span>
-        <h2>数据源管理</h2>
-        <form onSubmit={handleSubmit} className="modal-form">
-          <label htmlFor="pageSize">每页数量</label>
-          <input
-            id="pageSize"
-            name="pageSize"
-            type="number"
-            min="1"
-            value={pageSize}
-            onChange={(event) => setPageSize(event.target.value)}
-          />
-
-          <label htmlFor="defaultSearchField">默认搜索字段</label>
-          <select
-            id="defaultSearchField"
-            name="defaultSearchField"
-            value={defaultSearchField}
-            onChange={(event) => setDefaultSearchField(event.target.value)}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">数据源管理</h2>
+            <p className="mt-1 text-sm text-gray-500">配置前端默认选项与书库列表</p>
+          </div>
+          <button
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-sm transition hover:border-primary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            onClick={onClose}
+            aria-label="关闭设置"
           >
-            <option value="title">标题</option>
-            <option value="author">作者</option>
-            <option value="publisher">出版社</option>
-            <option value="isbn">ISBN</option>
-            <option value="tags">标签</option>
-          </select>
+            <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+          </button>
+        </div>
 
-          <div className="datasource-section">
-            <div className="datasource-header">
-              <h3>数据源列表</h3>
-              <button type="button" className="custom-button" onClick={handleAddDatasource}>
+        <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label htmlFor="pageSize" className="block text-sm font-medium text-gray-700">
+                每页数量
+              </label>
+              <input
+                id="pageSize"
+                name="pageSize"
+                type="number"
+                min="1"
+                value={pageSize}
+                onChange={(event) => setPageSize(event.target.value)}
+                className={`${inputClassName} mt-2`}
+              />
+            </div>
+            <div>
+              <label htmlFor="defaultSearchField" className="block text-sm font-medium text-gray-700">
+                默认搜索字段
+              </label>
+              <select
+                id="defaultSearchField"
+                name="defaultSearchField"
+                value={defaultSearchField}
+                onChange={(event) => setDefaultSearchField(event.target.value)}
+                className={`${inputClassName} mt-2`}
+              >
+                {fieldOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium text-gray-900">数据源列表</h3>
+              <button type="button" className={buttonSecondaryClassName} onClick={handleAddDatasource}>
                 新增数据源
               </button>
             </div>
-            {datasources.map((item, index) => (
-              <div key={index} className="datasource-item">
-                <div className="datasource-field">
-                  <label>名称</label>
-                  <input
-                    type="text"
-                    value={item.name}
-                    onChange={(event) => handleDatasourceChange(index, 'name', event.target.value)}
-                    placeholder="展示用名称"
-                    required
-                  />
+            <div className="space-y-4">
+              {datasources.map((item, index) => (
+                <div
+                  key={index}
+                  className="rounded-2xl border border-gray-200 bg-gray-50 p-4 shadow-sm"
+                >
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">名称</label>
+                      <input
+                        type="text"
+                        value={item.name}
+                        onChange={(event) => handleDatasourceChange(index, 'name', event.target.value)}
+                        placeholder="展示用名称"
+                        required
+                        className={`${inputClassName} mt-2`}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">类型</label>
+                      <select
+                        value={item.type}
+                        onChange={(event) => handleDatasourceChange(index, 'type', event.target.value)}
+                        className={`${inputClassName} mt-2`}
+                      >
+                        <option value="calibre">Calibre</option>
+                        <option value="legacy_db">Legacy DB</option>
+                      </select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700">路径</label>
+                      <input
+                        type="text"
+                        value={item.path}
+                        onChange={(event) => handleDatasourceChange(index, 'path', event.target.value)}
+                        placeholder="书库根路径或数据库文件"
+                        required
+                        className={`${inputClassName} mt-2`}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      type="button"
+                      className={buttonSecondaryClassName}
+                      onClick={() => handleRemoveDatasource(index)}
+                    >
+                      删除
+                    </button>
+                  </div>
                 </div>
-                <div className="datasource-field">
-                  <label>类型</label>
-                  <select
-                    value={item.type}
-                    onChange={(event) => handleDatasourceChange(index, 'type', event.target.value)}
-                  >
-                    <option value="calibre">Calibre</option>
-                    <option value="legacy_db">Legacy DB</option>
-                  </select>
-                </div>
-                <div className="datasource-field">
-                  <label>路径</label>
-                  <input
-                    type="text"
-                    value={item.path}
-                    onChange={(event) => handleDatasourceChange(index, 'path', event.target.value)}
-                    placeholder="书库根路径或数据库文件"
-                    required
-                  />
-                </div>
-                <button type="button" className="custom-delete-btn" onClick={() => handleRemoveDatasource(index)}>
-                  删除
-                </button>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          <button type="submit" className="custom-button" disabled={saving}>
-            {saving ? '保存中…' : '保存设置'}
-          </button>
+          <div className="flex items-center justify-end gap-3">
+            <button type="button" className={buttonSecondaryClassName} onClick={onClose}>
+              取消
+            </button>
+            <button type="submit" className={buttonPrimaryClassName} disabled={saving}>
+              {saving ? '保存中…' : '保存设置'}
+            </button>
+          </div>
         </form>
+
         {message && (
-          <div className={`custom-alert ${messageType === 'success' ? 'success' : 'error'}`}>
+          <div
+            className={`mt-4 rounded-lg border px-4 py-3 text-sm ${
+              messageType === 'success'
+                ? 'border-green-200 bg-green-50 text-green-700'
+                : 'border-red-200 bg-red-50 text-red-600'
+            }`}
+          >
             {message}
           </div>
         )}

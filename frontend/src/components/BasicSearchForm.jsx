@@ -4,6 +4,15 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import useGlobalStore from '../store/useGlobalStore'
 
+const selectClasses =
+  'w-full rounded-lg border-gray-300 text-sm text-gray-700 shadow-sm focus:border-primary focus:ring-primary md:w-40'
+
+const inputClasses =
+  'w-full flex-1 rounded-lg border-gray-300 text-sm text-gray-700 shadow-sm focus:border-primary focus:ring-primary'
+
+const buttonClasses =
+  'inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+
 const BasicSearchForm = () => {
   const navigate = useNavigate()
   const selectedDBs = useGlobalStore((state) => state.selectedDBs)
@@ -38,14 +47,12 @@ const BasicSearchForm = () => {
   }
 
   return (
-    <form className="mt-4" onSubmit={handleSubmit}>
-      <div className="mb-3 d-flex align-items-center">
-        <label htmlFor="basicSelectedField" className="form-label me-2"></label>
+    <form className="space-y-6" onSubmit={handleSubmit}>
+      <div className="flex flex-col gap-3 md:flex-row md:items-center">
         <select
           id="basicSelectedField"
           name="field"
-          className="form-select me-2"
-          style={{ width: 'auto' }}
+          className={selectClasses}
           value={field}
           onChange={(event) => setField(event.target.value)}
         >
@@ -58,35 +65,31 @@ const BasicSearchForm = () => {
           <option value="sscode">SS码</option>
           <option value="dxid">DXID</option>
         </select>
-        <label htmlFor="basicQuery" className="form-label me-2"></label>
         <input
           type="text"
           id="basicQuery"
           name="query"
           placeholder="请输入关键词"
-          className="form-control"
-          style={{ flexGrow: 1 }}
+          className={inputClasses}
           required
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
+        <button type="submit" className={buttonClasses}>
+          搜索
+        </button>
       </div>
-      <div className="mb-3 form-check">
+      <label className="flex items-center gap-2 text-sm text-gray-600">
         <input
           type="checkbox"
           id="basicFuzzy"
           name="fuzzy"
-          className="form-check-input"
+          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
           checked={fuzzy}
           onChange={(event) => setFuzzy(event.target.checked)}
         />
-        <label htmlFor="basicFuzzy" className="form-check-label">
-          模糊搜索
-        </label>
-      </div>
-      <button type="submit" className="custom-button">
-        搜索
-      </button>
+        模糊搜索
+      </label>
     </form>
   )
 }

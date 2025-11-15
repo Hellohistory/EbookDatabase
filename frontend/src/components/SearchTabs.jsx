@@ -15,25 +15,29 @@ const SearchTabs = () => {
 
   return (
     <div>
-      <ul className="search-tab">
-        {tabs.map((tab) => (
-          <li
-            key={tab.id}
-            className={activeTab === tab.id ? 'on' : ''}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.label}
-          </li>
-        ))}
-      </ul>
-      <div style={{ display: activeTab === 'basic' ? 'block' : 'none' }}>
-        <BasicSearchForm />
+      <div className="flex border-b border-gray-200">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`-mb-px whitespace-nowrap border-b-2 px-4 pb-3 text-sm font-semibold transition sm:px-6 ${
+                isActive
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-500 hover:border-gray-200 hover:text-gray-700'
+              }`}
+            >
+              {tab.label}
+            </button>
+          )
+        })}
       </div>
-      <div style={{ display: activeTab === 'advanced' ? 'block' : 'none' }}>
-        <AdvancedSearchForm />
-      </div>
-      <div style={{ display: activeTab === 'remote' ? 'block' : 'none' }}>
-        <RemoteAccess />
+      <div className="pt-6">
+        {activeTab === 'basic' && <BasicSearchForm />}
+        {activeTab === 'advanced' && <AdvancedSearchForm />}
+        {activeTab === 'remote' && <RemoteAccess />}
       </div>
     </div>
   )

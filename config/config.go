@@ -28,6 +28,7 @@ type DatasourceConfig struct {
 type Config struct {
 	PageSize           int                `mapstructure:"pageSize"`
 	DefaultSearchField string             `mapstructure:"defaultSearchField"`
+	AdminPassword      string             `mapstructure:"adminPassword"`
 	Datasources        []DatasourceConfig `mapstructure:"datasources"`
 }
 
@@ -78,6 +79,8 @@ func LoadConfig(configPath string) (*Config, error) {
 	if cfg.DefaultSearchField == "" {
 		cfg.DefaultSearchField = "title"
 	}
+
+	cfg.AdminPassword = strings.TrimSpace(cfg.AdminPassword)
 
 	normalized, err := normalizeDatasources(cfg.Datasources)
 	if err != nil {

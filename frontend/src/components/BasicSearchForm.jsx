@@ -15,7 +15,6 @@ const buttonClasses =
 
 const BasicSearchForm = () => {
   const navigate = useNavigate()
-  const selectedDBs = useGlobalStore((state) => state.selectedDBs)
   const settings = useGlobalStore((state) => state.settings)
 
   const [field, setField] = useState('title')
@@ -35,7 +34,6 @@ const BasicSearchForm = () => {
       return
     }
     const params = new URLSearchParams()
-    selectedDBs.forEach((db) => params.append('db_names', db))
     params.append('query', query.trim())
     if (field) {
       params.append('field', field)
@@ -48,7 +46,7 @@ const BasicSearchForm = () => {
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
-      <div className="flex flex-col gap-3 md:flex-row md:items-center">
+      <div className="flex flex-col space-y-3 md:flex-row md:items-center md:space-y-0 md:space-x-3">
         <select
           id="basicSelectedField"
           name="field"
@@ -79,7 +77,7 @@ const BasicSearchForm = () => {
           搜索
         </button>
       </div>
-      <label className="flex items-center gap-2 text-sm text-gray-600">
+      <label className="flex items-center space-x-2 text-sm text-gray-600">
         <input
           type="checkbox"
           id="basicFuzzy"

@@ -4,25 +4,33 @@ import { Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import SearchPage from './pages/SearchPage'
 import ResultsPage from './pages/ResultsPage'
-import AboutPage from './pages/AboutPage'
+import LoginPage from './pages/LoginPage'
+import AdminPage from './pages/AdminPage'
+import ProtectedRoute from './ProtectedRoute'
 import useGlobalStore from './store/useGlobalStore'
 
 const App = () => {
-  const fetchAvailableDBs = useGlobalStore((state) => state.fetchAvailableDBs)
   const fetchSettings = useGlobalStore((state) => state.fetchSettings)
 
   useEffect(() => {
-    fetchAvailableDBs()
     fetchSettings()
-  }, [fetchAvailableDBs, fetchSettings])
+  }, [fetchSettings])
 
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<SearchPage />} />
         <Route path="search" element={<ResultsPage />} />
-        <Route path="about" element={<AboutPage />} />
       </Route>
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminPage />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   )
 }

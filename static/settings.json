@@ -1,6 +1,7 @@
 {
     "pageSize": "20",
     "defaultSearchField": "title",
+    "adminPassword": "your-secret-password",
     "datasources": [
         {
             "name": "我的 Calibre 书库",

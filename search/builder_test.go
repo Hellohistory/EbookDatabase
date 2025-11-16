@@ -16,8 +16,8 @@ func TestBuildSQLQuerySingleFuzzy(t *testing.T) {
 		PageSize: 20,
 	})
 
-	expectedQuery := "SELECT * FROM books WHERE (title LIKE ?) LIMIT ? OFFSET ?"
-	expectedCount := "SELECT COUNT(*) FROM books WHERE (title LIKE ?)"
+	expectedQuery := "SELECT b.* FROM books b WHERE (EXISTS (SELECT 1 FROM books_fts f WHERE f.rowid = b.id AND f.title MATCH ?)) LIMIT ? OFFSET ?"
+	expectedCount := "SELECT COUNT(*) FROM books b WHERE (EXISTS (SELECT 1 FROM books_fts f WHERE f.rowid = b.id AND f.title MATCH ?))"
 
 	if query != expectedQuery {
 		t.Fatalf("unexpected query: %s", query)
@@ -30,7 +30,7 @@ func TestBuildSQLQuerySingleFuzzy(t *testing.T) {
 		t.Fatalf("unexpected args length: %d", len(args))
 	}
 
-	if args[0] != "%Go%" || args[1] != 20 || args[2] != 0 {
+	if args[0] != "go*" || args[1] != 20 || args[2] != 0 {
 		t.Fatalf("unexpected args: %#v", args)
 	}
 }
@@ -45,8 +45,8 @@ func TestBuildSQLQueryMultiFieldAndOr(t *testing.T) {
 		PageSize: 10,
 	})
 
-	expectedQuery := "SELECT * FROM books WHERE (title LIKE ?) AND (author = ?) OR (publisher = ?) LIMIT ? OFFSET ?"
-	expectedCount := "SELECT COUNT(*) FROM books WHERE (title LIKE ?) AND (author = ?) OR (publisher = ?)"
+	expectedQuery := "SELECT b.* FROM books b WHERE (EXISTS (SELECT 1 FROM books_fts f WHERE f.rowid = b.id AND f.title MATCH ?)) AND (b.author = ?) OR (b.publisher = ?) LIMIT ? OFFSET ?"
+	expectedCount := "SELECT COUNT(*) FROM books b WHERE (EXISTS (SELECT 1 FROM books_fts f WHERE f.rowid = b.id AND f.title MATCH ?)) AND (b.author = ?) OR (b.publisher = ?)"
 
 	if query != expectedQuery {
 		t.Fatalf("unexpected query: %s", query)
@@ -60,7 +60,7 @@ func TestBuildSQLQueryMultiFieldAndOr(t *testing.T) {
 	}
 
 	offset := (2 - 1) * 10
-	if args[0] != "%Go%" || args[1] != "Alice" || args[2] != "Press" || args[3] != 10 || args[4] != offset {
+	if args[0] != "go*" || args[1] != "Alice" || args[2] != "Press" || args[3] != 10 || args[4] != offset {
 		t.Fatalf("unexpected args: %#v", args)
 	}
 }
@@ -71,10 +71,10 @@ func TestBuildSQLQueryNoFields(t *testing.T) {
 		PageSize: 15,
 	})
 
-	if query != "SELECT * FROM books LIMIT ? OFFSET ?" {
+	if query != "SELECT b.* FROM books b LIMIT ? OFFSET ?" {
 		t.Fatalf("unexpected query: %s", query)
 	}
-	if count != "SELECT COUNT(*) FROM books" {
+	if count != "SELECT COUNT(*) FROM books b" {
 		t.Fatalf("unexpected count query: %s", count)
 	}
 	if len(args) != 2 {

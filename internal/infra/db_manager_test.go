@@ -1,5 +1,5 @@
-// path: database/manager_test.go
-package database
+// path: internal/infra/db_manager_test.go
+package infra
 
 import (
 	"os"

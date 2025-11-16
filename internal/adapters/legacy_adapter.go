@@ -1,17 +1,21 @@
-// Path: database/legacy_adapter.go
-package database
+// path: internal/adapters/legacy_adapter.go
+package adapters
 
 import (
 	"context"
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
+	"time"
 
 	_ "modernc.org/sqlite"
 
 	"ebookdatabase/config"
+	"ebookdatabase/internal/core"
+	"ebookdatabase/internal/infra/sqlitecfg"
 	"ebookdatabase/models"
 	"ebookdatabase/search"
 )
@@ -23,7 +27,7 @@ type legacyAdapter struct {
 }
 
 // NewLegacyAdapter 根据配置创建旧版数据库适配器。
-func NewLegacyAdapter(cfg config.DatasourceConfig) Datasource {
+func NewLegacyAdapter(cfg config.DatasourceConfig) core.Datasource {
 	return &legacyAdapter{
 		name: cfg.Name,
 		path: strings.TrimSpace(cfg.Path),
@@ -51,6 +55,8 @@ func (a *legacyAdapter) Init() error {
 		return fmt.Errorf("Legacy 数据库连接测试失败: %w", err)
 	}
 
+	sqlitecfg.ConfigureSQLitePragmas(db)
+
 	if err := ensureLegacyFTS(db); err != nil {
 		db.Close()
 		return fmt.Errorf("Legacy FTS 初始化失败: %w", err)
@@ -60,7 +66,7 @@ func (a *legacyAdapter) Init() error {
 	return nil
 }
 
-func (a *legacyAdapter) Search(ctx context.Context, params *search.QueryParams) ([]CanonicalBook, int64, error) {
+func (a *legacyAdapter) Search(ctx context.Context, params *search.QueryParams) ([]core.CanonicalBook, int64, error) {
 	if a.db == nil {
 		return nil, 0, fmt.Errorf("Legacy 数据源 %s 尚未初始化", a.name)
 	}
@@ -82,21 +88,46 @@ func (a *legacyAdapter) Search(ctx context.Context, params *search.QueryParams) 
 		countArgs = countArgs[:len(countArgs)-2]
 	}
 
+	start := time.Now()
 	rows, err := a.db.QueryContext(ctx, querySQL, queryArgs...)
 	if err != nil {
+		slog.Error("Legacy 查询失败",
+			slog.String("datasource", a.name),
+			slog.String("sql", querySQL),
+			slog.Any("sql_args", queryArgs),
+			slog.Any("request", params),
+			slog.Duration("elapsed", time.Since(start)),
+			slog.String("error", err.Error()),
+		)
 		return nil, 0, fmt.Errorf("Legacy 查询失败: %w", err)
 	}
 	books, err := scanLegacyBooks(rows)
 	if err != nil {
-		return nil, 0, err
+		slog.Error("Legacy 结果解析失败",
+			slog.String("datasource", a.name),
+			slog.String("sql", querySQL),
+			slog.Any("sql_args", queryArgs),
+			slog.Any("request", params),
+			slog.Duration("elapsed", time.Since(start)),
+			slog.String("error", err.Error()),
+		)
+		return nil, 0, fmt.Errorf("Legacy 结果解析失败: %w", err)
 	}
 
 	var total int64
 	if err := a.db.QueryRowContext(ctx, countSQL, countArgs...).Scan(&total); err != nil {
+		slog.Error("Legacy 计数查询失败",
+			slog.String("datasource", a.name),
+			slog.String("sql", countSQL),
+			slog.Any("sql_args", countArgs),
+			slog.Any("request", params),
+			slog.Duration("elapsed", time.Since(start)),
+			slog.String("error", err.Error()),
+		)
 		return nil, 0, fmt.Errorf("Legacy 计数查询失败: %w", err)
 	}
 
-	canonical := make([]CanonicalBook, 0, len(books))
+	canonical := make([]core.CanonicalBook, 0, len(books))
 	for _, book := range books {
 		id := ""
 		if book.ID != nil {
@@ -107,7 +138,7 @@ func (a *legacyAdapter) Search(ctx context.Context, params *search.QueryParams) 
 			title = "未命名"
 		}
 
-		canonical = append(canonical, CanonicalBook{
+		canonical = append(canonical, core.CanonicalBook{
 			ID:          id,
 			Title:       title,
 			Authors:     splitLegacyAuthors(getString(book.Author)),
@@ -119,6 +150,17 @@ func (a *legacyAdapter) Search(ctx context.Context, params *search.QueryParams) 
 			CanDownload: false,
 		})
 	}
+
+	slog.Info("Legacy 查询完成",
+		slog.String("datasource", a.name),
+		slog.String("sql", querySQL),
+		slog.Any("sql_args", queryArgs),
+		slog.String("count_sql", countSQL),
+		slog.Any("count_args", countArgs),
+		slog.Any("request", params),
+		slog.Duration("elapsed", time.Since(start)),
+		slog.Int("records", len(canonical)),
+	)
 
 	return canonical, total, nil
 }
@@ -173,7 +215,7 @@ func scanLegacyBooks(rows *sql.Rows) ([]models.Book, error) {
 
 	columns, err := rows.Columns()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("读取 Legacy 列信息失败: %w", err)
 	}
 
 	books := make([]models.Book, 0)
@@ -184,7 +226,7 @@ func scanLegacyBooks(rows *sql.Rows) ([]models.Book, error) {
 			ptrs[i] = &values[i]
 		}
 		if err := rows.Scan(ptrs...); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("扫描 Legacy 行失败: %w", err)
 		}
 
 		var book models.Book
@@ -193,11 +235,11 @@ func scanLegacyBooks(rows *sql.Rows) ([]models.Book, error) {
 			if err := book.SetField(normalized, values[i]); err != nil {
 				if errors.Is(err, models.ErrUnknownColumn) {
 					if err := book.SetField(column, values[i]); err != nil && !errors.Is(err, models.ErrUnknownColumn) {
-						return nil, err
+						return nil, fmt.Errorf("填充 Legacy 列失败: %w", err)
 					}
 					continue
 				}
-				return nil, err
+				return nil, fmt.Errorf("写入 Legacy 字段失败: %w", err)
 			}
 		}
 
@@ -205,7 +247,7 @@ func scanLegacyBooks(rows *sql.Rows) ([]models.Book, error) {
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("遍历 Legacy 行失败: %w", err)
 	}
 
 	return books, nil
@@ -236,21 +278,29 @@ FROM books`
 )
 
 func ensureLegacyFTS(db *sql.DB) error {
-	exists, err := tableExists(db, "books")
+	exists, err := sqlitecfg.TableExists(db, "books")
 	if err != nil {
-		return err
+		return fmt.Errorf("检查 Legacy books 表失败: %w", err)
 	}
 	if !exists {
 		return nil
 	}
 	if _, err := db.Exec(legacyFTSCreateSQL); err != nil {
-		return err
+		return fmt.Errorf("创建 Legacy FTS 表失败: %w", err)
 	}
-	if _, err := db.Exec(legacyFTSClearSQL); err != nil {
-		return err
+	tx, err := db.Begin()
+	if err != nil {
+		return fmt.Errorf("开启 Legacy FTS 事务失败: %w", err)
 	}
-	if _, err := db.Exec(legacyFTSPopulateSQL); err != nil {
-		return err
+	defer tx.Rollback()
+	if _, err := tx.Exec(legacyFTSClearSQL); err != nil {
+		return fmt.Errorf("清理 Legacy FTS 数据失败: %w", err)
+	}
+	if _, err := tx.Exec(legacyFTSPopulateSQL); err != nil {
+		return fmt.Errorf("重建 Legacy FTS 索引失败: %w", err)
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("提交 Legacy FTS 事务失败: %w", err)
 	}
 	return nil
 }

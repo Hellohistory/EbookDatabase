@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 
 	"ebookdatabase/config"
 	"ebookdatabase/models"
@@ -39,7 +39,7 @@ func (a *legacyAdapter) Init() error {
 	}
 
 	dsn := fmt.Sprintf("file:%s?_busy_timeout=5000", a.path)
-	db, err := sql.Open("sqlite3", dsn)
+	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		return fmt.Errorf("打开 Legacy 数据库失败: %w", err)
 	}

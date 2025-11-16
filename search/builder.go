@@ -7,13 +7,13 @@ import (
 
 // QueryParams 定义构建查询所需的参数集合。
 type QueryParams struct {
-        Fields            []string
-        Queries           []string
-        Logics            []string
-        Fuzzies           []*bool
-        Page              int
-        PageSize          int
-        DisablePagination bool
+	Fields            []string
+	Queries           []string
+	Logics            []string
+	Fuzzies           []*bool
+	Page              int
+	PageSize          int
+	DisablePagination bool
 }
 
 var fieldColumnMap = map[string]string{
@@ -26,43 +26,58 @@ var fieldColumnMap = map[string]string{
 	"dxid":        "dxid",
 }
 
+var ftsColumns = map[string]string{
+	"title":       "title",
+	"author":      "author",
+	"publisher":   "publisher",
+	"publishdate": "publish_date",
+	"isbn":        "isbn",
+	"sscode":      "ss_code",
+	"dxid":        "dxid",
+}
+
+const (
+	legacyBooksAlias    = "b"
+	legacyBooksFTSTable = "books_fts"
+)
+
 // BuildSQLQuery 根据查询参数构建查询与统计 SQL 及其参数，复现 Python 版本的逻辑。
 func BuildSQLQuery(params QueryParams) (string, string, []any) {
-        usePagination := !params.DisablePagination
+	usePagination := !params.DisablePagination
 
-        pageSize := params.PageSize
-        if usePagination {
-                if pageSize <= 0 {
-                        panic("page size must be positive")
-                }
-        } else if pageSize <= 0 {
-                pageSize = 0
-        }
+	pageSize := params.PageSize
+	if usePagination {
+		if pageSize <= 0 {
+			panic("page size must be positive")
+		}
+	} else if pageSize <= 0 {
+		pageSize = 0
+	}
 
-        page := params.Page
-        if page <= 0 {
-                page = 1
-        }
+	page := params.Page
+	if page <= 0 {
+		page = 1
+	}
 
-        var limitArgs []any
-        if usePagination {
-                limitArgs = []any{pageSize, (page - 1) * pageSize}
-        }
+	var limitArgs []any
+	if usePagination {
+		limitArgs = []any{pageSize, (page - 1) * pageSize}
+	}
 
 	if len(params.Fields) == 0 {
-                queryBuilder := strings.Builder{}
-                queryBuilder.WriteString("SELECT * FROM books")
-                if usePagination {
-                        queryBuilder.WriteString(" LIMIT ? OFFSET ?")
-                }
+		queryBuilder := strings.Builder{}
+		queryBuilder.WriteString("SELECT b.* FROM books b")
+		if usePagination {
+			queryBuilder.WriteString(" LIMIT ? OFFSET ?")
+		}
 
-                countBuilder := strings.Builder{}
-                countBuilder.WriteString("SELECT COUNT(*) FROM books")
+		countBuilder := strings.Builder{}
+		countBuilder.WriteString("SELECT COUNT(*) FROM books b")
 
-                if usePagination {
-                        return queryBuilder.String(), countBuilder.String(), limitArgs
-                }
-                return queryBuilder.String(), countBuilder.String(), nil
+		if usePagination {
+			return queryBuilder.String(), countBuilder.String(), limitArgs
+		}
+		return queryBuilder.String(), countBuilder.String(), nil
 	}
 
 	if len(params.Queries) != len(params.Fields) {
@@ -79,11 +94,11 @@ func BuildSQLQuery(params QueryParams) (string, string, []any) {
 
 	queryBuilder := strings.Builder{}
 	queryBuilder.Grow(64)
-	queryBuilder.WriteString("SELECT * FROM books WHERE ")
+	queryBuilder.WriteString("SELECT b.* FROM books b WHERE ")
 
 	countBuilder := strings.Builder{}
 	countBuilder.Grow(64)
-	countBuilder.WriteString("SELECT COUNT(*) FROM books WHERE ")
+	countBuilder.WriteString("SELECT COUNT(*) FROM books b WHERE ")
 
 	args := make([]any, 0, len(params.Fields)+2)
 
@@ -112,25 +127,41 @@ func BuildSQLQuery(params QueryParams) (string, string, []any) {
 		}
 
 		queryBuilder.WriteString("(")
-		queryBuilder.WriteString(column)
 		countBuilder.WriteString("(")
-		countBuilder.WriteString(column)
 
+		columnExpr := legacyBooksAlias + "." + column
 		if fuzzy {
-			queryBuilder.WriteString(" LIKE ?)")
-			countBuilder.WriteString(" LIKE ?)")
-			args = append(args, "%"+params.Queries[i]+"%")
+			ftsColumn, ok := ftsColumns[strings.ToLower(field)]
+			if !ok {
+				panic("no FTS column defined for field: " + field)
+			}
+
+			matchQuery := BuildFTSQuery(params.Queries[i], true)
+			if matchQuery == "" {
+				queryBuilder.WriteString("1 = 1")
+				countBuilder.WriteString("1 = 1")
+			} else {
+				condition := "EXISTS (SELECT 1 FROM " + legacyBooksFTSTable + " f WHERE f.rowid = " + legacyBooksAlias + ".id AND f." + ftsColumn + " MATCH ?)"
+				queryBuilder.WriteString(condition)
+				countBuilder.WriteString(condition)
+				args = append(args, matchQuery)
+			}
 		} else {
-			queryBuilder.WriteString(" = ?)")
-			countBuilder.WriteString(" = ?)")
+			queryBuilder.WriteString(columnExpr)
+			queryBuilder.WriteString(" = ?")
+			countBuilder.WriteString(columnExpr)
+			countBuilder.WriteString(" = ?")
 			args = append(args, params.Queries[i])
 		}
+
+		queryBuilder.WriteString(")")
+		countBuilder.WriteString(")")
 	}
 
-        if usePagination {
-                queryBuilder.WriteString(" LIMIT ? OFFSET ?")
-                args = append(args, limitArgs...)
-        }
+	if usePagination {
+		queryBuilder.WriteString(" LIMIT ? OFFSET ?")
+		args = append(args, limitArgs...)
+	}
 
-        return queryBuilder.String(), countBuilder.String(), args
+	return queryBuilder.String(), countBuilder.String(), args
 }

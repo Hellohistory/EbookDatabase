@@ -51,6 +51,11 @@ func (a *legacyAdapter) Init() error {
 		return fmt.Errorf("Legacy 数据库连接测试失败: %w", err)
 	}
 
+	if err := ensureLegacyFTS(db); err != nil {
+		db.Close()
+		return fmt.Errorf("Legacy FTS 初始化失败: %w", err)
+	}
+
 	a.db = db
 	return nil
 }
@@ -204,6 +209,50 @@ func scanLegacyBooks(rows *sql.Rows) ([]models.Book, error) {
 	}
 
 	return books, nil
+}
+
+const (
+	legacyFTSCreateSQL = `CREATE VIRTUAL TABLE IF NOT EXISTS books_fts USING fts5(
+title,
+author,
+publisher,
+publish_date,
+isbn,
+ss_code,
+dxid,
+tokenize='unicode61'
+)`
+	legacyFTSClearSQL    = `DELETE FROM books_fts`
+	legacyFTSPopulateSQL = `INSERT INTO books_fts(rowid, title, author, publisher, publish_date, isbn, ss_code, dxid)
+SELECT id,
+   lower(COALESCE(title, '')),
+   lower(COALESCE(author, '')),
+   lower(COALESCE(publisher, '')),
+   lower(COALESCE(publish_date, '')),
+   lower(COALESCE(ISBN, '')),
+   lower(COALESCE(SS_code, '')),
+   lower(COALESCE(dxid, ''))
+FROM books`
+)
+
+func ensureLegacyFTS(db *sql.DB) error {
+	exists, err := tableExists(db, "books")
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return nil
+	}
+	if _, err := db.Exec(legacyFTSCreateSQL); err != nil {
+		return err
+	}
+	if _, err := db.Exec(legacyFTSClearSQL); err != nil {
+		return err
+	}
+	if _, err := db.Exec(legacyFTSPopulateSQL); err != nil {
+		return err
+	}
+	return nil
 }
 
 func splitLegacyAuthors(raw string) []string {

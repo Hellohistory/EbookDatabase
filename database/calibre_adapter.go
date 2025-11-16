@@ -67,6 +67,11 @@ func (a *calibreAdapter) Init() error {
 		return fmt.Errorf("Calibre 数据库连接测试失败: %w", err)
 	}
 
+	if err := ensureCalibreFTS(db); err != nil {
+		db.Close()
+		return fmt.Errorf("Calibre FTS 初始化失败: %w", err)
+	}
+
 	a.db = db
 	return nil
 }
@@ -163,7 +168,7 @@ func (a *calibreAdapter) buildStatements(params *search.QueryParams) (string, []
 			continue
 		}
 
-		if i > 0 {
+		if len(conditions) > 0 {
 			logic := "AND"
 			if i-1 < len(params.Logics) {
 				candidate := strings.ToUpper(strings.TrimSpace(params.Logics[i-1]))
@@ -223,31 +228,26 @@ LEFT JOIN publishers p ON p.id = b.publisher`)
 	return selectSQL.String(), queryArgs, countSQL.String(), countArgs, nil
 }
 
-func calibreCondition(field, value string, fuzzy bool) (string, any) {
-	likeValue := prepareLikeValue(value, fuzzy)
-	switch field {
-	case "title":
-		return "LOWER(b.title) LIKE ?", likeValue
-	case "author", "authors":
-		return "EXISTS (SELECT 1 FROM books_authors_link bal JOIN authors a ON a.id = bal.author WHERE bal.book = b.id AND LOWER(a.name) LIKE ?)", likeValue
-	case "tag", "tags":
-		return "EXISTS (SELECT 1 FROM books_tags_link btl JOIN tags t ON t.id = btl.tag WHERE btl.book = b.id AND LOWER(t.name) LIKE ?)", likeValue
-	case "publisher":
-		return "EXISTS (SELECT 1 FROM publishers p WHERE p.id = b.publisher AND LOWER(p.name) LIKE ?)", likeValue
-	default:
-		return "LOWER(b.title) LIKE ?", likeValue
-	}
+var calibreFTSColumnMap = map[string]string{
+	"title":     "title",
+	"author":    "authors",
+	"authors":   "authors",
+	"tag":       "tags",
+	"tags":      "tags",
+	"publisher": "publisher",
 }
 
-func prepareLikeValue(value string, fuzzy bool) string {
-	normalized := strings.ToLower(strings.TrimSpace(value))
-	if normalized == "" {
-		return normalized
+func calibreCondition(field, value string, fuzzy bool) (string, any) {
+	column, ok := calibreFTSColumnMap[field]
+	if !ok {
+		column = "title"
 	}
-	if fuzzy {
-		return "%" + normalized + "%"
+	match := search.BuildFTSQuery(value, fuzzy)
+	if match == "" {
+		return "", nil
 	}
-	return normalized
+	clause := "EXISTS (SELECT 1 FROM " + calibreFTSTable + " f WHERE f.rowid = b.id AND f." + column + " MATCH ?)"
+	return clause, match
 }
 
 func buildWhereClause(conditions []string) string {
@@ -277,6 +277,49 @@ func splitList(raw string) []string {
 		}
 	}
 	return result
+}
+
+const (
+	calibreFTSTable     = "calibre_books_fts"
+	calibreFTSCreateSQL = `CREATE VIRTUAL TABLE IF NOT EXISTS calibre_books_fts USING fts5(
+title,
+authors,
+tags,
+publisher,
+description,
+tokenize='unicode61'
+)`
+	calibreFTSClearSQL    = `DELETE FROM calibre_books_fts`
+	calibreFTSPopulateSQL = `INSERT INTO calibre_books_fts(rowid, title, authors, tags, publisher, description)
+SELECT b.id,
+   lower(COALESCE(b.title, '')),
+   lower(COALESCE((SELECT GROUP_CONCAT(a.name, ' ') FROM authors a JOIN books_authors_link bal ON bal.author = a.id WHERE bal.book = b.id), '')),
+   lower(COALESCE((SELECT GROUP_CONCAT(t.name, ' ') FROM tags t JOIN books_tags_link btl ON btl.tag = t.id WHERE btl.book = b.id), '')),
+   lower(COALESCE(p.name, '')),
+   lower(COALESCE(cm.text, ''))
+FROM books b
+LEFT JOIN comments cm ON cm.book = b.id
+LEFT JOIN publishers p ON p.id = b.publisher`
+)
+
+func ensureCalibreFTS(db *sql.DB) error {
+	exists, err := tableExists(db, "books")
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return nil
+	}
+	if _, err := db.Exec(calibreFTSCreateSQL); err != nil {
+		return err
+	}
+	if _, err := db.Exec(calibreFTSClearSQL); err != nil {
+		return err
+	}
+	if _, err := db.Exec(calibreFTSPopulateSQL); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *calibreAdapter) GetBookFile(bookID string) (string, error) {

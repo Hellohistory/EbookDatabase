@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 
 	"ebookdatabase/config"
 	"ebookdatabase/search"
@@ -54,7 +54,7 @@ func (a *calibreAdapter) Init() error {
 	}
 
 	dsn := fmt.Sprintf("file:%s?_busy_timeout=5000&cache=shared", filepath.ToSlash(a.dbPath))
-	db, err := sql.Open("sqlite3", dsn)
+	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		return fmt.Errorf("打开 Calibre 数据库失败: %w", err)
 	}

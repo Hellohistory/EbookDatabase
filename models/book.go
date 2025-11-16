@@ -4,6 +4,7 @@ package models
 import (
 	"errors"
 	"fmt"
+	"strconv" // 导入 strconv 包
 )
 
 // ErrUnknownColumn 表示扫描结果中包含了 Book 结构未声明的列。
@@ -120,6 +121,7 @@ func asString(value any) (string, bool) {
 	}
 }
 
+// ===== 修改后的函数 =====
 func asInt64(value any) (int64, bool) {
 	switch v := value.(type) {
 	case nil:
@@ -130,10 +132,29 @@ func asInt64(value any) (int64, bool) {
 		return int64(v), true
 	case int:
 		return int64(v), true
+	// 新增：处理浮点数类型
+	case float64:
+		return int64(v), true
+	// 新增：处理字符串类型
+	case string:
+		// 尝试直接解析为整数
+		if i, err := strconv.ParseInt(v, 10, 64); err == nil {
+			return i, true
+		}
+		// 尝试解析为浮点数（兼容 "123.0" 这样的情况）
+		if f, err := strconv.ParseFloat(v, 64); err == nil {
+			return int64(f), true
+		}
+		return 0, false
 	case []byte:
 		var i int64
+		// 尝试直接扫描字节
 		if _, err := fmt.Sscan(string(v), &i); err == nil {
 			return i, true
+		}
+		// 新增：尝试将字节数组作为浮点数字符串解析
+		if f, err := strconv.ParseFloat(string(v), 64); err == nil {
+			return int64(f), true
 		}
 		return 0, false
 	default:

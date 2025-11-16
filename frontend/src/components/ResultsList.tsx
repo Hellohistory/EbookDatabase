@@ -1,13 +1,18 @@
 // path: frontend/src/components/ResultsList.tsx
 import { Link, useNavigate } from 'react-router-dom'
 import BookItem from './BookItem'
+import BookListItem from './BookListItem'
 import type { Book } from '../types/Book'
+
+type DisplayMode = 'grid' | 'list'
 
 type Props = {
   books: Book[]
+  displayMode?: DisplayMode
+  showCovers?: boolean
 }
 
-const ResultsList = ({ books }: Props) => {
+const ResultsList = ({ books, displayMode = 'grid', showCovers = true }: Props) => {
   const navigate = useNavigate()
 
   if (!books.length) {
@@ -81,12 +86,20 @@ const ResultsList = ({ books }: Props) => {
       </div>
     )
   }
+  const listClassName =
+    displayMode === 'grid'
+      ? 'grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+      : 'flex flex-col gap-4'
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {books.map((book) => (
-        <BookItem key={`${book.source}-${book.id}`} book={book} />
-      ))}
+    <div className={listClassName}>
+      {books.map((book) =>
+        displayMode === 'grid' ? (
+          <BookItem key={`${book.source}-${book.id}`} book={book} showCovers={showCovers} />
+        ) : (
+          <BookListItem key={`${book.source}-${book.id}`} book={book} showCovers={showCovers} />
+        )
+      )}
     </div>
   )
 }

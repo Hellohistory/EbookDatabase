@@ -1,5 +1,5 @@
-// Path: database/datasource.go
-package database
+// path: internal/core/types.go
+package core
 
 import (
 	"context"

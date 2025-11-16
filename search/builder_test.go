@@ -16,8 +16,8 @@ func TestBuildSQLQuerySingleFuzzy(t *testing.T) {
 		PageSize: 20,
 	})
 
-	expectedQuery := "SELECT b.* FROM books b WHERE (EXISTS (SELECT 1 FROM books_fts f WHERE f.rowid = b.id AND f.title MATCH ?)) LIMIT ? OFFSET ?"
-	expectedCount := "SELECT COUNT(*) FROM books b WHERE (EXISTS (SELECT 1 FROM books_fts f WHERE f.rowid = b.id AND f.title MATCH ?))"
+	expectedQuery := "SELECT b.* FROM books b JOIN books_fts f ON f.rowid = b.id WHERE (f MATCH ?) ORDER BY b.id DESC LIMIT ? OFFSET ?"
+	expectedCount := "SELECT COUNT(*) FROM books b JOIN books_fts f ON f.rowid = b.id WHERE (f MATCH ?)"
 
 	if query != expectedQuery {
 		t.Fatalf("unexpected query: %s", query)
@@ -30,7 +30,7 @@ func TestBuildSQLQuerySingleFuzzy(t *testing.T) {
 		t.Fatalf("unexpected args length: %d", len(args))
 	}
 
-	if args[0] != "go*" || args[1] != 20 || args[2] != 0 {
+	if args[0] != "title:(go*)" || args[1] != 20 || args[2] != 0 {
 		t.Fatalf("unexpected args: %#v", args)
 	}
 }
@@ -45,8 +45,8 @@ func TestBuildSQLQueryMultiFieldAndOr(t *testing.T) {
 		PageSize: 10,
 	})
 
-	expectedQuery := "SELECT b.* FROM books b WHERE (EXISTS (SELECT 1 FROM books_fts f WHERE f.rowid = b.id AND f.title MATCH ?)) AND (b.author = ?) OR (b.publisher = ?) LIMIT ? OFFSET ?"
-	expectedCount := "SELECT COUNT(*) FROM books b WHERE (EXISTS (SELECT 1 FROM books_fts f WHERE f.rowid = b.id AND f.title MATCH ?)) AND (b.author = ?) OR (b.publisher = ?)"
+	expectedQuery := "SELECT b.* FROM books b JOIN books_fts f ON f.rowid = b.id WHERE (f MATCH ?) AND (b.author = ?) OR (b.publisher = ?) ORDER BY b.id DESC LIMIT ? OFFSET ?"
+	expectedCount := "SELECT COUNT(*) FROM books b JOIN books_fts f ON f.rowid = b.id WHERE (f MATCH ?) AND (b.author = ?) OR (b.publisher = ?)"
 
 	if query != expectedQuery {
 		t.Fatalf("unexpected query: %s", query)
@@ -60,7 +60,7 @@ func TestBuildSQLQueryMultiFieldAndOr(t *testing.T) {
 	}
 
 	offset := (2 - 1) * 10
-	if args[0] != "go*" || args[1] != "Alice" || args[2] != "Press" || args[3] != 10 || args[4] != offset {
+	if args[0] != "title:(go*)" || args[1] != "Alice" || args[2] != "Press" || args[3] != 10 || args[4] != offset {
 		t.Fatalf("unexpected args: %#v", args)
 	}
 }
@@ -71,7 +71,7 @@ func TestBuildSQLQueryNoFields(t *testing.T) {
 		PageSize: 15,
 	})
 
-	if query != "SELECT b.* FROM books b LIMIT ? OFFSET ?" {
+	if query != "SELECT b.* FROM books b ORDER BY b.id DESC LIMIT ? OFFSET ?" {
 		t.Fatalf("unexpected query: %s", query)
 	}
 	if count != "SELECT COUNT(*) FROM books b" {

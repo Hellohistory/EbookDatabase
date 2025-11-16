@@ -42,3 +42,19 @@ func BuildFTSQuery(value string, fuzzy bool) string {
 	}
 	return "\"" + strings.Join(cleaned, " ") + "\""
 }
+
+// BuildColumnScopedFTSQuery 将 MATCH 查询字符串限定到指定列，避免跨列噪声。
+// 传入的列名与查询会被自动裁剪空白，列名为空时直接返回原查询字符串。
+func BuildColumnScopedFTSQuery(column, query string) string {
+	trimmedQuery := strings.TrimSpace(query)
+	if trimmedQuery == "" {
+		return ""
+	}
+
+	trimmedColumn := strings.TrimSpace(column)
+	if trimmedColumn == "" {
+		return trimmedQuery
+	}
+
+	return trimmedColumn + ":(" + trimmedQuery + ")"
+}

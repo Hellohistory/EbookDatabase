@@ -1,5 +1,5 @@
-// path: database/manager.go
-package database
+// path: internal/infra/db_manager.go
+package infra
 
 import (
 	"errors"
@@ -9,18 +9,20 @@ import (
 	"sync"
 
 	"ebookdatabase/config"
+	"ebookdatabase/internal/adapters"
+	"ebookdatabase/internal/core"
 )
 
 // DBManager 负责管理系统中注册的数据源实例。
 type DBManager struct {
 	mu      sync.RWMutex
-	sources map[string]Datasource
+	sources map[string]core.Datasource
 }
 
 // NewDBManager 创建一个新的 DBManager 实例。
 func NewDBManager() *DBManager {
 	return &DBManager{
-		sources: make(map[string]Datasource),
+		sources: make(map[string]core.Datasource),
 	}
 }
 
@@ -30,7 +32,7 @@ func (m *DBManager) InitFromConfig(cfg *config.Config) error {
 		return fmt.Errorf("配置不能为空")
 	}
 
-	newSources := make(map[string]Datasource)
+	newSources := make(map[string]core.Datasource)
 	var errs []error
 
 	for _, item := range cfg.Datasources {
@@ -72,19 +74,19 @@ func (m *DBManager) InitFromConfig(cfg *config.Config) error {
 	return nil
 }
 
-func (m *DBManager) createAdapter(cfg config.DatasourceConfig) (Datasource, error) {
+func (m *DBManager) createAdapter(cfg config.DatasourceConfig) (core.Datasource, error) {
 	switch strings.ToLower(cfg.Type) {
 	case "calibre":
-		return NewCalibreAdapter(cfg), nil
+		return adapters.NewCalibreAdapter(cfg), nil
 	case "legacy_db":
-		return NewLegacyAdapter(cfg), nil
+		return adapters.NewLegacyAdapter(cfg), nil
 	default:
 		return nil, fmt.Errorf("不支持的数据源类型: %s", cfg.Type)
 	}
 }
 
 // GetDatasource 返回指定名称的数据源实例。
-func (m *DBManager) GetDatasource(name string) (Datasource, bool) {
+func (m *DBManager) GetDatasource(name string) (core.Datasource, bool) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 

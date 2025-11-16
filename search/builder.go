@@ -66,7 +66,7 @@ func BuildSQLQuery(params QueryParams) (string, string, []any) {
 
 	if len(params.Fields) == 0 {
 		queryBuilder := strings.Builder{}
-		queryBuilder.WriteString("SELECT b.* FROM books b")
+		queryBuilder.WriteString("SELECT b.* FROM books b ORDER BY b.id DESC")
 		if usePagination {
 			queryBuilder.WriteString(" LIMIT ? OFFSET ?")
 		}
@@ -92,15 +92,10 @@ func BuildSQLQuery(params QueryParams) (string, string, []any) {
 		panic("number of fuzzies must be zero or equal to fields count")
 	}
 
-	queryBuilder := strings.Builder{}
-	queryBuilder.Grow(64)
-	queryBuilder.WriteString("SELECT b.* FROM books b WHERE ")
-
-	countBuilder := strings.Builder{}
-	countBuilder.Grow(64)
-	countBuilder.WriteString("SELECT COUNT(*) FROM books b WHERE ")
-
 	args := make([]any, 0, len(params.Fields)+2)
+	whereBuilder := strings.Builder{}
+	whereBuilder.Grow(64)
+	needsFTSJoin := false
 
 	for i, field := range params.Fields {
 		column, ok := fieldColumnMap[field]
@@ -118,16 +113,12 @@ func BuildSQLQuery(params QueryParams) (string, string, []any) {
 			if logic != "AND" && logic != "OR" {
 				panic("invalid logic operator: " + params.Logics[i-1])
 			}
-			queryBuilder.WriteString(" ")
-			queryBuilder.WriteString(logic)
-			queryBuilder.WriteString(" ")
-			countBuilder.WriteString(" ")
-			countBuilder.WriteString(logic)
-			countBuilder.WriteString(" ")
+			whereBuilder.WriteString(" ")
+			whereBuilder.WriteString(logic)
+			whereBuilder.WriteString(" ")
 		}
 
-		queryBuilder.WriteString("(")
-		countBuilder.WriteString("(")
+		whereBuilder.WriteString("(")
 
 		columnExpr := legacyBooksAlias + "." + column
 		if fuzzy {
@@ -138,29 +129,48 @@ func BuildSQLQuery(params QueryParams) (string, string, []any) {
 
 			matchQuery := BuildFTSQuery(params.Queries[i], true)
 			if matchQuery == "" {
-				queryBuilder.WriteString("1 = 1")
-				countBuilder.WriteString("1 = 1")
+				whereBuilder.WriteString("1 = 1")
 			} else {
-				condition := "EXISTS (SELECT 1 FROM " + legacyBooksFTSTable + " f WHERE f.rowid = " + legacyBooksAlias + ".id AND f." + ftsColumn + " MATCH ?)"
-				queryBuilder.WriteString(condition)
-				countBuilder.WriteString(condition)
-				args = append(args, matchQuery)
+				needsFTSJoin = true
+				scoped := BuildColumnScopedFTSQuery(ftsColumn, matchQuery)
+				whereBuilder.WriteString("f MATCH ?")
+				args = append(args, scoped)
 			}
 		} else {
-			queryBuilder.WriteString(columnExpr)
-			queryBuilder.WriteString(" = ?")
-			countBuilder.WriteString(columnExpr)
-			countBuilder.WriteString(" = ?")
+			whereBuilder.WriteString(columnExpr)
+			whereBuilder.WriteString(" = ?")
 			args = append(args, params.Queries[i])
 		}
 
-		queryBuilder.WriteString(")")
-		countBuilder.WriteString(")")
+		whereBuilder.WriteString(")")
 	}
 
+	fromClause := " FROM books b"
+	if needsFTSJoin {
+		fromClause += " JOIN " + legacyBooksFTSTable + " f ON f.rowid = b.id"
+	}
+
+	queryBuilder := strings.Builder{}
+	queryBuilder.Grow(64)
+	queryBuilder.WriteString("SELECT b.*")
+	queryBuilder.WriteString(fromClause)
+	if whereBuilder.Len() > 0 {
+		queryBuilder.WriteString(" WHERE ")
+		queryBuilder.WriteString(whereBuilder.String())
+	}
+	queryBuilder.WriteString(" ORDER BY b.id DESC")
 	if usePagination {
 		queryBuilder.WriteString(" LIMIT ? OFFSET ?")
 		args = append(args, limitArgs...)
+	}
+
+	countBuilder := strings.Builder{}
+	countBuilder.Grow(64)
+	countBuilder.WriteString("SELECT COUNT(*)")
+	countBuilder.WriteString(fromClause)
+	if whereBuilder.Len() > 0 {
+		countBuilder.WriteString(" WHERE ")
+		countBuilder.WriteString(whereBuilder.String())
 	}
 
 	return queryBuilder.String(), countBuilder.String(), args

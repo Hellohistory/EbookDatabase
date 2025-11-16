@@ -1,19 +1,23 @@
-// Path: database/calibre_adapter.go
-package database
+// path: internal/adapters/calibre_adapter.go
+package adapters
 
 import (
 	"context"
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	_ "modernc.org/sqlite"
 
 	"ebookdatabase/config"
+	"ebookdatabase/internal/core"
+	"ebookdatabase/internal/infra/sqlitecfg"
 	"ebookdatabase/search"
 )
 
@@ -25,7 +29,7 @@ type calibreAdapter struct {
 }
 
 // NewCalibreAdapter 根据配置创建 Calibre 数据源适配器。
-func NewCalibreAdapter(cfg config.DatasourceConfig) Datasource {
+func NewCalibreAdapter(cfg config.DatasourceConfig) core.Datasource {
 	root := strings.TrimSpace(cfg.Path)
 	dbPath := root
 	if strings.EqualFold(filepath.Ext(root), ".db") {
@@ -67,6 +71,8 @@ func (a *calibreAdapter) Init() error {
 		return fmt.Errorf("Calibre 数据库连接测试失败: %w", err)
 	}
 
+	sqlitecfg.ConfigureSQLitePragmas(db)
+
 	if err := ensureCalibreFTS(db); err != nil {
 		db.Close()
 		return fmt.Errorf("Calibre FTS 初始化失败: %w", err)
@@ -76,7 +82,7 @@ func (a *calibreAdapter) Init() error {
 	return nil
 }
 
-func (a *calibreAdapter) Search(ctx context.Context, params *search.QueryParams) ([]CanonicalBook, int64, error) {
+func (a *calibreAdapter) Search(ctx context.Context, params *search.QueryParams) ([]core.CanonicalBook, int64, error) {
 	if a.db == nil {
 		return nil, 0, fmt.Errorf("Calibre 数据源 %s 尚未初始化", a.name)
 	}
@@ -92,13 +98,22 @@ func (a *calibreAdapter) Search(ctx context.Context, params *search.QueryParams)
 		return nil, 0, err
 	}
 
+	start := time.Now()
 	rows, err := a.db.QueryContext(ctx, querySQL, queryArgs...)
 	if err != nil {
+		slog.Error("Calibre 查询失败",
+			slog.String("datasource", a.name),
+			slog.String("sql", querySQL),
+			slog.Any("sql_args", queryArgs),
+			slog.Any("request", params),
+			slog.Duration("elapsed", time.Since(start)),
+			slog.String("error", err.Error()),
+		)
 		return nil, 0, fmt.Errorf("Calibre 查询失败: %w", err)
 	}
 	defer rows.Close()
 
-	books := make([]CanonicalBook, 0)
+	books := make([]core.CanonicalBook, 0)
 	for rows.Next() {
 		var (
 			id          int64
@@ -111,10 +126,18 @@ func (a *calibreAdapter) Search(ctx context.Context, params *search.QueryParams)
 		)
 
 		if err := rows.Scan(&id, &title, &authorsRaw, &description, &tagsRaw, &publisher, &hasCover); err != nil {
+			slog.Error("Calibre 结果解析失败",
+				slog.String("datasource", a.name),
+				slog.String("sql", querySQL),
+				slog.Any("sql_args", queryArgs),
+				slog.String("error", err.Error()),
+				slog.Any("request", params),
+				slog.Duration("elapsed", time.Since(start)),
+			)
 			return nil, 0, fmt.Errorf("Calibre 结果解析失败: %w", err)
 		}
 
-		book := CanonicalBook{
+		book := core.CanonicalBook{
 			ID:          strconv.FormatInt(id, 10),
 			Title:       strings.TrimSpace(title.String),
 			Authors:     splitList(authorsRaw.String),
@@ -134,13 +157,40 @@ func (a *calibreAdapter) Search(ctx context.Context, params *search.QueryParams)
 	}
 
 	if err := rows.Err(); err != nil {
+		slog.Error("Calibre 查询遍历失败",
+			slog.String("datasource", a.name),
+			slog.String("sql", querySQL),
+			slog.Any("sql_args", queryArgs),
+			slog.Any("request", params),
+			slog.Duration("elapsed", time.Since(start)),
+			slog.String("error", err.Error()),
+		)
 		return nil, 0, fmt.Errorf("Calibre 查询遍历失败: %w", err)
 	}
 
 	var total int64
 	if err := a.db.QueryRowContext(ctx, countSQL, countArgs...).Scan(&total); err != nil {
+		slog.Error("Calibre 计数查询失败",
+			slog.String("datasource", a.name),
+			slog.String("sql", countSQL),
+			slog.Any("sql_args", countArgs),
+			slog.Any("request", params),
+			slog.Duration("elapsed", time.Since(start)),
+			slog.String("error", err.Error()),
+		)
 		return nil, 0, fmt.Errorf("Calibre 计数查询失败: %w", err)
 	}
+
+	slog.Info("Calibre 查询完成",
+		slog.String("datasource", a.name),
+		slog.String("sql", querySQL),
+		slog.Any("sql_args", queryArgs),
+		slog.String("count_sql", countSQL),
+		slog.Any("count_args", countArgs),
+		slog.Any("request", params),
+		slog.Duration("elapsed", time.Since(start)),
+		slog.Int("records", len(books)),
+	)
 
 	return books, total, nil
 }
@@ -148,6 +198,7 @@ func (a *calibreAdapter) Search(ctx context.Context, params *search.QueryParams)
 func (a *calibreAdapter) buildStatements(params *search.QueryParams) (string, []any, string, []any, error) {
 	conditions := make([]string, 0, len(params.Fields))
 	args := make([]any, 0, len(params.Fields))
+	needFTSJoin := false
 
 	for i, field := range params.Fields {
 		queryValue := ""
@@ -163,9 +214,12 @@ func (a *calibreAdapter) buildStatements(params *search.QueryParams) (string, []
 			fuzzy = *params.Fuzzies[i]
 		}
 
-		condition, value := calibreCondition(strings.ToLower(field), queryValue, fuzzy)
+		condition, value, usesFTS := calibreCondition(strings.ToLower(field), queryValue, fuzzy)
 		if condition == "" {
 			continue
+		}
+		if usesFTS {
+			needFTSJoin = true
 		}
 
 		if len(conditions) > 0 {
@@ -196,14 +250,20 @@ func (a *calibreAdapter) buildStatements(params *search.QueryParams) (string, []
 FROM books b
 LEFT JOIN comments cm ON cm.book = b.id
 LEFT JOIN publishers p ON p.id = b.publisher`)
+	if needFTSJoin {
+		selectSQL.WriteString(" JOIN " + calibreFTSTable + " f ON f.rowid = b.id")
+	}
 	if whereClause != "" {
 		selectSQL.WriteString(" WHERE ")
 		selectSQL.WriteString(whereClause)
 	}
-	selectSQL.WriteString(" ORDER BY LOWER(b.title)")
+	selectSQL.WriteString(" ORDER BY b.id DESC")
 
 	countSQL := strings.Builder{}
 	countSQL.WriteString("SELECT COUNT(*) FROM books b")
+	if needFTSJoin {
+		countSQL.WriteString(" JOIN " + calibreFTSTable + " f ON f.rowid = b.id")
+	}
 	if whereClause != "" {
 		countSQL.WriteString(" WHERE ")
 		countSQL.WriteString(whereClause)
@@ -237,17 +297,17 @@ var calibreFTSColumnMap = map[string]string{
 	"publisher": "publisher",
 }
 
-func calibreCondition(field, value string, fuzzy bool) (string, any) {
+func calibreCondition(field, value string, fuzzy bool) (string, any, bool) {
 	column, ok := calibreFTSColumnMap[field]
 	if !ok {
 		column = "title"
 	}
 	match := search.BuildFTSQuery(value, fuzzy)
 	if match == "" {
-		return "", nil
+		return "", nil, false
 	}
-	clause := "EXISTS (SELECT 1 FROM " + calibreFTSTable + " f WHERE f.rowid = b.id AND f." + column + " MATCH ?)"
-	return clause, match
+	scoped := search.BuildColumnScopedFTSQuery(column, match)
+	return "f MATCH ?", scoped, true
 }
 
 func buildWhereClause(conditions []string) string {
@@ -303,21 +363,29 @@ LEFT JOIN publishers p ON p.id = b.publisher`
 )
 
 func ensureCalibreFTS(db *sql.DB) error {
-	exists, err := tableExists(db, "books")
+	exists, err := sqlitecfg.TableExists(db, "books")
 	if err != nil {
-		return err
+		return fmt.Errorf("检查 Calibre books 表失败: %w", err)
 	}
 	if !exists {
 		return nil
 	}
 	if _, err := db.Exec(calibreFTSCreateSQL); err != nil {
-		return err
+		return fmt.Errorf("创建 Calibre FTS 表失败: %w", err)
 	}
-	if _, err := db.Exec(calibreFTSClearSQL); err != nil {
-		return err
+	tx, err := db.Begin()
+	if err != nil {
+		return fmt.Errorf("开启 Calibre FTS 事务失败: %w", err)
 	}
-	if _, err := db.Exec(calibreFTSPopulateSQL); err != nil {
-		return err
+	defer tx.Rollback()
+	if _, err := tx.Exec(calibreFTSClearSQL); err != nil {
+		return fmt.Errorf("清理 Calibre FTS 数据失败: %w", err)
+	}
+	if _, err := tx.Exec(calibreFTSPopulateSQL); err != nil {
+		return fmt.Errorf("重建 Calibre FTS 索引失败: %w", err)
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("提交 Calibre FTS 事务失败: %w", err)
 	}
 	return nil
 }
@@ -328,7 +396,7 @@ func (a *calibreAdapter) GetBookFile(bookID string) (string, error) {
 	}
 	id, err := strconv.ParseInt(strings.TrimSpace(bookID), 10, 64)
 	if err != nil {
-		return "", fmt.Errorf("无效的图书 ID: %s", bookID)
+		return "", fmt.Errorf("无效的图书 ID: %w", err)
 	}
 
 	const query = `SELECT b.path, d.name, d.format
@@ -373,7 +441,7 @@ func (a *calibreAdapter) GetBookCover(bookID string) (string, error) {
 	}
 	id, err := strconv.ParseInt(strings.TrimSpace(bookID), 10, 64)
 	if err != nil {
-		return "", fmt.Errorf("无效的图书 ID: %s", bookID)
+		return "", fmt.Errorf("无效的图书 ID: %w", err)
 	}
 
 	const query = "SELECT path, has_cover FROM books WHERE id = ?"

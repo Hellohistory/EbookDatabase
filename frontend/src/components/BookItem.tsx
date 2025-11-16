@@ -3,6 +3,7 @@ import type { Book } from '../types/Book'
 
 type Props = {
   book: Book
+  showCovers?: boolean
 }
 
 const joinValues = (values?: string[]) => {
@@ -12,7 +13,7 @@ const joinValues = (values?: string[]) => {
   return values.filter((item) => item && item.trim().length > 0).join('，')
 }
 
-const BookItem = ({ book }: Props) => {
+const BookItem = ({ book, showCovers = true }: Props) => {
   const authorsText = joinValues(book.authors)
   const hasTags = Array.isArray(book.tags) && book.tags.length > 0
   const coverUrl = book.has_cover
@@ -25,22 +26,30 @@ const BookItem = ({ book }: Props) => {
   ]
     .filter(Boolean)
     .join(' ')
+  const contentWrapperClassName = [
+    'flex flex-1 flex-col justify-between p-6',
+    showCovers ? 'md:w-2/3' : 'w-full'
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-lg transition hover:-translate-y-1 hover:shadow-2xl md:flex-row">
-      <div className={coverWrapperClassName}>
-        {coverUrl ? (
-          <img
-            src={coverUrl}
-            alt={`${book.title || '未命名'} 封面`}
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <span>暂无封面</span>
-        )}
-      </div>
-      <div className="flex flex-1 flex-col justify-between p-6 md:w-2/3">
+      {showCovers && (
+        <div className={coverWrapperClassName}>
+          {coverUrl ? (
+            <img
+              src={coverUrl}
+              alt={`${book.title || '未命名'} 封面`}
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <span>暂无封面</span>
+          )}
+        </div>
+      )}
+      <div className={contentWrapperClassName}>
         <div className="space-y-4">
           <div className="space-y-2">
             <h2 className="text-xl font-semibold text-gray-900">{book.title || '未命名'}</h2>

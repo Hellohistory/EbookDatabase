@@ -11,13 +11,14 @@ Dockerfile
 
 # 依赖和构建产物
 node_modules
+frontend/node_modules
 frontend/dist
+frontend/.wrangler
 *.log
 
-# 静态资源和文档 (Go 构建器不需要它们)
-frontend/
-Markdown/
-static/
+# 运行时只需要默认配置文件，其他静态源文件由前端构建产物提供
+static/*
+!static/settings.json
 
 # 实例数据
 instance/

@@ -76,11 +76,11 @@ const ResultsPage = () => {
   const hasQuery = queryString.length > 0
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="meta-label">Results</p>
-          <h1 className="mt-1 text-3xl font-bold text-ink">检索结果</h1>
+          <h1 className="mt-1 text-2xl font-bold text-ink sm:text-3xl">检索结果</h1>
         </div>
         <Link
           to="/"
@@ -136,28 +136,28 @@ const ResultsPage = () => {
       )}
 
       {hasQuery && !loading && !error && (
-        <div className="space-y-6">
-          <div className="surface p-5">
-            <div className="grid gap-3 text-sm sm:grid-cols-3">
+        <div className="space-y-5">
+          <div className="surface p-4 sm:p-5">
+            <div className="grid gap-3 text-sm sm:grid-cols-[repeat(3,minmax(0,160px))_minmax(0,1fr)] sm:items-center">
               <div>
                 <p className="meta-label">Time</p>
-                <p className="mt-1 text-lg font-bold text-ink">{searchSeconds}s</p>
+                <p className="mt-1 text-base font-bold text-ink">{searchSeconds}s</p>
               </div>
               <div>
                 <p className="meta-label">Records</p>
-                <p className="mt-1 text-lg font-bold text-ink">{meta.totalRecords}</p>
+                <p className="mt-1 text-base font-bold text-ink">{meta.totalRecords}</p>
               </div>
               <div>
                 <p className="meta-label">Pages</p>
-                <p className="mt-1 text-lg font-bold text-ink">{meta.totalPages}</p>
+                <p className="mt-1 text-base font-bold text-ink">{meta.totalPages}</p>
+              </div>
+              <div className="border-t border-[var(--line)] pt-3 text-xs leading-relaxed text-[var(--muted)] sm:border-l sm:border-t-0 sm:py-1 sm:pl-4">
+                本项目不会用于任何商业场景；如遇倒卖，请直接举报。
               </div>
             </div>
-            <p className="mt-4 border-t border-[var(--line)] pt-4 text-xs leading-relaxed text-[var(--muted)]">
-              本项目绝不可能盈利，也不会用于任何商业场景(此场景包括论坛币等虚拟货币)，如果存在，请不要犹豫，直接举报商家或发帖人。
-            </p>
           </div>
 
-          <ResultsList books={books} />
+          <ResultsList books={books} displayMode="list" showCovers={false} />
           <Pagination totalPages={meta.totalPages} />
         </div>
       )}

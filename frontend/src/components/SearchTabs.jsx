@@ -23,7 +23,7 @@ const SearchTabs = () => {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`focus-ring -mb-px whitespace-nowrap border-b-2 px-3 pb-3 text-sm font-bold transition sm:px-5 ${
+              className={`focus-ring -mb-px whitespace-nowrap border-b-2 px-3 pb-3 text-sm font-bold transition sm:px-4 ${
                 isActive
                   ? 'border-primary text-primary'
                   : 'border-transparent text-[var(--muted)] hover:border-[var(--line)] hover:text-ink'

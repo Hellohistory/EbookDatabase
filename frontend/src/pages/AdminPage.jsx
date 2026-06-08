@@ -31,6 +31,8 @@ const buttonSecondaryClassName =
 
 const buttonDangerClassName = 'btn-danger'
 
+const labelClassName = 'block text-xs font-bold uppercase tracking-wide text-[var(--muted)]'
+
 const AdminPage = () => {
   const navigate = useNavigate()
   const token = useGlobalStore((state) => state.token)
@@ -164,98 +166,112 @@ const AdminPage = () => {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="meta-label">Admin Console</p>
-          <h1 className="mt-1 text-3xl font-bold text-ink">后台管理</h1>
+    <div className="app-shell min-h-screen px-4 py-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full max-w-7xl space-y-5">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="meta-label">Admin Console</p>
+            <h1 className="mt-1 text-2xl font-bold text-ink sm:text-3xl">后台管理</h1>
+          </div>
+          <button type="button" className={buttonSecondaryClassName} onClick={handleLogout}>
+            登出
+          </button>
         </div>
-        <button type="button" className={buttonSecondaryClassName} onClick={handleLogout}>
-          登出
-        </button>
-      </div>
 
-      <div className="surface p-5 sm:p-6">
-        {loadingConfig ? (
-          <div className="py-10 text-center text-sm font-semibold text-[var(--muted)]">正在读取配置，请稍候...</div>
-        ) : (
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label htmlFor="pageSize" className="block text-sm font-bold text-ink">
-                  每页数量
-                </label>
-                <input
-                  id="pageSize"
-                  name="pageSize"
-                  type="number"
-                  min="1"
-                  value={pageSize}
-                  onChange={(event) => setPageSize(event.target.value)}
-                  className={`${inputClassName} mt-2`}
-                />
-              </div>
-              <div>
-                <label htmlFor="defaultSearchField" className="block text-sm font-bold text-ink">
-                  默认搜索字段
-                </label>
-                <select
-                  id="defaultSearchField"
-                  name="defaultSearchField"
-                  value={defaultSearchField}
-                  onChange={(event) => setDefaultSearchField(event.target.value)}
-                  className={`${inputClassName} mt-2`}
-                >
-                  {fieldOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="md:col-span-2">
-                <label htmlFor="adminPassword" className="block text-sm font-bold text-ink">
-                  管理员密码
-                </label>
-                <input
-                  id="adminPassword"
-                  name="adminPassword"
-                  type="text"
-                  value={adminPassword}
-                  onChange={(event) => setAdminPassword(event.target.value)}
-                  className={`${inputClassName} mt-2`}
-                  placeholder="用于后台登录的密码或 bcrypt 哈希"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label htmlFor="corsAllowedOrigins" className="block text-sm font-bold text-ink">
-                  CORS 白名单
-                </label>
-                <textarea
-                  id="corsAllowedOrigins"
-                  name="corsAllowedOrigins"
-                  rows={3}
-                  value={corsAllowedOrigins}
-                  onChange={(event) => setCorsAllowedOrigins(event.target.value)}
-                  className={`${inputClassName} mt-2`}
-                  placeholder="每行一个 origin，例如 http://localhost:5173"
-                />
-              </div>
-            </div>
+        <div className="surface p-5 sm:p-6">
+          {loadingConfig ? (
+            <div className="py-10 text-center text-sm font-semibold text-[var(--muted)]">正在读取配置，请稍候...</div>
+          ) : (
+            <form className="space-y-5" onSubmit={handleSubmit}>
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.35fr)]">
+              <section className="space-y-4">
+                <div>
+                  <h2 className="text-base font-bold text-ink">系统参数</h2>
+                  <p className="mt-1 text-sm text-[var(--muted)]">控制默认检索行为和后台访问。</p>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="pageSize" className={labelClassName}>
+                      每页数量
+                    </label>
+                    <input
+                      id="pageSize"
+                      name="pageSize"
+                      type="number"
+                      min="1"
+                      value={pageSize}
+                      onChange={(event) => setPageSize(event.target.value)}
+                      className={`${inputClassName} mt-2`}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="defaultSearchField" className={labelClassName}>
+                      默认字段
+                    </label>
+                    <select
+                      id="defaultSearchField"
+                      name="defaultSearchField"
+                      value={defaultSearchField}
+                      onChange={(event) => setDefaultSearchField(event.target.value)}
+                      className={`${inputClassName} mt-2`}
+                    >
+                      {fieldOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label htmlFor="adminPassword" className={labelClassName}>
+                      管理员密码
+                    </label>
+                    <input
+                      id="adminPassword"
+                      name="adminPassword"
+                      type="text"
+                      value={adminPassword}
+                      onChange={(event) => setAdminPassword(event.target.value)}
+                      className={`${inputClassName} mt-2`}
+                      placeholder="明文密码或 bcrypt 哈希"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label htmlFor="corsAllowedOrigins" className={labelClassName}>
+                      CORS 白名单
+                    </label>
+                    <textarea
+                      id="corsAllowedOrigins"
+                      name="corsAllowedOrigins"
+                      rows={4}
+                      value={corsAllowedOrigins}
+                      onChange={(event) => setCorsAllowedOrigins(event.target.value)}
+                      className={`${inputClassName} mt-2`}
+                      placeholder="每行一个 origin，例如 http://localhost:5173"
+                    />
+                  </div>
+                </div>
+              </section>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-ink">数据源列表</h2>
-                <button type="button" className={buttonSecondaryClassName} onClick={handleAddDatasource}>
-                  新增数据源
-                </button>
-              </div>
-              <div className="space-y-4">
-                {datasources.map((item, index) => (
-                  <div key={index} className="surface-flat p-4">
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <section className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-base font-bold text-ink">数据源</h2>
+                    <p className="mt-1 text-sm text-[var(--muted)]">当前 {datasources.length} 个数据源。</p>
+                  </div>
+                  <button type="button" className={buttonSecondaryClassName} onClick={handleAddDatasource}>
+                    新增数据源
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {datasources.map((item, index) => (
+                    <div
+                      key={index}
+                      className="surface-flat grid gap-3 p-4 lg:grid-cols-[minmax(0,1fr)_150px_76px] lg:items-end"
+                    >
                       <div>
-                        <label className="block text-sm font-bold text-ink">名称</label>
+                        <label className={labelClassName}>名称</label>
                         <input
                           type="text"
                           value={item.name}
@@ -266,7 +282,7 @@ const AdminPage = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-ink">类型</label>
+                        <label className={labelClassName}>类型</label>
                         <select
                           value={item.type}
                           onChange={(event) => handleDatasourceChange(index, 'type', event.target.value)}
@@ -276,8 +292,11 @@ const AdminPage = () => {
                           <option value="legacy_db">Legacy DB</option>
                         </select>
                       </div>
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-bold text-ink">路径</label>
+                      <button type="button" className={buttonDangerClassName} onClick={() => handleRemoveDatasource(index)}>
+                        删除
+                      </button>
+                      <div className="lg:col-span-3">
+                        <label className={labelClassName}>路径</label>
                         <input
                           type="text"
                           value={item.path}
@@ -288,38 +307,34 @@ const AdminPage = () => {
                         />
                       </div>
                     </div>
-                    <div className="mt-4 flex justify-end">
-                      <button type="button" className={buttonDangerClassName} onClick={() => handleRemoveDatasource(index)}>
-                        删除
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </section>
             </div>
 
-            <div className="flex items-center justify-end gap-3">
-              <button type="button" className={buttonSecondaryClassName} onClick={loadConfig} disabled={saving}>
+            <div className="flex flex-col gap-3 border-t border-[var(--line)] pt-5 sm:flex-row sm:items-center sm:justify-end">
+              <button type="button" className={`${buttonSecondaryClassName} w-full sm:w-auto`} onClick={loadConfig} disabled={saving}>
                 重置
               </button>
-              <button type="submit" className={buttonPrimaryClassName} disabled={saving}>
+              <button type="submit" className={`${buttonPrimaryClassName} w-full sm:w-auto`} disabled={saving}>
                 {saving ? '保存中…' : '保存配置'}
               </button>
             </div>
-          </form>
-        )}
+            </form>
+          )}
 
-        {message && (
-          <div
-            className={`mt-6 rounded-md border px-4 py-3 text-sm ${
-              messageType === 'success'
-                ? 'border-green-200 bg-green-50 text-green-700'
-                : 'border-red-200 bg-red-50 text-red-600'
-            }`}
-          >
-            {message}
-          </div>
-        )}
+          {message && (
+            <div
+              className={`mt-6 rounded-md border px-4 py-3 text-sm ${
+                messageType === 'success'
+                  ? 'border-green-200 bg-green-50 text-green-700'
+                  : 'border-red-200 bg-red-50 text-red-600'
+              }`}
+            >
+              {message}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

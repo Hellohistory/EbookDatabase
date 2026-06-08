@@ -44,12 +44,12 @@ const LoginPage = () => {
   return (
     <div className="app-shell flex min-h-screen items-center justify-center px-4 py-16 max-[520px]:justify-start">
       <form
-        className="surface w-full max-w-xs p-7 sm:p-10"
+        className="surface w-full max-w-sm p-7 sm:p-8"
         onSubmit={handleSubmit}
       >
         <p className="meta-label">Admin</p>
-        <h1 className="mt-2 text-3xl font-bold text-ink">后台登录</h1>
-        <div className="mt-8 space-y-5">
+        <h1 className="mt-1 text-2xl font-bold text-ink">后台登录</h1>
+        <div className="mt-6 space-y-5">
           <div>
             <label htmlFor="adminPassword" className="block text-sm font-bold text-ink">
               管理员密码

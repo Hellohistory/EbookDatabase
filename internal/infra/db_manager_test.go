@@ -2,9 +2,12 @@
 package infra
 
 import (
+	"database/sql"
 	"os"
 	"path/filepath"
 	"testing"
+
+	_ "modernc.org/sqlite"
 
 	"ebookdatabase/config"
 )
@@ -12,13 +15,7 @@ import (
 func TestInitFromConfigRegistersSources(t *testing.T) {
 	dir := t.TempDir()
 	legacyPath := filepath.Join(dir, "legacy.db")
-	file, err := os.Create(legacyPath)
-	if err != nil {
-		t.Fatalf("failed to create legacy db file: %v", err)
-	}
-	if err := file.Close(); err != nil {
-		t.Fatalf("failed to close legacy db file: %v", err)
-	}
+	createMinimalLegacyDB(t, legacyPath)
 
 	cfg := &config.Config{
 		PageSize:           20,
@@ -73,13 +70,7 @@ func TestInitFromConfigUnsupportedType(t *testing.T) {
 func TestCloseReleasesDatasources(t *testing.T) {
 	dir := t.TempDir()
 	legacyPath := filepath.Join(dir, "legacy.db")
-	file, err := os.Create(legacyPath)
-	if err != nil {
-		t.Fatalf("failed to create legacy db file: %v", err)
-	}
-	if err := file.Close(); err != nil {
-		t.Fatalf("failed to close legacy db file: %v", err)
-	}
+	createMinimalLegacyDB(t, legacyPath)
 
 	cfg := &config.Config{
 		PageSize:           10,
@@ -104,5 +95,36 @@ func TestCloseReleasesDatasources(t *testing.T) {
 
 	if src, ok := manager.GetDatasource("legacy"); ok && src != nil {
 		t.Fatalf("expected datasource map to be cleared after Close")
+	}
+}
+
+func createMinimalLegacyDB(t *testing.T, path string) {
+	t.Helper()
+
+	file, err := os.Create(path)
+	if err != nil {
+		t.Fatalf("failed to create legacy db file: %v", err)
+	}
+	if err := file.Close(); err != nil {
+		t.Fatalf("failed to close legacy db file: %v", err)
+	}
+
+	db, err := sql.Open("sqlite", path)
+	if err != nil {
+		t.Fatalf("failed to open legacy db file: %v", err)
+	}
+	defer db.Close()
+
+	if _, err := db.Exec(`CREATE TABLE books (
+id INTEGER PRIMARY KEY,
+title TEXT,
+author TEXT,
+publisher TEXT,
+publish_date TEXT,
+ISBN TEXT,
+SS_code TEXT,
+dxid TEXT
+)`); err != nil {
+		t.Fatalf("failed to create legacy books table: %v", err)
 	}
 }

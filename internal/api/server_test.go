@@ -227,6 +227,60 @@ func TestCORSAllowsConfiguredOriginsOnly(t *testing.T) {
 	}
 }
 
+func TestSearchSupportsMergedLegacySchema(t *testing.T) {
+	dir := t.TempDir()
+	dbPath := filepath.Join(dir, "merged.db")
+	createMergedLegacyDB(t, dbPath)
+
+	configPath := filepath.Join(dir, "settings.json")
+	settings := `{
+  "pageSize": 5,
+  "defaultSearchField": "title",
+  "adminPassword": "secret",
+  "datasources": [
+    {"name": "merged", "type": "legacy_db", "path": "` + filepath.ToSlash(dbPath) + `"}
+  ]
+}`
+	if err := os.WriteFile(configPath, []byte(settings), 0o644); err != nil {
+		t.Fatalf("failed to write config: %v", err)
+	}
+
+	cfg, err := config.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig returned error: %v", err)
+	}
+
+	manager := infra.NewDBManager()
+	if err := manager.InitFromConfig(cfg); err != nil {
+		t.Fatalf("InitFromConfig returned error: %v", err)
+	}
+	defer manager.Close()
+
+	server, err := NewServer(cfg, manager, configPath, ":10223", time.Minute)
+	if err != nil {
+		t.Fatalf("NewServer returned error: %v", err)
+	}
+
+	search := performRequest(server, http.MethodGet, "/api/v1/search?field=title&query=%E5%8E%86%E5%8F%B2&fuzzy=true&page=1&pageSize=5", "", nil)
+	if search.Code != http.StatusOK {
+		t.Fatalf("GET merged search status = %d, body = %s", search.Code, search.Body.String())
+	}
+
+	var payload struct {
+		Books        []map[string]any `json:"books"`
+		TotalRecords int              `json:"totalRecords"`
+	}
+	if err := json.Unmarshal(search.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("failed to decode search response: %v", err)
+	}
+	if payload.TotalRecords != 1 || len(payload.Books) != 1 {
+		t.Fatalf("unexpected merged search response: %+v", payload)
+	}
+	if payload.Books[0]["id"] != "10" || payload.Books[0]["title"] != "历史入门" {
+		t.Fatalf("unexpected merged book: %+v", payload.Books[0])
+	}
+}
+
 func newTestServer(t *testing.T) (*Server, func()) {
 	t.Helper()
 
@@ -296,6 +350,62 @@ dxid TEXT
 VALUES (1, 'Go Systems', 'Alice', 'Tech Press', '2026', '9780000000001', 'SS1', 'DX1')`)
 	if err != nil {
 		t.Fatalf("failed to seed books table: %v", err)
+	}
+}
+
+func createMergedLegacyDB(t *testing.T, path string) {
+	t.Helper()
+
+	db, err := sql.Open("sqlite", path)
+	if err != nil {
+		t.Fatalf("failed to open sqlite database: %v", err)
+	}
+	defer db.Close()
+
+	_, err = db.Exec(`CREATE TABLE books (
+book_id INTEGER PRIMARY KEY,
+primary_key TEXT NOT NULL UNIQUE,
+ss_code TEXT,
+dxid TEXT,
+title TEXT,
+title_norm TEXT,
+author TEXT,
+publisher TEXT,
+publish_date TEXT,
+publish_year INTEGER,
+page_count INTEGER,
+isbn TEXT,
+description TEXT,
+removed_flag INTEGER NOT NULL DEFAULT 0
+)`)
+	if err != nil {
+		t.Fatalf("failed to create merged books table: %v", err)
+	}
+
+	_, err = db.Exec(`CREATE VIRTUAL TABLE book_search_fts USING fts5(
+title,
+author,
+publisher,
+content='books',
+content_rowid='book_id',
+tokenize='unicode61 remove_diacritics 2'
+)`)
+	if err != nil {
+		t.Fatalf("failed to create merged fts table: %v", err)
+	}
+
+	_, err = db.Exec(`INSERT INTO books (book_id, primary_key, ss_code, dxid, title, title_norm, author, publisher, publish_date, publish_year, page_count, isbn)
+VALUES
+(10, 'SS:10', 'SS10', 'DX10', '历史入门', '历史入门', 'Alice', 'History Press', '2026', 2026, 120, '9780000000010'),
+(11, 'SS:11', 'SS11', 'DX11', 'Go Systems', 'Go Systems', 'Bob', 'Tech Press', '2025', 2025, 220, '9780000000011')`)
+	if err != nil {
+		t.Fatalf("failed to seed merged books table: %v", err)
+	}
+
+	_, err = db.Exec(`INSERT INTO book_search_fts(rowid, title, author, publisher)
+SELECT book_id, title, author, publisher FROM books`)
+	if err != nil {
+		t.Fatalf("failed to seed merged fts table: %v", err)
 	}
 }
 

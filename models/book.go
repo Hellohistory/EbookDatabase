@@ -32,7 +32,7 @@ func (b *Book) SetField(column string, value any) error {
 		return nil
 	}
 	switch column {
-	case "id":
+	case "id", "book_id":
 		if v, ok := asInt64(value); ok {
 			b.ID = &v
 			return nil

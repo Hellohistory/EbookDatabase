@@ -12,6 +12,10 @@ interface LoadingState {
 interface SearchSettingsPayload {
   pageSize?: unknown
   defaultSearchField?: unknown
+  resultDisplayMode?: unknown
+  resultDensity?: unknown
+  showCovers?: unknown
+  showIdentifiers?: unknown
   [key: string]: unknown
 }
 
@@ -53,6 +57,28 @@ const normalizeSettings = (payload: SearchSettingsPayload): Partial<Settings> =>
 
   if (typeof payload.defaultSearchField === 'string' && payload.defaultSearchField.trim() !== '') {
     normalized.defaultSearchField = payload.defaultSearchField
+  }
+
+  if (
+    typeof payload.resultDisplayMode === 'string' &&
+    ['compact', 'detail', 'table', 'card'].includes(payload.resultDisplayMode)
+  ) {
+    normalized.resultDisplayMode = payload.resultDisplayMode as Settings['resultDisplayMode']
+  }
+
+  if (
+    typeof payload.resultDensity === 'string' &&
+    ['compact', 'comfortable'].includes(payload.resultDensity)
+  ) {
+    normalized.resultDensity = payload.resultDensity as Settings['resultDensity']
+  }
+
+  if (typeof payload.showCovers === 'boolean') {
+    normalized.showCovers = payload.showCovers
+  }
+
+  if (typeof payload.showIdentifiers === 'boolean') {
+    normalized.showIdentifiers = payload.showIdentifiers
   }
 
   return normalized

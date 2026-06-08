@@ -169,6 +169,10 @@ func (s *Server) handleGetSettings(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"pageSize":           s.config.PageSize,
 		"defaultSearchField": s.config.DefaultSearchField,
+		"resultDisplayMode":  s.config.ResultDisplayMode,
+		"resultDensity":      s.config.ResultDensity,
+		"showCovers":         s.config.ShowCovers,
+		"showIdentifiers":    s.config.ShowIdentifiers,
 	})
 }
 

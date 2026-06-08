@@ -168,6 +168,11 @@ func (a *legacyAdapter) Search(ctx context.Context, params *search.QueryParams) 
 			Description: "",
 			Tags:        nil,
 			Publisher:   strings.TrimSpace(getString(book.Publisher)),
+			PublishDate: strings.TrimSpace(getString(book.PublishDate)),
+			PageCount:   getInt64(book.PageCount),
+			ISBN:        strings.TrimSpace(getString(book.ISBN)),
+			SSCode:      strings.TrimSpace(getString(book.SSCode)),
+			DXID:        strings.TrimSpace(getString(book.DXID)),
 			Source:      a.name,
 			HasCover:    false,
 			CanDownload: false,
@@ -288,6 +293,7 @@ func buildLegacySQLForSchema(params search.QueryParams, schema legacySchema) (st
 	whereBuilder := strings.Builder{}
 	whereBuilder.Grow(64)
 	needsFTSJoin := false
+	whereUsesBookColumns := false
 
 	for i, rawField := range params.Fields {
 		field := strings.ToLower(strings.TrimSpace(rawField))
@@ -338,12 +344,18 @@ func buildLegacySQLForSchema(params search.QueryParams, schema legacySchema) (st
 			whereBuilder.WriteString(" = ?")
 			args = append(args, params.Queries[i])
 		}
+		whereUsesBookColumns = true
 		whereBuilder.WriteString(")")
 	}
 
 	fromClause := " FROM books b"
+	countFromClause := fromClause
 	if needsFTSJoin {
 		fromClause = " FROM " + schema.ftsTable + " JOIN books b ON b." + schema.idColumn + " = " + schema.ftsTable + ".rowid"
+		countFromClause = fromClause
+		if !whereUsesBookColumns {
+			countFromClause = " FROM " + schema.ftsTable
+		}
 	}
 
 	queryBuilder := strings.Builder{}
@@ -369,7 +381,7 @@ func buildLegacySQLForSchema(params search.QueryParams, schema legacySchema) (st
 
 	countBuilder := strings.Builder{}
 	countBuilder.WriteString("SELECT COUNT(*)")
-	countBuilder.WriteString(fromClause)
+	countBuilder.WriteString(countFromClause)
 	if whereBuilder.Len() > 0 {
 		countBuilder.WriteString(" WHERE ")
 		countBuilder.WriteString(whereBuilder.String())
@@ -594,6 +606,13 @@ func splitLegacyAuthors(raw string) []string {
 func getString(value *string) string {
 	if value == nil {
 		return ""
+	}
+	return *value
+}
+
+func getInt64(value *int64) int64 {
+	if value == nil {
+		return 0
 	}
 	return *value
 }

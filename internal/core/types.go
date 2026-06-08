@@ -15,6 +15,11 @@ type CanonicalBook struct {
 	Description string   `json:"description,omitempty"`
 	Tags        []string `json:"tags,omitempty"`
 	Publisher   string   `json:"publisher,omitempty"`
+	PublishDate string   `json:"publish_date,omitempty"`
+	PageCount   int64    `json:"page_count,omitempty"`
+	ISBN        string   `json:"isbn,omitempty"`
+	SSCode      string   `json:"ss_code,omitempty"`
+	DXID        string   `json:"dxid,omitempty"`
 	Source      string   `json:"source"`
 	HasCover    bool     `json:"has_cover"`
 	CanDownload bool     `json:"can_download"`

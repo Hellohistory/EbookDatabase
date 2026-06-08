@@ -6,6 +6,11 @@ export interface Book {
   description?: string
   tags?: string[]
   publisher?: string
+  publish_date?: string
+  page_count?: number
+  isbn?: string
+  ss_code?: string
+  dxid?: string
   source: string
   has_cover: boolean
   can_download: boolean

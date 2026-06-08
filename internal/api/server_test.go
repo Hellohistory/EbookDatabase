@@ -25,6 +25,23 @@ func TestPublicAPIAndAdminAuth(t *testing.T) {
 	if settings.Code != http.StatusOK {
 		t.Fatalf("GET settings status = %d, body = %s", settings.Code, settings.Body.String())
 	}
+	var settingsPayload struct {
+		PageSize          int    `json:"pageSize"`
+		ResultDisplayMode string `json:"resultDisplayMode"`
+		ResultDensity     string `json:"resultDensity"`
+		ShowCovers        bool   `json:"showCovers"`
+		ShowIdentifiers   bool   `json:"showIdentifiers"`
+	}
+	if err := json.Unmarshal(settings.Body.Bytes(), &settingsPayload); err != nil {
+		t.Fatalf("failed to decode settings response: %v", err)
+	}
+	if settingsPayload.PageSize != 5 ||
+		settingsPayload.ResultDisplayMode != "compact" ||
+		settingsPayload.ResultDensity != "compact" ||
+		settingsPayload.ShowCovers ||
+		!settingsPayload.ShowIdentifiers {
+		t.Fatalf("unexpected settings response: %+v", settingsPayload)
+	}
 
 	health := performRequest(server, http.MethodGet, "/api/v1/health", "", nil)
 	if health.Code != http.StatusOK {
@@ -156,6 +173,10 @@ func TestPublicAPIAndAdminAuth(t *testing.T) {
 	updatedConfig := `{
   "pageSize": 7,
   "defaultSearchField": "title",
+  "resultDisplayMode": "detail",
+  "resultDensity": "comfortable",
+  "showCovers": true,
+  "showIdentifiers": false,
   "adminPassword": "secret",
   "corsAllowedOrigins": ["http://localhost:5173"],
   "datasources": [
@@ -175,13 +196,21 @@ func TestPublicAPIAndAdminAuth(t *testing.T) {
 	}
 
 	var savedSettings struct {
-		PageSize int `json:"pageSize"`
+		PageSize          int    `json:"pageSize"`
+		ResultDisplayMode string `json:"resultDisplayMode"`
+		ResultDensity     string `json:"resultDensity"`
+		ShowCovers        bool   `json:"showCovers"`
+		ShowIdentifiers   bool   `json:"showIdentifiers"`
 	}
 	if err := json.Unmarshal(settingsAfterSave.Body.Bytes(), &savedSettings); err != nil {
 		t.Fatalf("failed to decode settings after save: %v", err)
 	}
-	if savedSettings.PageSize != 7 {
-		t.Fatalf("expected updated page size, got %d", savedSettings.PageSize)
+	if savedSettings.PageSize != 7 ||
+		savedSettings.ResultDisplayMode != "detail" ||
+		savedSettings.ResultDensity != "comfortable" ||
+		!savedSettings.ShowCovers ||
+		savedSettings.ShowIdentifiers {
+		t.Fatalf("unexpected saved settings: %+v", savedSettings)
 	}
 
 	adminAfterSave := performRequest(server, http.MethodGet, "/api/v1/admin/config", "", map[string]string{
@@ -192,10 +221,20 @@ func TestPublicAPIAndAdminAuth(t *testing.T) {
 	}
 
 	var savedConfig struct {
+		ResultDisplayMode  string   `json:"resultDisplayMode"`
+		ResultDensity      string   `json:"resultDensity"`
+		ShowCovers         bool     `json:"showCovers"`
+		ShowIdentifiers    bool     `json:"showIdentifiers"`
 		CORSAllowedOrigins []string `json:"corsAllowedOrigins"`
 	}
 	if err := json.Unmarshal(adminAfterSave.Body.Bytes(), &savedConfig); err != nil {
 		t.Fatalf("failed to decode admin config after save: %v", err)
+	}
+	if savedConfig.ResultDisplayMode != "detail" ||
+		savedConfig.ResultDensity != "comfortable" ||
+		!savedConfig.ShowCovers ||
+		savedConfig.ShowIdentifiers {
+		t.Fatalf("expected saved display settings, got %+v", savedConfig)
 	}
 	if len(savedConfig.CORSAllowedOrigins) != 1 || savedConfig.CORSAllowedOrigins[0] != "http://localhost:5173" {
 		t.Fatalf("expected saved CORS origins, got %+v", savedConfig.CORSAllowedOrigins)

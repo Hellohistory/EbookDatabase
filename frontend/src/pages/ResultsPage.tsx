@@ -4,6 +4,8 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import Pagination from '../components/Pagination'
 import ResultsList from '../components/ResultsList'
+import type { DisplayMode, ResultDensity } from '../components/ResultsList'
+import useGlobalStore from '../store/useGlobalStore'
 import type { Book } from '../types/Book'
 import { buildApiUrl } from '../utils/api'
 
@@ -20,8 +22,31 @@ interface SearchResponse {
   searchTimeMs?: number
 }
 
+const displayModeOptions: Array<{ value: DisplayMode; label: string }> = [
+  { value: 'compact', label: '紧凑' },
+  { value: 'detail', label: '详情' },
+  { value: 'table', label: '表格' },
+  { value: 'card', label: '卡片' }
+]
+
+const densityOptions: Array<{ value: ResultDensity; label: string }> = [
+  { value: 'compact', label: '紧凑' },
+  { value: 'comfortable', label: '舒展' }
+]
+
+const segmentButtonClassName = (active: boolean) =>
+  [
+    'h-9 whitespace-nowrap rounded-md px-3 text-sm font-bold transition',
+    active
+      ? 'bg-[var(--accent)] text-white shadow-sm'
+      : 'border border-transparent text-[var(--muted)] hover:border-[var(--line)] hover:bg-slate-50 hover:text-ink'
+  ]
+    .filter(Boolean)
+    .join(' ')
+
 const ResultsPage = () => {
   const [searchParams] = useSearchParams()
+  const settings = useGlobalStore((state) => state.settings)
   const [books, setBooks] = useState<Book[]>([])
   const [meta, setMeta] = useState<ResultsMeta>({
     totalPages: 0,
@@ -30,8 +55,19 @@ const ResultsPage = () => {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [displayMode, setDisplayMode] = useState<DisplayMode>('compact')
+  const [density, setDensity] = useState<ResultDensity>('compact')
+  const [showCovers, setShowCovers] = useState(false)
+  const [showIdentifiers, setShowIdentifiers] = useState(true)
 
   const queryString = useMemo(() => searchParams.toString(), [searchParams])
+
+  useEffect(() => {
+    setDisplayMode(settings.resultDisplayMode ?? 'compact')
+    setDensity(settings.resultDensity ?? 'compact')
+    setShowCovers(settings.showCovers ?? false)
+    setShowIdentifiers(settings.showIdentifiers ?? true)
+  }, [settings.resultDisplayMode, settings.resultDensity, settings.showCovers, settings.showIdentifiers])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -138,26 +174,85 @@ const ResultsPage = () => {
       {hasQuery && !loading && !error && (
         <div className="space-y-5">
           <div className="surface p-4 sm:p-5">
-            <div className="grid gap-3 text-sm sm:grid-cols-[repeat(3,minmax(0,160px))_minmax(0,1fr)] sm:items-center">
-              <div>
-                <p className="meta-label">Time</p>
-                <p className="mt-1 text-base font-bold text-ink">{searchSeconds}s</p>
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+              <div className="grid gap-3 text-sm sm:grid-cols-3 xl:min-w-[480px]">
+                <div>
+                  <p className="meta-label">Time</p>
+                  <p className="mt-1 text-base font-bold text-ink">{searchSeconds}s</p>
+                </div>
+                <div>
+                  <p className="meta-label">Records</p>
+                  <p className="mt-1 text-base font-bold text-ink">{meta.totalRecords}</p>
+                </div>
+                <div>
+                  <p className="meta-label">Pages</p>
+                  <p className="mt-1 text-base font-bold text-ink">{meta.totalPages}</p>
+                </div>
               </div>
-              <div>
-                <p className="meta-label">Records</p>
-                <p className="mt-1 text-base font-bold text-ink">{meta.totalRecords}</p>
-              </div>
-              <div>
-                <p className="meta-label">Pages</p>
-                <p className="mt-1 text-base font-bold text-ink">{meta.totalPages}</p>
-              </div>
-              <div className="border-t border-[var(--line)] pt-3 text-xs leading-relaxed text-[var(--muted)] sm:border-l sm:border-t-0 sm:py-1 sm:pl-4">
-                本项目不会用于任何商业场景；如遇倒卖，请直接举报。
+              <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end xl:justify-end">
+                <div className="min-w-0">
+                  <p className="meta-label mb-2">View</p>
+                  <div className="flex flex-wrap gap-1 rounded-md border border-[var(--line)] bg-white p-1">
+                    {displayModeOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        className={segmentButtonClassName(displayMode === option.value)}
+                        aria-pressed={displayMode === option.value}
+                        onClick={() => setDisplayMode(option.value)}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="min-w-0">
+                  <p className="meta-label mb-2">Density</p>
+                  <div className="flex flex-wrap gap-1 rounded-md border border-[var(--line)] bg-white p-1">
+                    {densityOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        className={segmentButtonClassName(density === option.value)}
+                        aria-pressed={density === option.value}
+                        onClick={() => setDensity(option.value)}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <label className="inline-flex h-9 items-center gap-2 rounded-md border border-[var(--line)] bg-white px-3 text-sm font-bold text-[var(--muted)]">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-[var(--line)] text-primary focus:ring-primary"
+                      checked={showCovers}
+                      onChange={(event) => setShowCovers(event.target.checked)}
+                    />
+                    <span>封面</span>
+                  </label>
+                  <label className="inline-flex h-9 items-center gap-2 rounded-md border border-[var(--line)] bg-white px-3 text-sm font-bold text-[var(--muted)]">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-[var(--line)] text-primary focus:ring-primary"
+                      checked={showIdentifiers}
+                      onChange={(event) => setShowIdentifiers(event.target.checked)}
+                    />
+                    <span>标识</span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>
 
-          <ResultsList books={books} displayMode="list" showCovers={false} />
+          <ResultsList
+            books={books}
+            displayMode={displayMode}
+            density={density}
+            showCovers={showCovers}
+            showIdentifiers={showIdentifiers}
+          />
           <Pagination totalPages={meta.totalPages} />
         </div>
       )}

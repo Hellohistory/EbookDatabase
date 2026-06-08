@@ -15,6 +15,8 @@ const (
 	defaultConfigName      = "settings"
 	defaultConfigType      = "json"
 	defaultPageSize        = 20
+	defaultDisplayMode     = "compact"
+	defaultResultDensity   = "compact"
 )
 
 // DatasourceConfig 描述单个数据源的必要信息。
@@ -28,6 +30,10 @@ type DatasourceConfig struct {
 type Config struct {
 	PageSize           int                `mapstructure:"pageSize"`
 	DefaultSearchField string             `mapstructure:"defaultSearchField"`
+	ResultDisplayMode  string             `mapstructure:"resultDisplayMode"`
+	ResultDensity      string             `mapstructure:"resultDensity"`
+	ShowCovers         bool               `mapstructure:"showCovers"`
+	ShowIdentifiers    bool               `mapstructure:"showIdentifiers"`
 	AdminPassword      string             `mapstructure:"adminPassword"`
 	CORSAllowedOrigins []string           `mapstructure:"corsAllowedOrigins"`
 	Datasources        []DatasourceConfig `mapstructure:"datasources"`
@@ -81,6 +87,11 @@ func LoadConfig(configPath string) (*Config, error) {
 		cfg.DefaultSearchField = "title"
 	}
 
+	cfg.ResultDisplayMode = normalizeDisplayMode(cfg.ResultDisplayMode)
+	cfg.ResultDensity = normalizeResultDensity(cfg.ResultDensity)
+	cfg.ShowCovers = v.GetBool("showCovers")
+	cfg.ShowIdentifiers = normalizeBool(v.Get("showIdentifiers"), true)
+
 	cfg.AdminPassword = strings.TrimSpace(cfg.AdminPassword)
 	cfg.CORSAllowedOrigins = normalizeOrigins(cfg.CORSAllowedOrigins)
 
@@ -97,6 +108,45 @@ func LoadConfig(configPath string) (*Config, error) {
 	}
 
 	return &cfg, nil
+}
+
+func normalizeDisplayMode(value string) string {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "compact", "detail", "table", "card":
+		return strings.ToLower(strings.TrimSpace(value))
+	default:
+		return defaultDisplayMode
+	}
+}
+
+func normalizeResultDensity(value string) string {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "compact", "comfortable":
+		return strings.ToLower(strings.TrimSpace(value))
+	default:
+		return defaultResultDensity
+	}
+}
+
+func normalizeBool(value any, fallback bool) bool {
+	switch v := value.(type) {
+	case nil:
+		return fallback
+	case bool:
+		return v
+	case string:
+		trimmed := strings.TrimSpace(v)
+		if trimmed == "" {
+			return fallback
+		}
+		parsed, err := strconv.ParseBool(trimmed)
+		if err != nil {
+			return fallback
+		}
+		return parsed
+	default:
+		return fallback
+	}
 }
 
 func parsePageSize(value any) (int, error) {

@@ -20,6 +20,23 @@ const fieldOptions = [
   { value: 'dxid', label: 'DXID' }
 ]
 
+const displayModeOptions = [
+  { value: 'compact', label: '紧凑列表' },
+  { value: 'detail', label: '详情列表' },
+  { value: 'table', label: '数据表格' },
+  { value: 'card', label: '卡片视图' }
+]
+
+const densityOptions = [
+  { value: 'compact', label: '紧凑' },
+  { value: 'comfortable', label: '舒展' }
+]
+
+const normalizeOption = (value, options, fallback) => {
+  const normalized = String(value ?? '').trim()
+  return options.some((option) => option.value === normalized) ? normalized : fallback
+}
+
 const inputClassName =
   'field-control block'
 
@@ -41,6 +58,10 @@ const AdminPage = () => {
 
   const [pageSize, setPageSize] = useState('')
   const [defaultSearchField, setDefaultSearchField] = useState('title')
+  const [resultDisplayMode, setResultDisplayMode] = useState('compact')
+  const [resultDensity, setResultDensity] = useState('compact')
+  const [showCovers, setShowCovers] = useState(false)
+  const [showIdentifiers, setShowIdentifiers] = useState(true)
   const [adminPassword, setAdminPassword] = useState('')
   const [corsAllowedOrigins, setCorsAllowedOrigins] = useState('')
   const [datasources, setDatasources] = useState([emptyDatasource()])
@@ -66,6 +87,10 @@ const AdminPage = () => {
       const data = await response.json()
       setPageSize(String(data.pageSize ?? data.page_size ?? ''))
       setDefaultSearchField(String(data.defaultSearchField ?? 'title'))
+      setResultDisplayMode(normalizeOption(data.resultDisplayMode, displayModeOptions, 'compact'))
+      setResultDensity(normalizeOption(data.resultDensity, densityOptions, 'compact'))
+      setShowCovers(typeof data.showCovers === 'boolean' ? data.showCovers : false)
+      setShowIdentifiers(typeof data.showIdentifiers === 'boolean' ? data.showIdentifiers : true)
       setAdminPassword(String(data.adminPassword ?? ''))
       setCorsAllowedOrigins(Array.isArray(data.corsAllowedOrigins) ? data.corsAllowedOrigins.join('\n') : '')
       if (Array.isArray(data.datasources) && data.datasources.length > 0) {
@@ -124,6 +149,10 @@ const AdminPage = () => {
     const payload = {
       pageSize,
       defaultSearchField,
+      resultDisplayMode,
+      resultDensity,
+      showCovers,
+      showIdentifiers,
       adminPassword,
       corsAllowedOrigins: corsAllowedOrigins
         .split(/\r?\n/)
@@ -221,6 +250,64 @@ const AdminPage = () => {
                         </option>
                       ))}
                     </select>
+                  </div>
+                  <div>
+                    <label htmlFor="resultDisplayMode" className={labelClassName}>
+                      默认视图
+                    </label>
+                    <select
+                      id="resultDisplayMode"
+                      name="resultDisplayMode"
+                      value={resultDisplayMode}
+                      onChange={(event) => setResultDisplayMode(event.target.value)}
+                      className={`${inputClassName} mt-2`}
+                    >
+                      {displayModeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="resultDensity" className={labelClassName}>
+                      结果密度
+                    </label>
+                    <select
+                      id="resultDensity"
+                      name="resultDensity"
+                      value={resultDensity}
+                      onChange={(event) => setResultDensity(event.target.value)}
+                      className={`${inputClassName} mt-2`}
+                    >
+                      {densityOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <label className="surface-flat flex min-h-[52px] items-center justify-between gap-3 px-4 py-3">
+                        <span className="text-sm font-bold text-ink">默认显示封面</span>
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-[var(--line)] text-primary focus:ring-primary"
+                          checked={showCovers}
+                          onChange={(event) => setShowCovers(event.target.checked)}
+                        />
+                      </label>
+                      <label className="surface-flat flex min-h-[52px] items-center justify-between gap-3 px-4 py-3">
+                        <span className="text-sm font-bold text-ink">默认显示标识</span>
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-[var(--line)] text-primary focus:ring-primary"
+                          checked={showIdentifiers}
+                          onChange={(event) => setShowIdentifiers(event.target.checked)}
+                        />
+                      </label>
+                    </div>
                   </div>
                   <div className="sm:col-span-2">
                     <label htmlFor="adminPassword" className={labelClassName}>

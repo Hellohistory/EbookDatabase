@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom'
 
 const iconButtonClasses =
-  'inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-sm transition hover:border-primary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+  'focus-ring inline-flex h-10 w-10 items-center justify-center rounded-md border border-[var(--line)] bg-[var(--paper-strong)] text-[var(--muted)] transition hover:border-primary hover:text-primary'
 
 const HeaderIcons = () => {
   return (
@@ -20,7 +20,7 @@ const HeaderIcons = () => {
         href="https://gitee.com/etojsyc/EbookDatabase"
         target="_blank"
         rel="noreferrer"
-        className={iconButtonClasses}
+        className={`${iconButtonClasses} max-[520px]:hidden`}
         aria-label="Gitee 仓库"
       >
         <img src="/gitee-svgrepo-com.svg" alt="Gitee" className="h-5 w-5" />

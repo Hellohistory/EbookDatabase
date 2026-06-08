@@ -1,6 +1,7 @@
 // path: frontend/src/store/useGlobalStore.ts
 import { create } from 'zustand'
 import type { Settings } from '../types/Settings'
+import { buildApiUrl } from '../utils/api'
 
 type LoadingKey = 'settings'
 
@@ -72,7 +73,7 @@ const useGlobalStore = create<GlobalState>((set) => ({
   fetchSettings: async () => {
     set(updateLoading('settings', true))
     try {
-      const response = await fetch('/api/v1/settings')
+      const response = await fetch(buildApiUrl('/api/v1/settings'))
       if (!response.ok) {
         throw new Error('无法获取设置')
       }
@@ -86,7 +87,7 @@ const useGlobalStore = create<GlobalState>((set) => ({
   },
   login: async (password: string) => {
     try {
-      const response = await fetch('/api/v1/login', {
+      const response = await fetch(buildApiUrl('/api/v1/login'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

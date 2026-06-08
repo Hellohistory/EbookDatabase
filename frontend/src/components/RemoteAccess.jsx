@@ -1,6 +1,7 @@
 // path: frontend/src/components/RemoteAccess.jsx
 import { useEffect, useState } from 'react'
 import { QRCodeCanvas } from 'qrcode.react'
+import { buildApiUrl } from '../utils/api'
 
 const RemoteAccess = () => {
   const [url, setUrl] = useState('')
@@ -10,7 +11,7 @@ const RemoteAccess = () => {
     let isMounted = true
     const load = async () => {
       try {
-        const response = await fetch('/api/v1/qr-code-url')
+        const response = await fetch(buildApiUrl('/api/v1/qr-code-url'))
         if (!response.ok) {
           throw new Error('无法获取远程访问地址')
         }
@@ -32,23 +33,25 @@ const RemoteAccess = () => {
 
   if (error) {
     return (
-      <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+      <p className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
         {error}
       </p>
     )
   }
 
   if (!url) {
-    return <p className="text-sm text-gray-500">正在加载远程访问地址…</p>
+    return <p className="text-sm font-semibold text-[var(--muted)]">正在加载远程访问地址...</p>
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 text-center text-sm text-gray-600">
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="grid gap-4 text-sm text-[var(--muted)] sm:grid-cols-[220px_minmax(0,1fr)] sm:items-center">
+      <div className="surface-flat flex justify-center p-4">
         <QRCodeCanvas value={url} size={180} />
       </div>
-      <p className="break-all font-medium text-gray-700">{url}</p>
-      <p>使用移动设备扫码访问</p>
+      <div>
+        <p className="meta-label">Remote URL</p>
+        <p className="mt-2 break-all font-mono text-sm font-bold text-ink">{url}</p>
+      </div>
     </div>
   )
 }

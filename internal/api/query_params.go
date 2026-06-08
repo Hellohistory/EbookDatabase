@@ -41,8 +41,19 @@ func (s *Server) buildQueryParams(c *gin.Context) (*search.QueryParams, error) {
 		return nil, fmt.Errorf("字段与关键字数量不匹配")
 	}
 
+	for _, field := range fields {
+		if !isSupportedSearchField(field) {
+			return nil, fmt.Errorf("不支持的搜索字段: %s", field)
+		}
+	}
+
 	if len(fields) > 1 && len(logics) != len(fields)-1 {
 		return nil, fmt.Errorf("逻辑运算符数量不正确")
+	}
+	for _, logic := range logics {
+		if !isSupportedLogic(logic) {
+			return nil, fmt.Errorf("不支持的逻辑运算符: %s", logic)
+		}
 	}
 
 	fuzzyRaw := normalizeValues(firstNonEmpty(c.QueryArray("fuzzies[]"), c.QueryArray("fuzzies")))
@@ -85,6 +96,24 @@ func (s *Server) buildQueryParams(c *gin.Context) (*search.QueryParams, error) {
 		PageSize:          pageSize,
 		DisablePagination: false,
 	}, nil
+}
+
+func isSupportedSearchField(field string) bool {
+	switch strings.ToLower(strings.TrimSpace(field)) {
+	case "title", "author", "publisher", "publishdate", "isbn", "sscode", "dxid":
+		return true
+	default:
+		return false
+	}
+}
+
+func isSupportedLogic(logic string) bool {
+	switch strings.ToUpper(strings.TrimSpace(logic)) {
+	case "AND", "OR":
+		return true
+	default:
+		return false
+	}
 }
 
 func parsePositiveInt(value string, fallback int) int {

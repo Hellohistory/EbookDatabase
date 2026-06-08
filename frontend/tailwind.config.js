@@ -10,7 +10,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#4A90E2",
+        primary: "#0f766e",
+        ink: "#1f2933",
+        paper: "#eef3ef",
+        amberline: "#b7791f",
       },
     },
   },

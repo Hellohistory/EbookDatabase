@@ -25,8 +25,8 @@ const ResultsList = ({ books, displayMode = 'grid', showCovers = true }: Props) 
     }
 
     return (
-      <div className="rounded-3xl border border-dashed border-primary/20 bg-white px-6 py-12 text-center shadow-sm ring-1 ring-gray-100 sm:px-10 sm:py-16">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary sm:h-16 sm:w-16">
+      <div className="surface px-6 py-12 text-center sm:px-10 sm:py-14">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-md border border-[var(--line)] bg-white/70 text-primary sm:h-16 sm:w-16">
           <svg
             className="h-8 w-8 sm:h-9 sm:w-9"
             xmlns="http://www.w3.org/2000/svg"
@@ -64,21 +64,21 @@ const ResultsList = ({ books, displayMode = 'grid', showCovers = true }: Props) 
             />
           </svg>
         </div>
-        <h2 className="mt-6 text-base font-semibold text-gray-900 sm:text-lg">没有找到匹配的结果</h2>
-        <p className="mt-2 text-sm leading-relaxed text-gray-500">
+        <h2 className="mt-6 text-base font-bold text-ink sm:text-lg">没有找到匹配的结果</h2>
+        <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
           可以尝试更换关键词、减少过滤条件，或稍后再试。
         </p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 text-sm sm:flex-row">
           <button
             type="button"
             onClick={handleGoBack}
-            className="inline-flex w-full items-center justify-center rounded-lg border border-primary px-5 py-2 font-semibold text-primary transition hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:w-auto"
+            className="btn-secondary w-full sm:w-auto"
           >
             返回上一页
           </button>
           <Link
             to="/"
-            className="inline-flex w-full items-center justify-center rounded-lg bg-primary px-5 py-2 font-semibold text-white shadow-sm transition hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:w-auto"
+            className="btn-primary w-full sm:w-auto"
           >
             回到检索首页
           </Link>
@@ -88,7 +88,7 @@ const ResultsList = ({ books, displayMode = 'grid', showCovers = true }: Props) 
   }
   const listClassName =
     displayMode === 'grid'
-      ? 'grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+      ? 'grid gap-5 lg:grid-cols-2'
       : 'flex flex-col gap-4'
 
   return (

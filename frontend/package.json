@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "wrangler deploy",
+    "deploy:pages": "wrangler pages deploy dist"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

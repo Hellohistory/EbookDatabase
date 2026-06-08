@@ -55,7 +55,7 @@ func NewServer(cfg *config.Config, manager *infra.DBManager, configPath, listenA
 
 	engine := gin.New()
 	engine.Use(panicRecoveryMiddleware())
-	engine.Use(corsMiddleware())
+	engine.Use(corsMiddleware(cfg, listenAddr))
 
 	engine.Static("/assets", "./frontend/dist/assets")
 	engine.StaticFile("/github-mark.svg", "./frontend/dist/github-mark.svg")
@@ -70,6 +70,7 @@ func NewServer(cfg *config.Config, manager *infra.DBManager, configPath, listenA
 		apiV1.GET("/search", srv.handleSearch)
 		apiV1.GET("/available-dbs", srv.handleGetDatasources)
 		apiV1.GET("/settings", srv.handleGetSettings)
+		apiV1.GET("/health", srv.handleHealth)
 		apiV1.POST("/login", srv.handleLogin)
 		apiV1.GET("/qr-code-url", srv.handleGetQRCodeURL)
 		apiV1.GET("/download", srv.handleDownload)
@@ -85,6 +86,13 @@ func NewServer(cfg *config.Config, manager *infra.DBManager, configPath, listenA
 
 	srv.engine = engine
 	return srv, nil
+}
+
+func (s *Server) handleHealth(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"status":      "ok",
+		"datasources": len(s.resolveSources()),
+	})
 }
 
 // Run 启动 HTTP 服务。
@@ -103,13 +111,47 @@ func (s *Server) Engine() *gin.Engine {
 	return s.engine
 }
 
-func corsMiddleware() gin.HandlerFunc {
+func corsMiddleware(appConfig *config.Config, listenAddr string) gin.HandlerFunc {
 	cfg := cors.DefaultConfig()
-	cfg.AllowAllOrigins = true
 	cfg.AllowCredentials = true
 	cfg.AddAllowMethods("PUT", "DELETE", "OPTIONS")
 	cfg.AddAllowHeaders("Authorization", "Content-Type", "X-Requested-With")
+	cfg.AllowOrigins = allowedOrigins(appConfig, listenAddr)
 	return cors.New(cfg)
+}
+
+func allowedOrigins(appConfig *config.Config, listenAddr string) []string {
+	origins := make([]string, 0, 8)
+	seen := make(map[string]struct{})
+
+	add := func(origin string) {
+		origin = strings.TrimSpace(origin)
+		if origin == "" || origin == "*" {
+			return
+		}
+		if _, ok := seen[origin]; ok {
+			return
+		}
+		seen[origin] = struct{}{}
+		origins = append(origins, origin)
+	}
+
+	if appConfig != nil {
+		for _, origin := range appConfig.CORSAllowedOrigins {
+			add(origin)
+		}
+	}
+
+	port := strings.TrimPrefix(strings.TrimSpace(listenAddr), ":")
+	if port != "" {
+		add("http://127.0.0.1:" + port)
+		add("http://localhost:" + port)
+	}
+
+	add("http://127.0.0.1:5173")
+	add("http://localhost:5173")
+
+	return origins
 }
 
 func (s *Server) serveSPAIndex(c *gin.Context) {

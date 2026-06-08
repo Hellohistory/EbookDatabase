@@ -16,8 +16,8 @@ func TestBuildSQLQuerySingleFuzzy(t *testing.T) {
 		PageSize: 20,
 	})
 
-	expectedQuery := "SELECT b.* FROM books b JOIN books_fts f ON f.rowid = b.id WHERE (f MATCH ?) ORDER BY b.id DESC LIMIT ? OFFSET ?"
-	expectedCount := "SELECT COUNT(*) FROM books b JOIN books_fts f ON f.rowid = b.id WHERE (f MATCH ?)"
+	expectedQuery := "SELECT b.* FROM books b JOIN books_fts ON books_fts.rowid = b.id WHERE (books_fts MATCH ?) ORDER BY b.id DESC LIMIT ? OFFSET ?"
+	expectedCount := "SELECT COUNT(*) FROM books b JOIN books_fts ON books_fts.rowid = b.id WHERE (books_fts MATCH ?)"
 
 	if query != expectedQuery {
 		t.Fatalf("unexpected query: %s", query)
@@ -45,8 +45,8 @@ func TestBuildSQLQueryMultiFieldAndOr(t *testing.T) {
 		PageSize: 10,
 	})
 
-	expectedQuery := "SELECT b.* FROM books b JOIN books_fts f ON f.rowid = b.id WHERE (f MATCH ?) AND (b.author = ?) OR (b.publisher = ?) ORDER BY b.id DESC LIMIT ? OFFSET ?"
-	expectedCount := "SELECT COUNT(*) FROM books b JOIN books_fts f ON f.rowid = b.id WHERE (f MATCH ?) AND (b.author = ?) OR (b.publisher = ?)"
+	expectedQuery := "SELECT b.* FROM books b JOIN books_fts ON books_fts.rowid = b.id WHERE (books_fts MATCH ?) AND (b.author = ?) OR (b.publisher = ?) ORDER BY b.id DESC LIMIT ? OFFSET ?"
+	expectedCount := "SELECT COUNT(*) FROM books b JOIN books_fts ON books_fts.rowid = b.id WHERE (books_fts MATCH ?) AND (b.author = ?) OR (b.publisher = ?)"
 
 	if query != expectedQuery {
 		t.Fatalf("unexpected query: %s", query)

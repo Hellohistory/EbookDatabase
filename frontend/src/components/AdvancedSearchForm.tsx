@@ -15,10 +15,8 @@ type SearchField =
   | 'publisher'
   | 'publishdate'
   | 'isbn'
-  | 'tags'
   | 'sscode'
   | 'dxid'
-  | 'identifier'
 
 interface Condition {
   field: SearchField
@@ -41,18 +39,18 @@ type ConditionAction =
   | { type: 'SET_FIRST_FIELD'; field: SearchField }
 
 const selectClasses =
-  'w-full rounded-lg border-gray-300 text-sm text-gray-700 shadow-sm focus:border-primary focus:ring-primary'
+  'field-control'
 
 const inputClasses =
-  'w-full rounded-lg border-gray-300 text-sm text-gray-700 shadow-sm focus:border-primary focus:ring-primary'
+  'field-control'
 
-const checkboxClasses = 'h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary'
+const checkboxClasses = 'h-4 w-4 rounded border-[var(--line)] text-primary focus:ring-primary'
 
 const buttonPrimaryClassName =
-  'inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60'
+  'btn-primary disabled:cursor-not-allowed disabled:opacity-60'
 
 const buttonSecondaryClassName =
-  'inline-flex items-center justify-center rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
+  'btn-secondary'
 
 const conditionsReducer = (state: Condition[], action: ConditionAction): Condition[] => {
   switch (action.type) {
@@ -236,10 +234,7 @@ const AdvancedSearchForm = () => {
           const isPublishDateField = condition.field === 'publishdate'
 
           return (
-            <div
-              key={index}
-              className="flex flex-col gap-4 rounded-2xl bg-gray-50 p-4 shadow-sm md:flex-row md:items-start md:gap-6"
-            >
+            <div key={index} className="surface-flat flex flex-col gap-4 p-4 md:flex-row md:items-start md:gap-5">
               <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
                 <select
                   name={`field-${index}`}
@@ -252,7 +247,6 @@ const AdvancedSearchForm = () => {
                   <option value="publisher">出版商</option>
                   <option value="publishdate">出版时间</option>
                   <option value="isbn">ISBN码</option>
-                  <option value="tags">标签</option>
                   <option value="sscode">SS码</option>
                   <option value="dxid">DXID</option>
                 </select>
@@ -293,7 +287,7 @@ const AdvancedSearchForm = () => {
                     <option value="OR">或 (OR)</option>
                   </select>
                 )}
-                <label className="inline-flex items-center justify-between gap-2 text-sm text-gray-600 sm:justify-start">
+                <label className="inline-flex items-center justify-start gap-2 text-sm font-semibold text-[var(--muted)]">
                   <input
                     type="checkbox"
                     className={checkboxClasses}

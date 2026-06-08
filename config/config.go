@@ -29,6 +29,7 @@ type Config struct {
 	PageSize           int                `mapstructure:"pageSize"`
 	DefaultSearchField string             `mapstructure:"defaultSearchField"`
 	AdminPassword      string             `mapstructure:"adminPassword"`
+	CORSAllowedOrigins []string           `mapstructure:"corsAllowedOrigins"`
 	Datasources        []DatasourceConfig `mapstructure:"datasources"`
 }
 
@@ -81,6 +82,7 @@ func LoadConfig(configPath string) (*Config, error) {
 	}
 
 	cfg.AdminPassword = strings.TrimSpace(cfg.AdminPassword)
+	cfg.CORSAllowedOrigins = normalizeOrigins(cfg.CORSAllowedOrigins)
 
 	normalized, err := normalizeDatasources(cfg.Datasources)
 	if err != nil {
@@ -158,4 +160,21 @@ func normalizeDatasources(items []DatasourceConfig) ([]DatasourceConfig, error) 
 	}
 
 	return normalized, nil
+}
+
+func normalizeOrigins(items []string) []string {
+	normalized := make([]string, 0, len(items))
+	seen := make(map[string]struct{})
+	for _, item := range items {
+		origin := strings.TrimSpace(item)
+		if origin == "" {
+			continue
+		}
+		if _, ok := seen[origin]; ok {
+			continue
+		}
+		seen[origin] = struct{}{}
+		normalized = append(normalized, origin)
+	}
+	return normalized
 }

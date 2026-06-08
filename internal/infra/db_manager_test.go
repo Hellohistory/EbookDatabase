@@ -12,8 +12,12 @@ import (
 func TestInitFromConfigRegistersSources(t *testing.T) {
 	dir := t.TempDir()
 	legacyPath := filepath.Join(dir, "legacy.db")
-	if _, err := os.Create(legacyPath); err != nil {
+	file, err := os.Create(legacyPath)
+	if err != nil {
 		t.Fatalf("failed to create legacy db file: %v", err)
+	}
+	if err := file.Close(); err != nil {
+		t.Fatalf("failed to close legacy db file: %v", err)
 	}
 
 	cfg := &config.Config{
@@ -69,8 +73,12 @@ func TestInitFromConfigUnsupportedType(t *testing.T) {
 func TestCloseReleasesDatasources(t *testing.T) {
 	dir := t.TempDir()
 	legacyPath := filepath.Join(dir, "legacy.db")
-	if _, err := os.Create(legacyPath); err != nil {
+	file, err := os.Create(legacyPath)
+	if err != nil {
 		t.Fatalf("failed to create legacy db file: %v", err)
+	}
+	if err := file.Close(); err != nil {
+		t.Fatalf("failed to close legacy db file: %v", err)
 	}
 
 	cfg := &config.Config{

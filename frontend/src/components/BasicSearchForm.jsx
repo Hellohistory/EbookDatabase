@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast'
 import useGlobalStore from '../store/useGlobalStore'
 
 const selectClasses =
-  'field-control md:w-44'
+  'field-control'
 
 const inputClasses =
   'field-control flex-1'
@@ -130,7 +130,7 @@ const BasicSearchForm = () => {
         </div>
         <button
           type="submit"
-          className={`${buttonClasses} ${loading ? 'gap-2' : ''} w-full`}
+          className={`${buttonClasses} ${loading ? 'gap-2' : ''} w-full md:self-start`}
           disabled={loading}
           aria-busy={loading}
         >

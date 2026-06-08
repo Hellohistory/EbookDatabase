@@ -3,7 +3,7 @@ import SearchTabs from '../components/SearchTabs'
 
 const SearchPage = () => {
   return (
-    <div className="mx-auto w-full max-w-5xl min-w-0">
+    <div className="w-full min-w-0">
       <section className="surface min-w-0 overflow-hidden">
         <div className="border-b border-[var(--line)] px-5 py-5 sm:px-7">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

@@ -234,72 +234,75 @@ const AdvancedSearchForm = () => {
           const isPublishDateField = condition.field === 'publishdate'
 
           return (
-            <div key={index} className="surface-flat flex flex-col gap-4 p-4 md:flex-row md:items-start md:gap-5">
-              <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
-                <select
-                  name={`field-${index}`}
-                  className={`${selectClasses} md:w-44`}
-                  value={condition.field}
-                  onChange={(event) => handleFieldChange(index, event.target.value as Condition['field'])}
-                >
-                  <option value="title">书名</option>
-                  <option value="author">作者</option>
-                  <option value="publisher">出版商</option>
-                  <option value="publishdate">出版时间</option>
-                  <option value="isbn">ISBN码</option>
-                  <option value="sscode">SS码</option>
-                  <option value="dxid">DXID</option>
-                </select>
-                <div className="flex flex-1 flex-col">
-                  <input
-                    type="text"
-                    name={`query-${index}`}
-                    placeholder={
-                      isPublishDateField ? '请输入 YYYY-MM-DD 格式的日期' : '请输入关键词'
-                    }
-                    className={`${inputClasses} ${
-                      showError
-                        ? 'border-red-500 ring-2 ring-red-500 focus:border-red-500 focus:ring-red-500'
-                        : ''
-                    }`}
-                    required
-                    value={condition.query}
-                    aria-invalid={showError ? 'true' : 'false'}
-                    inputMode={isIsbnField ? 'numeric' : 'text'}
-                    pattern={
-                      isIsbnField ? '\d+' : isPublishDateField ? '\d{4}-\d{2}-\d{2}' : undefined
-                    }
-                    onChange={(event) => handleQueryChange(index, event.target.value)}
-                    onBlur={(event) => handleQueryBlur(index, event.target.value)}
-                  />
-                  {showError && <p className="mt-1 text-xs text-red-600">{errorMessage}</p>}
-                </div>
+            <div
+              key={index}
+              className="surface-flat grid gap-3 p-4 lg:grid-cols-[176px_minmax(0,1fr)_112px_72px_80px] lg:items-start"
+            >
+              <select
+                name={`field-${index}`}
+                className={selectClasses}
+                value={condition.field}
+                onChange={(event) => handleFieldChange(index, event.target.value as Condition['field'])}
+              >
+                <option value="title">书名</option>
+                <option value="author">作者</option>
+                <option value="publisher">出版商</option>
+                <option value="publishdate">出版时间</option>
+                <option value="isbn">ISBN码</option>
+                <option value="sscode">SS码</option>
+                <option value="dxid">DXID</option>
+              </select>
+              <div className="flex min-w-0 flex-col">
+                <input
+                  type="text"
+                  name={`query-${index}`}
+                  placeholder={
+                    isPublishDateField ? '请输入 YYYY-MM-DD 格式的日期' : '请输入关键词'
+                  }
+                  className={`${inputClasses} ${
+                    showError
+                      ? 'border-red-500 ring-2 ring-red-500 focus:border-red-500 focus:ring-red-500'
+                      : ''
+                  }`}
+                  required
+                  value={condition.query}
+                  aria-invalid={showError ? 'true' : 'false'}
+                  inputMode={isIsbnField ? 'numeric' : 'text'}
+                  pattern={
+                    isIsbnField ? '\d+' : isPublishDateField ? '\d{4}-\d{2}-\d{2}' : undefined
+                  }
+                  onChange={(event) => handleQueryChange(index, event.target.value)}
+                  onBlur={(event) => handleQueryBlur(index, event.target.value)}
+                />
+                {showError && <p className="mt-1 text-xs text-red-600">{errorMessage}</p>}
               </div>
-              <div className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-3 md:w-auto">
-                {index > 0 && (
-                  <select
-                    name={`logic-${index}`}
-                    className={`${selectClasses} sm:w-28`}
-                    value={condition.logic}
-                    onChange={(event) => updateCondition(index, 'logic', event.target.value as Condition['logic'])}
-                  >
-                    <option value="AND">与 (AND)</option>
-                    <option value="OR">或 (OR)</option>
-                  </select>
-                )}
-                <label className="inline-flex items-center justify-start gap-2 text-sm font-semibold text-[var(--muted)]">
-                  <input
-                    type="checkbox"
-                    className={checkboxClasses}
-                    checked={condition.fuzzy}
-                    onChange={(event) => updateCondition(index, 'fuzzy', event.target.checked)}
-                  />
-                  模糊
-                </label>
+              {index > 0 ? (
+                <select
+                  name={`logic-${index}`}
+                  className={selectClasses}
+                  value={condition.logic}
+                  onChange={(event) => updateCondition(index, 'logic', event.target.value as Condition['logic'])}
+                >
+                  <option value="AND">与 (AND)</option>
+                  <option value="OR">或 (OR)</option>
+                </select>
+              ) : (
+                <div className="hidden h-10 lg:block" aria-hidden="true" />
+              )}
+              <label className="inline-flex min-h-10 items-center justify-start gap-2 text-sm font-semibold text-[var(--muted)] lg:justify-center">
+                <input
+                  type="checkbox"
+                  className={checkboxClasses}
+                  checked={condition.fuzzy}
+                  onChange={(event) => updateCondition(index, 'fuzzy', event.target.checked)}
+                />
+                模糊
+              </label>
+              <div>
                 {index > 0 && (
                   <button
                     type="button"
-                    className={`${buttonSecondaryClassName} w-full sm:w-auto`}
+                    className={`${buttonSecondaryClassName} w-full`}
                     onClick={() => removeCondition(index)}
                   >
                     删除

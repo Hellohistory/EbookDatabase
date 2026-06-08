@@ -1,6 +1,6 @@
 # path: Dockerfile
 # 阶段 1: 构建 React 前端
-FROM node:22-alpine AS frontend-builder
+FROM node:22-alpine3.23 AS frontend-builder
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm install
@@ -8,7 +8,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # 阶段 2: 构建 Go 后端
-FROM golang:1.23-alpine AS go-builder
+FROM golang:1.25.11-alpine3.23 AS go-builder
 WORKDIR /app
 RUN apk --no-cache add build-base sqlite-dev
 COPY go.mod go.sum ./
@@ -18,7 +18,7 @@ COPY . .
 RUN CGO_ENABLED=1 go build -ldflags="-w -s" -o /ebook-server .
 
 # 阶段 3: 最终镜像
-FROM alpine:latest
+FROM alpine:3.23
 RUN apk --no-cache add ca-certificates sqlite-libs
 WORKDIR /app
 
